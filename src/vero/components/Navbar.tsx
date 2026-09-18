@@ -40,6 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               title="Return to Main Portfolio"
             >
               <ArrowLeft className="h-3.5 w-3.5 transition-transform group-hover:-translate-x-0.5" />
+              <span className="inline sm:hidden">BACK</span>
               <span className="hidden sm:inline">PORTFOLIO</span>
             </button>
           )}

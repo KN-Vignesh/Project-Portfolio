@@ -85,11 +85,11 @@ export const GeminiAIAssistant: React.FC = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-40 px-4 py-2.5 rounded-full bg-[#101216] border border-[#7CFF6B]/50 hover:border-[#7CFF6B] text-[#F2F2F2] shadow-2xl shadow-black/80 flex items-center space-x-2.5 font-mono text-xs transition-all hover:scale-105 cursor-pointer group"
+          className="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-full bg-[#101216]/95 backdrop-blur-md border border-[#7CFF6B]/50 hover:border-[#7CFF6B] text-[#F2F2F2] shadow-2xl shadow-black/80 flex items-center space-x-2 sm:space-x-2.5 font-mono text-xs transition-all hover:scale-105 cursor-pointer group"
           aria-label="Open AI Assistant"
         >
-          <div className="w-6 h-6 rounded-full bg-[#7CFF6B]/15 text-[#7CFF6B] flex items-center justify-center">
-            <Bot className="w-3.5 h-3.5" />
+          <div className="w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-[#7CFF6B]/15 text-[#7CFF6B] flex items-center justify-center">
+            <Bot className="w-3 sm:w-3.5 h-3 sm:h-3.5" />
           </div>
           <div className="flex items-center space-x-2">
             <span className="font-bold text-[#F2F2F2]">ASK AI AGENT</span>
@@ -100,7 +100,7 @@ export const GeminiAIAssistant: React.FC = () => {
 
       {/* Floating Chat Drawer */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[94vw] sm:w-[420px] h-[550px] max-h-[85vh] bg-[#08090B] border border-[#24272D] rounded-xl shadow-2xl shadow-black flex flex-col font-mono overflow-hidden animate-fadeIn">
+        <div className="fixed bottom-16 md:bottom-6 right-2 sm:right-6 z-50 w-[96vw] sm:w-[420px] h-[550px] max-h-[80vh] bg-[#08090B] border border-[#24272D] rounded-xl shadow-2xl shadow-black flex flex-col font-mono overflow-hidden animate-fadeIn">
           
           {/* Header */}
           <div className="p-3.5 bg-[#101216] border-b border-[#24272D] flex items-center justify-between">

@@ -13,6 +13,8 @@ import { ContactSection } from './components/ContactSection';
 import { GeminiAIAssistant } from './components/GeminiAIAssistant';
 import { ResumeModal } from './components/ResumeModal';
 import { Footer } from './components/Footer';
+import { OfflineIndicator } from './components/OfflineIndicator';
+import { MobileAppDock } from './components/MobileAppDock';
 import { PROJECTS } from './data/portfolioData';
 import { ProjectItem } from './types';
 import VeroApp from './vero/VeroApp';
@@ -147,6 +149,9 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#08090B] text-[#F2F2F2] flex flex-col selection:bg-[#7CFF6B]/20 selection:text-[#7CFF6B]">
+      {/* PWA Offline Status Banner */}
+      <OfflineIndicator />
+
       {/* Persistent Technical Navigation Bar */}
       <Navigation
         activeSection={activeSection}
@@ -155,8 +160,8 @@ export default function App() {
         onOpenVero={handleOpenVero}
       />
 
-      {/* Main Multi-Section Portfolio Experience */}
-      <main className="flex-grow">
+      {/* Main Multi-Section Portfolio Experience with mobile dock clearance */}
+      <main className="flex-grow pb-20 md:pb-0">
         {/* 01 / HERO */}
         <HeroSection
           onExploreProjects={() => handleNavigate('projects')}
@@ -200,6 +205,14 @@ export default function App() {
           onOpenResume={() => setIsResumeOpen(true)}
         />
       </main>
+
+      {/* Mobile App Navigation Bottom Dock */}
+      <MobileAppDock
+        activeSection={activeSection}
+        onNavigate={handleNavigate}
+        onOpenResume={() => setIsResumeOpen(true)}
+        onOpenVero={handleOpenVero}
+      />
 
       {/* Standalone Project Detail View Modal */}
       <ProjectDetailModal

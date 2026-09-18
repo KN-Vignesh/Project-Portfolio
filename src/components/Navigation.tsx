@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { Menu, X, ArrowUpRight, FileDown, GitPullRequest } from 'lucide-react';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface NavigationProps {
   activeSection: string;
@@ -124,6 +125,9 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
             </button>
           )}
 
+          {/* In-App PWA Install Button */}
+          <PWAInstallButton variant="compact" />
+
           {/* Download Resume Button */}
           {onOpenResume ? (
             <button
@@ -193,6 +197,11 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
                 <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
               </button>
             )}
+            {/* Mobile App Install Button */}
+            <div className="w-full">
+              <PWAInstallButton variant="full" className="w-full py-2.5 justify-center" />
+            </div>
+
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
