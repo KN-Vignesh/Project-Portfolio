@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --background: #08090B;
+    --surface: #101216;
+    --surface-2: #15181D;
+    --text-primary: #F2F2F2;
+    --text-secondary: #8B8F98;
+    --border: #24272D;
+    --accent-green: #7CFF6B;
+    --accent-blue: #6EA8FE;
+    --accent-orange: #FFB86B;
+    --danger: #FF6B6B;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background-color: #08090B;
+    color: #F2F2F2;
+  }
+
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', monospace, ui-monospace, SFMono-Regular;
+  }
+}
+
+/* Technical grid background */
+.tech-grid {
+  background-size: 40px 40px;
+  background-image: 
+    linear-gradient(to right, rgba(36, 39, 45, 0.35) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(36, 39, 45, 0.35) 1px, transparent 1px);
+}
+
+.tech-dots {
+  background-image: radial-gradient(rgba(139, 143, 152, 0.15) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Custom technical scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #08090B;
+}
+::-webkit-scrollbar-thumb {
+  background: #24272D;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #7CFF6B;
+}

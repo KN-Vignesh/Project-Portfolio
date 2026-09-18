@@ -1,0 +1,845 @@
+%PDF-1.3
+%ºß¬à
+3 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 4 0 R
+>>
+endobj
+4 0 obj
+<<
+/Length 11763
+>>
+stream
+0.200025 w
+0 G
+BT
+/F2 22 Tf
+25.2999999999999972 TL
+0.067 0.094 0.153 rg
+40. 801.8899999999999864 Td
+(VIGNESH K N) Tj
+ET
+BT
+/F2 12 Tf
+13.7999999999999989 TL
+0.063 0.451 0.235 rg
+40. 783.8899999999999864 Td
+(AI SOFTWARE ENGINEER | MACHINE LEARNING & BACKEND SYSTEMS) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.294 0.333 0.388 rg
+40. 769.8899999999999864 Td
+(Bengaluru, India  |  +91 8861524366  |  vigneshknagaraj@outlook.com  |  vigneshkn13@gmail.com) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.294 0.333 0.388 rg
+40. 758.8899999999999864 Td
+(LinkedIn: linkedin.com/in/vignesh-k-n  |  GitHub: github.com/KN-Vignesh  |  Projects: github.com/KN-Vignesh/Projects) Tj
+ET
+0.82 0.84 0.86 RG
+1. w
+40. 748.8899999999999864 m
+555.2799999999999727 748.8899999999999864 l
+S
+BT
+/F2 11 Tf
+12.6499999999999986 TL
+0.067 0.094 0.153 rg
+40. 734.8899999999999864 Td
+(PROFESSIONAL SUMMARY) Tj
+ET
+0.82 0.84 0.86 RG
+0.75 w
+40. 730.8899999999999864 m
+555.2799999999999727 730.8899999999999864 l
+S
+BT
+/F1 9.5 Tf
+10.9249999999999989 TL
+0.122 0.161 0.216 rg
+40. 720.8899999999999864 Td
+(Results-driven AI Software Engineer with 4+ years of hands-on experience in full-stack engineering, cloud automation, and) Tj
+T* (high-throughput microservices, now focused on production-oriented AI, Generative AI, LLM orchestration, RAG) Tj
+T* (architectures, parameter-efficient fine-tuning \(LoRA/QLoRA\), and containerized inference APIs. Proven track record of) Tj
+T* (architecting scalable enterprise modules with .NET Core 8, Angular 18, Azure, and Python, combining rigorous software) Tj
+T* (engineering standards with machine learning and agentic workflows.) Tj
+ET
+BT
+/F2 11 Tf
+12.6499999999999986 TL
+0.067 0.094 0.153 rg
+40. 648.8899999999999864 Td
+(TECHNICAL SKILLS) Tj
+ET
+0.82 0.84 0.86 RG
+0.75 w
+40. 644.8899999999999864 m
+555.2799999999999727 644.8899999999999864 l
+S
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.067 0.094 0.153 rg
+40. 634.8899999999999864 Td
+(Languages & Core:) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+127.1700000000000017 634.8899999999999864 Td
+(Python, C#, .NET Core 8, SQL, JavaScript, TypeScript, HTML5/CSS3, Git) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.067 0.094 0.153 rg
+40. 621.8899999999999864 Td
+(Machine Learning & DL:) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+147.6899999999999977 621.8899999999999864 Td
+(Scikit-learn, PyTorch, TensorFlow, Transformers, CNN, BERT, Decision Forests, XGBoost,) Tj
+T* (Cross-Validation) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.067 0.094 0.153 rg
+40. 597.8899999999999864 Td
+(Generative AI & LLMs:) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+140.6700000000000159 597.8899999999999864 Td
+(Large Language Models, PEFT / LoRA, QLoRA \(4-bit NF4\), RAG Pipelines, Vector Search, FAISS,) Tj
+T* (LangChain, Prompt Design) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.067 0.094 0.153 rg
+40. 573.8899999999999864 Td
+(Cloud, APIs & Microservices:) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+169.5600000000000591 573.8899999999999864 Td
+(FastAPI, ASP.NET MVC, RESTful APIs, Azure Functions, Azure Service Bus, Azure Cosmos DB,) Tj
+T* (MySQL, Docker) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.067 0.094 0.153 rg
+40. 549.8899999999999864 Td
+(DevOps & Engineering Practices:) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+187.3800000000000239 549.8899999999999864 Td
+(CI/CD \(Jenkins, GitHub Actions\), Postman, Swagger, MLOps, System Design, SonarQube,) Tj
+T* (Clean Architecture) Tj
+ET
+BT
+/F2 11 Tf
+12.6499999999999986 TL
+0.067 0.094 0.153 rg
+40. 513.8899999999999864 Td
+(PROFESSIONAL EXPERIENCE) Tj
+ET
+0.82 0.84 0.86 RG
+0.75 w
+40. 509.8899999999999864 m
+555.2799999999999727 509.8899999999999864 l
+S
+BT
+/F2 10 Tf
+11.5 TL
+0.067 0.094 0.153 rg
+40. 499.8899999999999864 Td
+(Software Engineer) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0.063 0.451 0.235 rg
+127.4000000000000199 499.8899999999999864 Td
+( |  ACL Digital) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.294 0.333 0.388 rg
+400.3899999999999864 499.8899999999999864 Td
+(Aug 2024 – Present  \(Bengaluru, India\)) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 486.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 486.8899999999999864 Td
+(Architected full-stack modules integrating Agentic AI and LLM APIs for the enterprise TLK Device Configuration App) Tj
+T* (\(OnePortal\).) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 462.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 462.8899999999999864 Td
+(Developed high-performance backend microservices using .NET Core 8 and responsive frontend user interfaces in Angular) Tj
+T* (18.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 438.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 438.8899999999999864 Td
+(Engineered database operations and optimized query patterns with Entity Framework Core and MySQL.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 425.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 425.8899999999999864 Td
+(Implemented Reinforcement Learning from Human Feedback \(RLHF\) strategies and Generative AI / NLP evaluation) Tj
+T* (scorecards.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 401.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 401.8899999999999864 Td
+(Built automated data validation pipelines and secure client-side scanner implementation for hardware Device Registration.) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0.067 0.094 0.153 rg
+40. 383.8899999999999864 Td
+(Software Engineer) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0.063 0.451 0.235 rg
+127.4000000000000199 383.8899999999999864 Td
+( |  Enmarq Technologies) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.294 0.333 0.388 rg
+393.0099999999999909 383.8899999999999864 Td
+(Aug 2022 – Aug 2024  \(Bengaluru, India\)) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 370.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 370.8899999999999864 Td
+(Engineered scalable serverless REST APIs using Azure Functions, Azure Service Bus, and Azure Cosmos DB.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 357.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 357.8899999999999864 Td
+(Built Vector Search data management architectures and NLP / Generative AI / RAG data ingestion pipelines.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 344.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 344.8899999999999864 Td
+(Maintained robust CI/CD and MLOps automation with Git, Jenkins, and automated testing suites.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 331.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 331.8899999999999864 Td
+(Spearheaded BeyondTrust PAM / BeyondInsight deployment for 6,000+ enterprise users with a 90-day delivery deadline.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 318.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 318.8899999999999864 Td
+(Executed Sitecore CMS upgrades from 8.3 to 10.3, Content Hub, Experience Editor, and SQL stored procedures for) Tj
+T* (managed enterprise printing systems.) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0.067 0.094 0.153 rg
+40. 289.8899999999999864 Td
+(Intern Associate) Tj
+ET
+BT
+/F2 10 Tf
+11.5 TL
+0.063 0.451 0.235 rg
+117.3999999999999915 289.8899999999999864 Td
+( |  Enmarq Technologies) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.294 0.333 0.388 rg
+397.8699999999999477 289.8899999999999864 Td
+(Feb 2022 – Jul 2022  \(Bengaluru, India\)) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 276.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 276.8899999999999864 Td
+(Developed Python and C# scheduled background jobs for automated cloud data workflows.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 263.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 263.8899999999999864 Td
+(Extracted, sanitized, and transformed complex data structures from Cosmos DB for downstream analytics and AI workflows.) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+46. 250.8899999999999864 Td
+(•) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+58. 250.8899999999999864 Td
+(Conducted thorough API validation and contract testing utilizing Postman and Swagger specifications.) Tj
+ET
+BT
+/F2 11 Tf
+12.6499999999999986 TL
+0.067 0.094 0.153 rg
+40. 224.8899999999999864 Td
+(FEATURED ENGINEERING & AI PROJECTS) Tj
+ET
+0.82 0.84 0.86 RG
+0.75 w
+40. 220.8899999999999864 m
+555.2799999999999727 220.8899999999999864 l
+S
+BT
+/F2 9.5 Tf
+10.9249999999999989 TL
+0.067 0.094 0.153 rg
+40. 210.8899999999999864 Td
+(Intelligent Customer Churn Prediction) Tj
+ET
+BT
+/F3 8.5 Tf
+9.7749999999999986 TL
+0.294 0.333 0.388 rg
+215.0949999999999704 210.8899999999999864 Td
+( — [Python, Scikit-learn, XGBoost, FastAPI, Docker, Classification Pipelines]) Tj
+ET
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.122 0.161 0.216 rg
+46. 198.8899999999999864 Td
+(End-to-end production ML pipeline analyzing telecom subscription patterns to forecast retention attrition. Features modular data) Tj
+T* (validation, Scikit-learn preprocessing pipelines, multi-model evaluation, and low-latency FastAPI inference service packaged with) Tj
+T* (Docker.) Tj
+ET
+BT
+/F2 9.5 Tf
+10.9249999999999989 TL
+0.067 0.094 0.153 rg
+40. 163.3899999999999864 Td
+(Qwen2.5-Coder LoRA Fine-Tuning & Quantization) Tj
+ET
+BT
+/F3 8.5 Tf
+9.7749999999999986 TL
+0.294 0.333 0.388 rg
+266.964999999999975 163.3899999999999864 Td
+( — [Python, PyTorch, Hugging Face PEFT/TRL, BitsAndBytes 4-bit, LoRA /) Tj
+ET
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.122 0.161 0.216 rg
+46. 151.3899999999999864 Td
+(Parameter-Efficient Fine-Tuning \(PEFT\) on open-weight LLMs using rank-decomposed adapter matrices \(LoRA\) and 4-bit NormalFloat) Tj
+T* (\(NF4\) quantization. Demonstrated >70% VRAM memory reduction during training with preserved coding benchmark performance.) Tj
+ET
+BT
+/F2 9.5 Tf
+10.9249999999999989 TL
+0.067 0.094 0.153 rg
+40. 126.3899999999999864 Td
+(VERO — AI Code Analysis & Pull Request Intelligence) Tj
+ET
+BT
+/F3 8.5 Tf
+9.7749999999999986 TL
+0.294 0.333 0.388 rg
+287.1050000000000182 126.3899999999999864 Td
+( — [GitHub API, SonarQube, LLMs, Static Analysis, Rule Engine,) Tj
+ET
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.122 0.161 0.216 rg
+46. 114.3899999999999864 Td
+(Evidence-based GitHub Pull Request engineering analysis platform combining AST diff parsing, SonarQube static quality checks, and) Tj
+T* (structured LLM signals with a deterministic rule engine to deliver automated, hallucination-free merge recommendations.) Tj
+ET
+BT
+/F2 9.5 Tf
+10.9249999999999989 TL
+0.067 0.094 0.153 rg
+40. 89.3899999999999864 Td
+(BERT Model Engineering & CNN Spatial Hierarchies) Tj
+ET
+BT
+/F3 8.5 Tf
+9.7749999999999986 TL
+0.294 0.333 0.388 rg
+277.605000000000075 89.3899999999999864 Td
+( — [PyTorch, Hugging Face Transformers, Computer Vision, WordPiece) Tj
+ET
+BT
+/F1 8.5 Tf
+9.7749999999999986 TL
+0.122 0.161 0.216 rg
+46. 77.3899999999999864 Td
+(Explored bidirectional self-attention mechanisms, token embedding representation transfer learning, and convolutional feature hierarchy) Tj
+T* (learning with PyTorch training loops, learning rate scheduling, and validation scorecards.) Tj
+ET
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.294 0.333 0.388 rg
+228.67999999999995 20. Td
+(Vignesh K N — Resume  |  Page 1 of 2) Tj
+ET
+endstream
+endobj
+5 0 obj
+<</Type /Page
+/Parent 1 0 R
+/Resources 2 0 R
+/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
+/Contents 6 0 R
+>>
+endobj
+6 0 obj
+<<
+/Length 1532
+>>
+stream
+0.75 w
+0.82 0.84 0.86 RG
+BT
+/F2 11 Tf
+12.6499999999999986 TL
+0.067 0.094 0.153 rg
+40. 793.8899999999999864 Td
+(CERTIFICATIONS & EDUCATION) Tj
+ET
+0.82 0.84 0.86 RG
+0.75 w
+40. 789.8899999999999864 m
+555.2799999999999727 789.8899999999999864 l
+S
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.067 0.094 0.153 rg
+44. 779.8899999999999864 Td
+(•  Microsoft Certified: Azure Fundamentals \(AZ-900 / DP-900\)) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+305.1299999999999955 779.8899999999999864 Td
+(—  Microsoft) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.294 0.333 0.388 rg
+510.7299999999999613 779.8899999999999864 Td
+(2024–2026) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.067 0.094 0.153 rg
+44. 766.8899999999999864 Td
+(•  Oracle Cloud Infrastructure: Generative AI / AI Foundation) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+304.0500000000000682 766.8899999999999864 Td
+(—  Oracle) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.294 0.333 0.388 rg
+510.7299999999999613 766.8899999999999864 Td
+(2023–2024) Tj
+ET
+BT
+/F2 9 Tf
+10.3499999999999996 TL
+0.067 0.094 0.153 rg
+44. 753.8899999999999864 Td
+(•  Bachelor of Engineering \(B.E.\)) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.122 0.161 0.216 rg
+185.789999999999992 753.8899999999999864 Td
+(—  KVG College of Engineering) Tj
+ET
+BT
+/F1 9 Tf
+10.3499999999999996 TL
+0.294 0.333 0.388 rg
+490.75 753.8899999999999864 Td
+(Graduated 2019) Tj
+ET
+BT
+/F1 8 Tf
+9.1999999999999993 TL
+0.294 0.333 0.388 rg
+228.67999999999995 20. Td
+(Vignesh K N — Resume  |  Page 2 of 2) Tj
+ET
+endstream
+endobj
+1 0 obj
+<</Type /Pages
+/Kids [3 0 R 5 0 R ]
+/Count 2
+>>
+endobj
+7 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+8 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+9 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+10 0 obj
+<<
+/Type /Font
+/BaseFont /Helvetica-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+11 0 obj
+<<
+/Type /Font
+/BaseFont /Courier
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+12 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+13 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-Oblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+14 0 obj
+<<
+/Type /Font
+/BaseFont /Courier-BoldOblique
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+15 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Roman
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+16 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Bold
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+17 0 obj
+<<
+/Type /Font
+/BaseFont /Times-Italic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+18 0 obj
+<<
+/Type /Font
+/BaseFont /Times-BoldItalic
+/Subtype /Type1
+/Encoding /WinAnsiEncoding
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+19 0 obj
+<<
+/Type /Font
+/BaseFont /ZapfDingbats
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+20 0 obj
+<<
+/Type /Font
+/BaseFont /Symbol
+/Subtype /Type1
+/FirstChar 32
+/LastChar 255
+>>
+endobj
+2 0 obj
+<<
+/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
+/Font <<
+/F1 7 0 R
+/F2 8 0 R
+/F3 9 0 R
+/F4 10 0 R
+/F5 11 0 R
+/F6 12 0 R
+/F7 13 0 R
+/F8 14 0 R
+/F9 15 0 R
+/F10 16 0 R
+/F11 17 0 R
+/F12 18 0 R
+/F13 19 0 R
+/F14 20 0 R
+>>
+/XObject <<
+>>
+>>
+endobj
+21 0 obj
+<<
+/Producer (jsPDF 4.2.1)
+/CreationDate (D:20260918142000-00'00')
+>>
+endobj
+22 0 obj
+<<
+/Type /Catalog
+/Pages 1 0 R
+/OpenAction [3 0 R /FitH null]
+/PageLayout /OneColumn
+>>
+endobj
+xref
+0 23
+0000000000 65535 f 
+0000013689 00000 n 
+0000015514 00000 n 
+0000000015 00000 n 
+0000000152 00000 n 
+0000011968 00000 n 
+0000012105 00000 n 
+0000013752 00000 n 
+0000013877 00000 n 
+0000014007 00000 n 
+0000014140 00000 n 
+0000014278 00000 n 
+0000014402 00000 n 
+0000014531 00000 n 
+0000014663 00000 n 
+0000014799 00000 n 
+0000014927 00000 n 
+0000015054 00000 n 
+0000015183 00000 n 
+0000015316 00000 n 
+0000015418 00000 n 
+0000015764 00000 n 
+0000015850 00000 n 
+trailer
+<<
+/Size 23
+/Root 22 0 R
+/Info 21 0 R
+/ID [ <E1FD26C0E90CE16EAD97F96C8F745FDB> <E1FD26C0E90CE16EAD97F96C8F745FDB> ]
+>>
+startxref
+15954
+%%EOF
