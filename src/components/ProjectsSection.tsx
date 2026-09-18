@@ -5,9 +5,10 @@ import { ProjectItem } from '../types';
 
 interface ProjectsSectionProps {
   onSelectProject: (projectId: string) => void;
+  onOpenVero?: () => void;
 }
 
-export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProject }) => {
+export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProject, onOpenVero }) => {
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
 
   const categories = [
@@ -78,7 +79,15 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProjec
                 {/* Top status bar */}
                 <div>
                   <div className="flex items-center justify-between font-mono text-xs pb-3 mb-4 border-b border-[#24272D]">
-                    <span className="text-[#7CFF6B] font-bold">{project.number}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#7CFF6B] font-bold">{project.number}</span>
+                      {project.liveAppView === 'vero' && (
+                        <span className="flex items-center gap-1 text-[9px] text-[#7CFF6B] bg-[#7CFF6B]/15 border border-[#7CFF6B]/30 px-1.5 py-0.5 rounded font-bold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#7CFF6B] animate-pulse"></span>
+                          LIVE APP
+                        </span>
+                      )}
+                    </div>
                     <span className="text-[10px] text-[#8B8F98] tracking-wider uppercase">
                       {project.category}
                     </span>
@@ -140,14 +149,28 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProjec
                 </div>
 
                 {/* Bottom Action Links */}
-                <div className="pt-4 border-t border-[#24272D] flex items-center justify-between font-mono text-xs">
-                  <button
-                    onClick={() => onSelectProject(project.id)}
-                    className="text-[#7CFF6B] hover:text-[#7CFF6B]/80 font-bold flex items-center space-x-1 group/btn cursor-pointer"
-                  >
-                    <span>EXPLORE SYSTEM</span>
-                    <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                  </button>
+                <div className="pt-4 border-t border-[#24272D] flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => onSelectProject(project.id)}
+                      className="text-[#7CFF6B] hover:text-[#7CFF6B]/80 font-bold flex items-center space-x-1 group/btn cursor-pointer"
+                    >
+                      <span>EXPLORE SYSTEM</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                    </button>
+
+                    {project.liveAppView === 'vero' && onOpenVero && (
+                      <button
+                        id="projects-launch-vero-button"
+                        onClick={onOpenVero}
+                        className="px-2 py-0.5 rounded bg-[#7CFF6B] hover:bg-[#7CFF6B]/90 text-[#08090B] font-bold text-[10px] flex items-center gap-1 transition-all cursor-pointer shadow-sm shadow-[#7CFF6B]/20"
+                        title="Launch Live VERO PR Engine"
+                      >
+                        <span>LIVE ENGINE</span>
+                        <ArrowRight className="w-2.5 h-2.5" />
+                      </button>
+                    )}
+                  </div>
 
                   <div className="flex items-center space-x-2">
                     {project.notebookUrl && (

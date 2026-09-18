@@ -14,6 +14,7 @@ export interface ProjectItem {
   repository: string;
   notebookUrl?: string;
   documentationUrl?: string;
+  liveAppView?: string;
   status: string;
   sections: {
     problem: string;

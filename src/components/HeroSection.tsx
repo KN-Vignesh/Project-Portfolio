@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowDown, ExternalLink, Activity, Terminal, ShieldCheck, Cpu, FileDown } from 'lucide-react';
+import { ArrowDown, ExternalLink, Activity, Terminal, ShieldCheck, Cpu, FileDown, GitPullRequest, ArrowRight } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { NeuralCore3D } from './NeuralCore3D';
 
@@ -7,9 +7,10 @@ interface HeroSectionProps {
   onExploreProjects: () => void;
   onExploreSystem: () => void;
   onOpenResume?: () => void;
+  onOpenVero?: () => void;
 }
 
-export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreProjects, onExploreSystem, onOpenResume }) => {
+export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreProjects, onExploreSystem, onOpenResume, onOpenVero }) => {
   return (
     <section id="hero" className="relative min-h-screen pt-28 pb-16 flex flex-col justify-between overflow-hidden tech-grid">
       {/* Top subtle glow / radial backdrop */}
@@ -110,7 +111,48 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreProjects, onE
                 <span>LINKEDIN</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
+
+              {onOpenVero && (
+                <button
+                  id="hero-launch-vero-button"
+                  onClick={onOpenVero}
+                  className="px-5 py-3 rounded border border-[#7CFF6B]/50 bg-[#15181D] hover:bg-[#24272D] text-[#7CFF6B] font-bold transition-all shadow-md shadow-[#7CFF6B]/10 flex items-center space-x-2 cursor-pointer"
+                >
+                  <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse" />
+                  <span>TRY LIVE VERO PR ENGINE</span>
+                </button>
+              )}
             </div>
+
+            {/* Interactive VERO Feature Callout */}
+            {onOpenVero && (
+              <div
+                id="hero-vero-callout"
+                onClick={onOpenVero}
+                className="p-3.5 rounded-xl border border-[#7CFF6B]/30 bg-[#101216]/90 hover:border-[#7CFF6B] hover:bg-[#15181D] transition-all cursor-pointer flex items-center justify-between group shadow-sm hover:shadow-[#7CFF6B]/10"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#7CFF6B]/15 border border-[#7CFF6B]/30 text-[#7CFF6B]">
+                    <GitPullRequest className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-[#F2F2F2]">
+                      <span>FLAGSHIP LIVE APPLICATION: VERO</span>
+                      <span className="rounded bg-[#7CFF6B]/15 border border-[#7CFF6B]/40 px-1.5 py-0.2 text-[10px] text-[#7CFF6B]">
+                        INTERACTIVE ENGINE
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-mono text-[#8B8F98]">
+                      Deterministic SonarQube static gates + TypeSafe Jev structured signals for GitHub PRs.
+                    </p>
+                  </div>
+                </div>
+                <div className="font-mono text-xs text-[#7CFF6B] flex items-center gap-1 group-hover:translate-x-1 transition-transform pl-3">
+                  <span className="hidden sm:inline">LAUNCH NOW</span>
+                  <ArrowRight className="w-4 h-4" />
+                </div>
+              </div>
+            )}
 
             {/* Technical Capability Badges */}
             <div className="pt-4 border-t border-[#24272D]/60 grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-[11px] text-[#8B8F98]">

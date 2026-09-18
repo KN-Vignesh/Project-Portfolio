@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { PERSONAL_INFO } from '../data/portfolioData';
-import { Menu, X, ArrowUpRight, FileDown } from 'lucide-react';
+import { Menu, X, ArrowUpRight, FileDown, GitPullRequest } from 'lucide-react';
 
 interface NavigationProps {
   activeSection: string;
   onNavigate?: (sectionId: string) => void;
   onOpenResume?: () => void;
+  onOpenVero?: () => void;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigate, onOpenResume }) => {
+export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigate, onOpenResume, onOpenVero }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -109,6 +110,20 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
             <ArrowUpRight className="w-3 h-3" />
           </a>
 
+          {/* VERO Live Engine Button */}
+          {onOpenVero && (
+            <button
+              id="nav-launch-vero-button"
+              onClick={onOpenVero}
+              className="flex items-center gap-1.5 px-3 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#7CFF6B]/50 text-[#7CFF6B] font-bold transition-all shadow-sm hover:shadow-[#7CFF6B]/15 cursor-pointer"
+              title="Launch Live VERO Pull Request Intelligence Engine"
+            >
+              <GitPullRequest className="w-3.5 h-3.5 text-[#7CFF6B]" />
+              <span>VERO ENGINE</span>
+              <span className="h-1.5 w-1.5 rounded-full bg-[#7CFF6B] animate-pulse"></span>
+            </button>
+          )}
+
           {/* Download Resume Button */}
           {onOpenResume ? (
             <button
@@ -164,6 +179,20 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
             </a>
           ))}
           <div className="pt-3 flex flex-col gap-3 text-xs">
+            {onOpenVero && (
+              <button
+                id="mobile-launch-vero-button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenVero();
+                }}
+                className="w-full py-2.5 px-3 rounded bg-[#15181D] border border-[#7CFF6B]/60 text-[#7CFF6B] font-bold flex items-center justify-center gap-2 cursor-pointer shadow-sm"
+              >
+                <GitPullRequest className="w-4 h-4 text-[#7CFF6B]" />
+                <span>LAUNCH VERO AI PR ENGINE</span>
+                <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
+              </button>
+            )}
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

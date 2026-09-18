@@ -209,7 +209,8 @@ export const PROJECTS: ProjectItem[] = [
       "DETERMINISTIC DECISION ENGINE",
       "ENGINEERING VERDICT & PR COMMENT"
     ],
-    repository: "https://github.com/KN-Vignesh/Projects",
+    repository: "https://github.com/KN-Vignesh/VERO",
+    liveAppView: "vero",
     status: "APPLICATION_SYSTEM",
     sections: {
       problem: "Engineering pull request reviews suffer from inconsistent quality, manual overhead on stylistic/static checks, and missed architectural edge cases. Pure LLM code reviews hallucinate security flaws, while pure static linters lack holistic context.",

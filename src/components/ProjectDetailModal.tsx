@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { X, ExternalLink, BookOpen, ArrowRight, CheckCircle2, AlertTriangle, Lightbulb, Terminal, Cpu } from 'lucide-react';
+import { X, ExternalLink, BookOpen, ArrowRight, CheckCircle2, AlertTriangle, Lightbulb, Terminal, Cpu, GitPullRequest } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { PROJECTS } from '../data/portfolioData';
 
@@ -7,12 +7,14 @@ interface ProjectDetailModalProps {
   project: ProjectItem | null;
   onClose: () => void;
   onSelectProject: (projectId: string) => void;
+  onOpenVero?: () => void;
 }
 
 export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   project,
   onClose,
   onSelectProject,
+  onOpenVero,
 }) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,6 +47,21 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           </div>
 
           <div className="flex items-center space-x-2">
+            {project.liveAppView === 'vero' && onOpenVero && (
+              <button
+                id="modal-launch-vero-button"
+                onClick={() => {
+                  onClose();
+                  onOpenVero();
+                }}
+                className="px-3 py-1 text-xs rounded bg-[#7CFF6B] hover:bg-[#7CFF6B]/90 text-[#08090B] font-bold font-mono transition-all flex items-center gap-1.5 shadow-sm shadow-[#7CFF6B]/20 cursor-pointer"
+                title="Open Live VERO Pull Request Intelligence Engine"
+              >
+                <GitPullRequest className="w-3.5 h-3.5" />
+                <span>LAUNCH LIVE ENGINE</span>
+              </button>
+            )}
+
             <a
               href={project.repository}
               target="_blank"
@@ -103,6 +120,36 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 </span>
               ))}
             </div>
+
+            {/* Live Interactive Engine Banner */}
+            {project.liveAppView === 'vero' && onOpenVero && (
+              <div className="mt-4 p-4 rounded-xl border border-[#7CFF6B]/40 bg-[#101216] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-[#7CFF6B]/5">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-[#7CFF6B]/15 border border-[#7CFF6B]/30 flex items-center justify-center text-[#7CFF6B] shrink-0">
+                    <GitPullRequest className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-mono text-sm font-bold text-[#F2F2F2] flex items-center gap-2">
+                      <span>LIVE VERO ENGINE ACTIVE</span>
+                      <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
+                    </div>
+                    <p className="font-mono text-xs text-[#8B8F98]">
+                      Interactive GitHub PR diff ingestion, SonarQube static gates & TypeSafe Jev model choices.
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    onClose();
+                    onOpenVero();
+                  }}
+                  className="px-4 py-2 rounded-lg bg-[#7CFF6B] hover:bg-[#7CFF6B]/90 text-[#08090B] font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
+                >
+                  <span>LAUNCH ENGINE</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* 01 / PROBLEM */}
