@@ -10,7 +10,8 @@ import {
   Terminal,
   Activity,
   CheckCircle2,
-  GitPullRequest
+  GitPullRequest,
+  ArrowLeft
 } from 'lucide-react';
 import { ProjectItem } from '../types';
 import { PROJECTS } from '../data/portfolioData';
@@ -78,71 +79,118 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fadeIn">
-      {/* Container Dialog */}
-      <div className="relative w-full max-w-4xl bg-[#08090B] border border-[#24272D] rounded-xl shadow-2xl shadow-black overflow-hidden max-h-[92vh] flex flex-col my-auto">
+    <div
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/90 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 md:p-6 animate-fadeIn"
+    >
+      {/* Container Dialog: Full-screen on mobile with native feel, floating dialog on tablet/desktop */}
+      <div className="relative w-full max-w-4xl h-full sm:h-auto sm:max-h-[92vh] bg-[#08090B] border-0 sm:border sm:border-[#24272D] sm:rounded-xl shadow-2xl shadow-black overflow-hidden flex flex-col my-auto">
         
         {/* Sticky Clean Header Bar */}
-        <div className="px-4 py-3 border-b border-[#24272D] bg-[#101216] flex items-center justify-between gap-3 font-mono shrink-0">
-          <div className="flex items-center space-x-2.5">
-            <span className="px-2 py-0.5 rounded bg-[#08090B] border border-[#7CFF6B]/40 text-[#7CFF6B] text-xs font-bold">
-              {project.number}
-            </span>
-            <span className="text-xs text-[#F2F2F2] font-semibold truncate max-w-[200px] sm:max-w-xs">
-              {project.title}
-            </span>
+        <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-b border-[#24272D] bg-[#101216] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 font-mono shrink-0 sticky top-0 z-20">
+          {/* Top Row: Back Button, Number, Title & Mobile-only Quick Actions */}
+          <div className="flex items-center justify-between gap-2 min-w-0">
+            <div className="flex items-center gap-2 min-w-0">
+              {/* Prominent Back Button (Always visible, extra clear on mobile) */}
+              <button
+                onClick={onClose}
+                id="project-modal-back-btn"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#15181D] hover:bg-[#20242C] border border-[#24272D] hover:border-[#7CFF6B]/50 text-[#7CFF6B] hover:text-[#F2F2F2] font-mono text-xs font-bold transition-all shrink-0 cursor-pointer shadow-sm active:scale-95"
+                aria-label="Back to all projects"
+                title="Back to all projects"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>BACK</span>
+              </button>
+
+              {/* Project Number */}
+              <span className="px-2 py-0.5 rounded bg-[#08090B] border border-[#7CFF6B]/40 text-[#7CFF6B] text-xs font-bold shrink-0">
+                {project.number}
+              </span>
+
+              {/* Project Title */}
+              <span className="text-xs text-[#F2F2F2] font-semibold truncate max-w-[140px] xs:max-w-[200px] sm:max-w-xs" title={project.title}>
+                {project.title}
+              </span>
+            </div>
+
+            {/* Mobile Quick Actions (Repo + Close) */}
+            <div className="flex items-center gap-1.5 sm:hidden shrink-0">
+              <a
+                href={project.repository}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-1.5 text-xs rounded border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B] transition-colors"
+                title="View GitHub Repository"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-md text-[#8B8F98] hover:text-[#F2F2F2] hover:bg-[#15181D] transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
 
-          {/* Simple Tab Switcher: Experience & Overview vs Source Code */}
-          <div className="flex items-center bg-[#08090B] p-1 rounded-lg border border-[#24272D] text-xs">
-            <button
-              onClick={() => setActiveTab('experience')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded transition-colors cursor-pointer ${
-                activeTab === 'experience'
-                  ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
-                  : 'text-[#8B8F98] hover:text-[#F2F2F2]'
-              }`}
-            >
-              <Activity className="w-3.5 h-3.5" />
-              <span>EXPERIENCE</span>
-            </button>
+          {/* Tab Switcher & Desktop Action Buttons */}
+          <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
+            {/* Simple Tab Switcher: Experience vs Code */}
+            <div className="flex items-center bg-[#08090B] p-1 rounded-lg border border-[#24272D] text-xs w-full sm:w-auto">
+              <button
+                onClick={() => setActiveTab('experience')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1 rounded transition-colors cursor-pointer ${
+                  activeTab === 'experience'
+                    ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
+                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5" />
+                <span>EXPERIENCE</span>
+              </button>
 
-            <button
-              onClick={() => setActiveTab('code')}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded transition-colors cursor-pointer ${
-                activeTab === 'code'
-                  ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
-                  : 'text-[#8B8F98] hover:text-[#F2F2F2]'
-              }`}
-            >
-              <Code className="w-3.5 h-3.5" />
-              <span>CODE & NOTES</span>
-            </button>
-          </div>
+              <button
+                onClick={() => setActiveTab('code')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1 rounded transition-colors cursor-pointer ${
+                  activeTab === 'code'
+                    ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
+                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                }`}
+              >
+                <Code className="w-3.5 h-3.5" />
+                <span>CODE &amp; NOTES</span>
+              </button>
+            </div>
 
-          <div className="flex items-center space-x-2">
-            <a
-              href={project.repository}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-2.5 py-1 text-xs rounded border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B] transition-colors flex items-center gap-1 font-mono"
-            >
-              <span className="hidden sm:inline">REPO</span>
-              <ExternalLink className="w-3 h-3" />
-            </a>
+            {/* Desktop Action Buttons */}
+            <div className="hidden sm:flex items-center space-x-2">
+              <a
+                href={project.repository}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-2.5 py-1 text-xs rounded border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B] transition-colors flex items-center gap-1 font-mono"
+              >
+                <span>REPO</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
 
-            <button
-              onClick={onClose}
-              className="p-1.5 rounded-md text-[#8B8F98] hover:text-[#F2F2F2] hover:bg-[#15181D] transition-colors cursor-pointer"
-              aria-label="Close modal"
-            >
-              <X className="w-5 h-5" />
-            </button>
+              <button
+                onClick={onClose}
+                className="p-1.5 rounded-md text-[#8B8F98] hover:text-[#F2F2F2] hover:bg-[#15181D] transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-sm">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-sm flex-1">
           
           {/* TAB 1: EXPERIENCE INITIALLY + PARALLEL EXPLANATION */}
           {activeTab === 'experience' && (
@@ -348,20 +396,32 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
         </div>
 
-        {/* Minimal Clean Footer */}
-        <div className="px-4 py-3 border-t border-[#24272D] bg-[#101216] flex items-center justify-between font-mono text-xs shrink-0">
-          <span className="text-[#8B8F98] text-[11px]">
-            TECH STACK: <span className="text-[#F2F2F2]">{project.technologies.slice(0, 3).join(', ')}</span>
-          </span>
-          <a
-            href={project.repository}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3 py-1.5 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-colors flex items-center gap-1.5 cursor-pointer"
+        {/* Minimal Clean Footer with Persistent Back Navigation */}
+        <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-t border-[#24272D] bg-[#101216] flex items-center justify-between gap-2 font-mono text-xs shrink-0">
+          <button
+            onClick={onClose}
+            id="project-modal-bottom-back-btn"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#24272D] bg-[#15181D] hover:bg-[#20242C] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B]/40 font-mono text-xs font-semibold transition-colors cursor-pointer active:scale-95"
+            title="Back to All Projects"
           >
-            <span>GITHUB REPO</span>
-            <ExternalLink className="w-3.5 h-3.5" />
-          </a>
+            <ArrowLeft className="w-3.5 h-3.5 text-[#7CFF6B]" />
+            <span>BACK TO PROJECTS</span>
+          </button>
+
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-[#8B8F98] text-[11px] hidden md:inline">
+              TECH: <span className="text-[#F2F2F2]">{project.technologies.slice(0, 3).join(', ')}</span>
+            </span>
+            <a
+              href={project.repository}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <span>GITHUB REPO</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
+          </div>
         </div>
 
       </div>

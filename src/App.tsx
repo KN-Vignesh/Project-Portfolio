@@ -25,34 +25,48 @@ export default function App() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isResumeOpen, setIsResumeOpen] = useState<boolean>(false);
 
-  // Check URL hash on initial load for direct project deep-linking or VERO engine
+  // Check URL hash on initial load and navigation for direct project deep-linking or VERO engine
   useEffect(() => {
-    const handleHashChange = () => {
+    const handleUrlChange = () => {
       const hash = window.location.hash.replace('#', '');
+      
       if (hash === 'vero' || hash.startsWith('vero')) {
+        setSelectedProjectId(null);
         setCurrentView('vero');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
       
       setCurrentView('portfolio');
+      
       if (hash.startsWith('project-')) {
         const projId = hash.replace('project-', '');
         const exists = PROJECTS.find((p) => p.id === projId);
         if (exists) {
           setSelectedProjectId(projId);
+        } else {
+          setSelectedProjectId(null);
         }
-      } else if (hash) {
-        const element = document.getElementById(hash);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        // Crucial fix: Close project modal whenever URL hash is not a project deep-link
+        // This ensures mobile back button, URL editing, and dock navigation return cleanly to main page.
+        setSelectedProjectId(null);
+        if (hash) {
+          const element = document.getElementById(hash);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+          }
         }
       }
     };
 
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    handleUrlChange();
+    window.addEventListener('hashchange', handleUrlChange);
+    window.addEventListener('popstate', handleUrlChange);
+    return () => {
+      window.removeEventListener('hashchange', handleUrlChange);
+      window.removeEventListener('popstate', handleUrlChange);
+    };
   }, []);
 
   // Update active section based on scroll position (when in portfolio view)
@@ -94,6 +108,7 @@ export default function App() {
   }, [currentView]);
 
   const handleNavigate = (sectionId: string) => {
+    setSelectedProjectId(null);
     if (currentView !== 'portfolio') {
       setCurrentView('portfolio');
       setTimeout(() => {
@@ -108,17 +123,28 @@ export default function App() {
         element.scrollIntoView({ behavior: 'smooth' });
       }
     }
-    window.history.pushState(null, '', `#${sectionId}`);
+    window.location.hash = `#${sectionId}`;
   };
 
   const handleOpenProject = (projectId: string) => {
     setSelectedProjectId(projectId);
-    window.history.pushState(null, '', `#project-${projectId}`);
+    window.location.hash = `#project-${projectId}`;
   };
 
   const handleCloseProject = () => {
     setSelectedProjectId(null);
-    window.history.pushState(null, '', '#projects');
+    if (window.location.hash.startsWith('#project-')) {
+      if (window.history.length > 2) {
+        window.history.back();
+      } else {
+        window.location.hash = '#projects';
+      }
+      setTimeout(() => {
+        if (window.location.hash.startsWith('#project-')) {
+          window.location.hash = '#projects';
+        }
+      }, 60);
+    }
   };
 
   const handleOpenVero = () => {
