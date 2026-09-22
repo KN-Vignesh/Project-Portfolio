@@ -26,15 +26,15 @@ export const EngineeringSystemSection: React.FC<EngineeringSystemSectionProps> =
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 pb-4 border-b border-[#24272D]">
           <div>
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-widest uppercase mb-1">
-              [02] // ENGINEERING SYSTEM & LIFECYCLE
+            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase mb-1">
+              ENGINEERING LIFECYCLE & METHODOLOGY
             </div>
             <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#F2F2F2]">
-              HOW I ENGINEER INTELLIGENT SYSTEMS
+              SYSTEMS ARCHITECTURE & PIPELINE
             </h2>
           </div>
           <div className="font-mono text-xs text-[#8B8F98] mt-2 sm:mt-0">
-            DETERMINISTIC PIPELINE // 5 STAGES
+            5-STAGE REPRODUCIBLE WORKFLOW
           </div>
         </div>
 

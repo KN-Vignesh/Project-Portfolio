@@ -444,332 +444,13 @@ BT
 ET
 endstream
 endobj
-5 0 obj
-<</Type /Page
-/Parent 1 0 R
-/Resources 2 0 R
-/MediaBox [0 0 595.2799999999999727 841.8899999999999864]
-/Contents 6 0 R
->>
-endobj
-6 0 obj
-<<
-/Length 6885
->>
-stream
-0.8 w
-0.2 0.22 0.25 RG
-BT
-/F2 11 Tf
-12.6499999999999986 TL
-0.059 0.078 0.098 rg
-36. 807.8899999999999864 Td
-(VIGNESH KN) Tj
-ET
-BT
-/F1 8.5 Tf
-9.7749999999999986 TL
-0.294 0.333 0.388 rg
-272.0650000000000546 807.8899999999999864 Td
-(KEY ENGINEERING & AI PROJECTS \(RANKED BY PROJECT SEVERITY\)) Tj
-ET
-0.2 0.22 0.25 RG
-0.8 w
-36. 802.8899999999999864 m
-559.2799999999999727 802.8899999999999864 l
-S
-BT
-/F2 11 Tf
-12.6499999999999986 TL
-0.059 0.078 0.098 rg
-36. 788.8899999999999864 Td
-(Projects & System Architectures \(Sourced from GitHub\)) Tj
-ET
-0.2 0.22 0.25 RG
-0.8 w
-36. 785.8899999999999864 m
-559.2799999999999727 785.8899999999999864 l
-S
-BT
-/F2 9.2 Tf
-10.5799999999999983 TL
-0.059 0.078 0.098 rg
-36. 777.8899999999999864 Td
-(VERO — AI Code Analysis & Pull Request Intelligence) Tj
-ET
-BT
-/F2 7.8 Tf
-8.9699999999999989 TL
-0.725 0.11 0.11 rg
-277.4279999999999973 777.8899999999999864 Td
-([SEV-1 · CRITICAL]) Tj
-ET
-BT
-/F1 7.5 Tf
-8.625 TL
-0.294 0.333 0.388 rg
-435.30499999999995 777.8899999999999864 Td
-(https://github.com/KN-Vignesh/VERO) Tj
-ET
-BT
-/F3 7.8 Tf
-8.9699999999999989 TL
-0.294 0.333 0.388 rg
-42. 767.3899999999999864 Td
-(Tech Stack: TypeScript, Node.js, GitHub API, SonarQube Rules, TypeSafe Jev, LLM Prompting, Deterministic Policy Code) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 757.8899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 757.8899999999999864 Td
-(Evidence-based GitHub Pull Request engineering analysis platform combining AST diff parsing, SonarQube static quality checks, and) Tj
-T* (structured LLM signals with a deterministic rule engine.) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 737.3899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 737.3899999999999864 Td
-(Delivers automated, hallucination-free merge verdicts without repository checkouts, providing verifiable audit trails and structured Markdown) Tj
-T* (review summaries.) Tj
-ET
-BT
-/F2 9.2 Tf
-10.5799999999999983 TL
-0.059 0.078 0.098 rg
-36. 713.3899999999999864 Td
-(Intelligent Customer Churn Prediction System) Tj
-ET
-BT
-/F2 7.8 Tf
-8.9699999999999989 TL
-0.706 0.325 0.035 rg
-242.7439999999999998 713.3899999999999864 Td
-([SEV-2 · HIGH]) Tj
-ET
-BT
-/F1 7.5 Tf
-8.625 TL
-0.294 0.333 0.388 rg
-336.0799999999999272 713.3899999999999864 Td
-(https://github.com/KN-Vignesh/intelligent-customer-churn-prediction) Tj
-ET
-BT
-/F3 7.8 Tf
-8.9699999999999989 TL
-0.294 0.333 0.388 rg
-42. 702.8899999999999864 Td
-(Tech Stack: Python, Scikit-learn, XGBoost, FastAPI, Docker, Pydantic, Tabular ML) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 693.3899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 693.3899999999999864 Td
-(End-to-end reproducible classification pipeline transforming raw Telco records into low-latency prediction endpoints.) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 682.3899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 682.3899999999999864 Td
-(Features isolated Scikit-learn preprocessing pipelines, multi-model evaluation \(Logistic Regression, Random Forest, XGBoost\), cost-sensitive) Tj
-T* (threshold tuning, and Alpine Docker containerization.) Tj
-ET
-BT
-/F2 9.2 Tf
-10.5799999999999983 TL
-0.059 0.078 0.098 rg
-36. 658.3899999999999864 Td
-(Qwen2.5 / LoRA & QLoRA Memory-Efficient LLM Fine-Tuning) Tj
-ET
-BT
-/F2 7.8 Tf
-8.9699999999999989 TL
-0.706 0.325 0.035 rg
-307.8799999999999386 658.3899999999999864 Td
-([SEV-3 · HIGH]) Tj
-ET
-BT
-/F1 7.5 Tf
-8.625 TL
-0.294 0.333 0.388 rg
-297.5299999999999727 658.3899999999999864 Td
-(https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning) Tj
-ET
-BT
-/F3 7.8 Tf
-8.9699999999999989 TL
-0.294 0.333 0.388 rg
-42. 647.8899999999999864 Td
-(Tech Stack: Python, PyTorch, Hugging Face PEFT/TRL, BitsAndBytes 4-bit, LoRA / QLoRA, NF4) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 638.3899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 638.3899999999999864 Td
-(Parameter-Efficient Fine-Tuning \(PEFT\) on open-weight LLMs using rank-decomposed adapter matrices \(LoRA r=8/16, alpha=32\) and 4-bit) Tj
-T* (NormalFloat \(NF4\) quantization.) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 617.8899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 617.8899999999999864 Td
-(Preserves base model frozen weights while optimizing attention projection layers \(q_proj, v_proj\), generating isolated <50MB adapter weights.) Tj
-ET
-BT
-/F2 9.2 Tf
-10.5799999999999983 TL
-0.059 0.078 0.098 rg
-36. 603.3899999999999864 Td
-(BERT Bidirectional Model Engineering & Downstream NLP) Tj
-ET
-BT
-/F2 7.8 Tf
-8.9699999999999989 TL
-0.114 0.306 0.847 rg
-297.3919999999999391 603.3899999999999864 Td
-([SEV-4 · MEDIUM]) Tj
-ET
-BT
-/F1 7.5 Tf
-8.625 TL
-0.294 0.333 0.388 rg
-299.0299999999999727 603.3899999999999864 Td
-(https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/BERT_MODEL) Tj
-ET
-BT
-/F3 7.8 Tf
-8.9699999999999989 TL
-0.294 0.333 0.388 rg
-42. 592.8899999999999864 Td
-(Tech Stack: PyTorch, Hugging Face Transformers, WordPiece Tokenizer, Transfer Learning, AdamW) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 583.3899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 583.3899999999999864 Td
-(Adapted pretrained bidirectional Transformer encoders to downstream text classification and entity extraction.) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 572.3899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 572.3899999999999864 Td
-(Engineered pooled CLS linear heads, custom tokenization pipelines, and AdamW linear learning rate warmup with gradient clipping \(1.0\).) Tj
-ET
-BT
-/F2 9.2 Tf
-10.5799999999999983 TL
-0.059 0.078 0.098 rg
-36. 557.8899999999999864 Td
-(Multi-Metric Model Evaluation & Experiment Benchmarking Suite) Tj
-ET
-BT
-/F2 7.8 Tf
-8.9699999999999989 TL
-0.114 0.306 0.847 rg
-324.1639999999999873 557.8899999999999864 Td
-([SEV-5 · MEDIUM]) Tj
-ET
-BT
-/F1 7.5 Tf
-8.625 TL
-0.294 0.333 0.388 rg
-272.1800000000000068 557.8899999999999864 Td
-(https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/Combined_metric_Calc) Tj
-ET
-BT
-/F3 7.8 Tf
-8.9699999999999989 TL
-0.294 0.333 0.388 rg
-42. 547.3899999999999864 Td
-(Tech Stack: Python, Scikit-learn, ROC-AUC, Precision-Recall, Calibration Curves, Bootstrap) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-42. 537.8899999999999864 Td
-(%Ï) Tj
-ET
-BT
-/F1 8 Tf
-9.1999999999999993 TL
-0.059 0.078 0.098 rg
-52. 537.8899999999999864 Td
-(Unified model comparison suite synthesizing discrimination metrics, calibration curves \(Brier score\), and latency metrics across candidate) Tj
-T* (models for evidence-based deployment justification.) Tj
-ET
-endstream
-endobj
 1 0 obj
 <</Type /Pages
-/Kids [3 0 R 5 0 R ]
-/Count 2
+/Kids [3 0 R ]
+/Count 1
 >>
 endobj
-7 0 obj
+5 0 obj
 <<
 /Type /Font
 /BaseFont /Helvetica
@@ -779,7 +460,7 @@ endobj
 /LastChar 255
 >>
 endobj
-8 0 obj
+6 0 obj
 <<
 /Type /Font
 /BaseFont /Helvetica-Bold
@@ -789,7 +470,7 @@ endobj
 /LastChar 255
 >>
 endobj
-9 0 obj
+7 0 obj
 <<
 /Type /Font
 /BaseFont /Helvetica-Oblique
@@ -799,7 +480,7 @@ endobj
 /LastChar 255
 >>
 endobj
-10 0 obj
+8 0 obj
 <<
 /Type /Font
 /BaseFont /Helvetica-BoldOblique
@@ -809,7 +490,7 @@ endobj
 /LastChar 255
 >>
 endobj
-11 0 obj
+9 0 obj
 <<
 /Type /Font
 /BaseFont /Courier
@@ -819,7 +500,7 @@ endobj
 /LastChar 255
 >>
 endobj
-12 0 obj
+10 0 obj
 <<
 /Type /Font
 /BaseFont /Courier-Bold
@@ -829,7 +510,7 @@ endobj
 /LastChar 255
 >>
 endobj
-13 0 obj
+11 0 obj
 <<
 /Type /Font
 /BaseFont /Courier-Oblique
@@ -839,7 +520,7 @@ endobj
 /LastChar 255
 >>
 endobj
-14 0 obj
+12 0 obj
 <<
 /Type /Font
 /BaseFont /Courier-BoldOblique
@@ -849,7 +530,7 @@ endobj
 /LastChar 255
 >>
 endobj
-15 0 obj
+13 0 obj
 <<
 /Type /Font
 /BaseFont /Times-Roman
@@ -859,7 +540,7 @@ endobj
 /LastChar 255
 >>
 endobj
-16 0 obj
+14 0 obj
 <<
 /Type /Font
 /BaseFont /Times-Bold
@@ -869,7 +550,7 @@ endobj
 /LastChar 255
 >>
 endobj
-17 0 obj
+15 0 obj
 <<
 /Type /Font
 /BaseFont /Times-Italic
@@ -879,7 +560,7 @@ endobj
 /LastChar 255
 >>
 endobj
-18 0 obj
+16 0 obj
 <<
 /Type /Font
 /BaseFont /Times-BoldItalic
@@ -889,7 +570,7 @@ endobj
 /LastChar 255
 >>
 endobj
-19 0 obj
+17 0 obj
 <<
 /Type /Font
 /BaseFont /ZapfDingbats
@@ -898,7 +579,7 @@ endobj
 /LastChar 255
 >>
 endobj
-20 0 obj
+18 0 obj
 <<
 /Type /Font
 /BaseFont /Symbol
@@ -911,32 +592,32 @@ endobj
 <<
 /ProcSet [/PDF /Text /ImageB /ImageC /ImageI]
 /Font <<
-/F1 7 0 R
-/F2 8 0 R
-/F3 9 0 R
-/F4 10 0 R
-/F5 11 0 R
-/F6 12 0 R
-/F7 13 0 R
-/F8 14 0 R
-/F9 15 0 R
-/F10 16 0 R
-/F11 17 0 R
-/F12 18 0 R
-/F13 19 0 R
-/F14 20 0 R
+/F1 5 0 R
+/F2 6 0 R
+/F3 7 0 R
+/F4 8 0 R
+/F5 9 0 R
+/F6 10 0 R
+/F7 11 0 R
+/F8 12 0 R
+/F9 13 0 R
+/F10 14 0 R
+/F11 15 0 R
+/F12 16 0 R
+/F13 17 0 R
+/F14 18 0 R
 >>
 /XObject <<
 >>
 >>
 endobj
-21 0 obj
+19 0 obj
 <<
 /Producer (jsPDF 4.2.1)
 /CreationDate (D:20260922174919-00'00')
 >>
 endobj
-22 0 obj
+20 0 obj
 <<
 /Type /Catalog
 /Pages 1 0 R
@@ -945,37 +626,35 @@ endobj
 >>
 endobj
 xref
-0 23
+0 21
 0000000000 65535 f 
-0000016743 00000 n 
-0000018568 00000 n 
+0000009669 00000 n 
+0000011486 00000 n 
 0000000015 00000 n 
 0000000152 00000 n 
-0000009669 00000 n 
-0000009806 00000 n 
-0000016806 00000 n 
-0000016931 00000 n 
-0000017061 00000 n 
-0000017194 00000 n 
-0000017332 00000 n 
-0000017456 00000 n 
-0000017585 00000 n 
-0000017717 00000 n 
-0000017853 00000 n 
-0000017981 00000 n 
-0000018108 00000 n 
-0000018237 00000 n 
-0000018370 00000 n 
-0000018472 00000 n 
-0000018818 00000 n 
-0000018904 00000 n 
+0000009726 00000 n 
+0000009851 00000 n 
+0000009981 00000 n 
+0000010114 00000 n 
+0000010251 00000 n 
+0000010374 00000 n 
+0000010503 00000 n 
+0000010635 00000 n 
+0000010771 00000 n 
+0000010899 00000 n 
+0000011026 00000 n 
+0000011155 00000 n 
+0000011288 00000 n 
+0000011390 00000 n 
+0000011734 00000 n 
+0000011820 00000 n 
 trailer
 <<
-/Size 23
-/Root 22 0 R
-/Info 21 0 R
-/ID [ <D2380AFE445BDFC651E2648F2501640A> <D2380AFE445BDFC651E2648F2501640A> ]
+/Size 21
+/Root 20 0 R
+/Info 19 0 R
+/ID [ <A8CDE4F1EAF7518E26CFC2B781EB0862> <A8CDE4F1EAF7518E26CFC2B781EB0862> ]
 >>
 startxref
-19008
+11924
 %%EOF

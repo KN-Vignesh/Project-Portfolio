@@ -1,31 +1,18 @@
 import React from 'react';
-import { Home, FolderGit2, GitPullRequest, Cpu, FileText, Smartphone } from 'lucide-react';
-import { usePWAInstall } from '../hooks/usePWAInstall';
+import { Home, FolderGit2, GitPullRequest, Cpu } from 'lucide-react';
 
 interface MobileAppDockProps {
   activeSection: string;
   onNavigate: (sectionId: string) => void;
-  onOpenResume: () => void;
+  onOpenResume?: () => void;
   onOpenVero: () => void;
 }
 
 export const MobileAppDock: React.FC<MobileAppDockProps> = ({
   activeSection,
   onNavigate,
-  onOpenResume,
   onOpenVero,
 }) => {
-  const { isInstalled, isInstallable, isIOS, install } = usePWAInstall();
-
-  const handleInstallClick = async () => {
-    if (isInstallable) {
-      await install();
-    } else {
-      const pwaBtn = document.getElementById('pwa-install-trigger-button');
-      if (pwaBtn) pwaBtn.click();
-    }
-  };
-
   const navItems = [
     { id: 'hero', label: 'Home', icon: Home },
     { id: 'projects', label: 'Projects', icon: FolderGit2 },
@@ -78,29 +65,6 @@ export const MobileAppDock: React.FC<MobileAppDockProps> = ({
             </button>
           );
         })}
-
-        {/* Resume Quick Trigger */}
-        <button
-          id="mobile-dock-resume"
-          onClick={onOpenResume}
-          className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[#8B8F98] hover:text-[#F2F2F2] transition-all cursor-pointer min-h-[46px]"
-        >
-          <FileText className="w-5 h-5 stroke-[1.8]" />
-          <span className="text-[10px] font-mono tracking-tight mt-1 font-medium">Resume</span>
-        </button>
-
-        {/* If not installed, show Install prompt tab in dock */}
-        {!isInstalled && (
-          <button
-            id="mobile-dock-install"
-            onClick={handleInstallClick}
-            className="flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl text-[#7CFF6B] bg-[#7CFF6B]/10 border border-[#7CFF6B]/30 hover:bg-[#7CFF6B]/20 transition-all cursor-pointer min-h-[46px]"
-            title="Install App"
-          >
-            <Smartphone className="w-5 h-5 stroke-[2]" />
-            <span className="text-[10px] font-mono tracking-tight mt-1 font-bold">App</span>
-          </button>
-        )}
       </div>
     </nav>
   );

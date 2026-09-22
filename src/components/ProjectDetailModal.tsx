@@ -1,7 +1,21 @@
-import React, { useEffect } from 'react';
-import { X, ExternalLink, BookOpen, ArrowRight, CheckCircle2, AlertTriangle, Lightbulb, Terminal, Cpu, GitPullRequest } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+  X,
+  ExternalLink,
+  Code,
+  Copy,
+  Check,
+  FileCode,
+  FolderGit2,
+  Terminal,
+  Activity,
+  CheckCircle2,
+  GitPullRequest
+} from 'lucide-react';
 import { ProjectItem } from '../types';
 import { PROJECTS } from '../data/portfolioData';
+import { PROJECT_CODE_RESOURCES, PROJECT_STANDALONE_REPOS } from '../data/projectCodeData';
+import { ProjectInteractiveExperience } from './ProjectInteractiveExperience';
 
 interface ProjectDetailModalProps {
   project: ProjectItem | null;
@@ -16,6 +30,11 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   onSelectProject,
   onOpenVero,
 }) => {
+  const [activeTab, setActiveTab] = useState<'experience' | 'code'>('experience');
+  const [activeFileIndex, setActiveFileIndex] = useState(0);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedClone, setCopiedClone] = useState(false);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -24,69 +43,97 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
+  // Reset file tab when project changes
+  useEffect(() => {
+    setActiveFileIndex(0);
+    setActiveTab('experience');
+  }, [project?.id]);
+
   if (!project) return null;
 
-  const relatedProjects = PROJECTS.filter((p) =>
-    project.relatedProjectIds.includes(p.id)
-  );
+  const codeFiles = PROJECT_CODE_RESOURCES[project.id] || [];
+  const activeCodeFile = codeFiles[activeFileIndex] || codeFiles[0];
+  const standaloneRepo = PROJECT_STANDALONE_REPOS[project.id];
+
+  const handleCopyCode = async () => {
+    if (!activeCodeFile) return;
+    try {
+      await navigator.clipboard.writeText(activeCodeFile.code);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
+
+  const handleCopyClone = async () => {
+    if (!standaloneRepo) return;
+    try {
+      await navigator.clipboard.writeText(standaloneRepo.cloneCommand);
+      setCopiedClone(true);
+      setTimeout(() => setCopiedClone(false), 2000);
+    } catch {
+      // fallback
+    }
+  };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fadeIn">
       {/* Container Dialog */}
       <div className="relative w-full max-w-4xl bg-[#08090B] border border-[#24272D] rounded-xl shadow-2xl shadow-black overflow-hidden max-h-[92vh] flex flex-col my-auto">
         
-        {/* Sticky Top Header Bar */}
-        <div className="p-4 sm:p-5 border-b border-[#24272D] bg-[#101216] flex items-center justify-between font-mono shrink-0">
-          <div className="flex items-center space-x-3">
+        {/* Sticky Clean Header Bar */}
+        <div className="px-4 py-3 border-b border-[#24272D] bg-[#101216] flex items-center justify-between gap-3 font-mono shrink-0">
+          <div className="flex items-center space-x-2.5">
             <span className="px-2 py-0.5 rounded bg-[#08090B] border border-[#7CFF6B]/40 text-[#7CFF6B] text-xs font-bold">
               {project.number}
             </span>
-            <span className="text-xs text-[#8B8F98] uppercase tracking-wider hidden sm:inline">
-              {project.category}
+            <span className="text-xs text-[#F2F2F2] font-semibold truncate max-w-[200px] sm:max-w-xs">
+              {project.title}
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
-            {project.liveAppView === 'vero' && onOpenVero && (
-              <button
-                id="modal-launch-vero-button"
-                onClick={() => {
-                  onClose();
-                  onOpenVero();
-                }}
-                className="px-3 py-1 text-xs rounded bg-[#7CFF6B] hover:bg-[#7CFF6B]/90 text-[#08090B] font-bold font-mono transition-all flex items-center gap-1.5 shadow-sm shadow-[#7CFF6B]/20 cursor-pointer"
-                title="Open Live VERO Pull Request Intelligence Engine"
-              >
-                <GitPullRequest className="w-3.5 h-3.5" />
-                <span>LAUNCH LIVE ENGINE</span>
-              </button>
-            )}
+          {/* Simple Tab Switcher: Experience & Overview vs Source Code */}
+          <div className="flex items-center bg-[#08090B] p-1 rounded-lg border border-[#24272D] text-xs">
+            <button
+              onClick={() => setActiveTab('experience')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded transition-colors cursor-pointer ${
+                activeTab === 'experience'
+                  ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
+                  : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+              }`}
+            >
+              <Activity className="w-3.5 h-3.5" />
+              <span>EXPERIENCE</span>
+            </button>
 
+            <button
+              onClick={() => setActiveTab('code')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded transition-colors cursor-pointer ${
+                activeTab === 'code'
+                  ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
+                  : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+              }`}
+            >
+              <Code className="w-3.5 h-3.5" />
+              <span>CODE & NOTES</span>
+            </button>
+          </div>
+
+          <div className="flex items-center space-x-2">
             <a
               href={project.repository}
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-1 text-xs rounded border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B] transition-colors flex items-center gap-1.5"
+              className="px-2.5 py-1 text-xs rounded border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B] transition-colors flex items-center gap-1 font-mono"
             >
-              <span>GITHUB</span>
-              <ExternalLink className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">REPO</span>
+              <ExternalLink className="w-3 h-3" />
             </a>
-
-            {project.notebookUrl && (
-              <a
-                href={project.notebookUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-3 py-1 text-xs rounded border border-[#24272D] text-[#8B8F98] hover:text-[#6EA8FE] hover:border-[#6EA8FE] transition-colors flex items-center gap-1.5"
-              >
-                <span>NOTEBOOK</span>
-                <BookOpen className="w-3.5 h-3.5" />
-              </a>
-            )}
 
             <button
               onClick={onClose}
-              className="p-1 rounded-md text-[#8B8F98] hover:text-[#F2F2F2] hover:bg-[#15181D] transition-colors"
+              className="p-1.5 rounded-md text-[#8B8F98] hover:text-[#F2F2F2] hover:bg-[#15181D] transition-colors cursor-pointer"
               aria-label="Close modal"
             >
               <X className="w-5 h-5" />
@@ -95,238 +142,226 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="p-6 sm:p-8 overflow-y-auto space-y-8 text-[#8B8F98] text-sm">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-sm">
           
-          {/* Main Title & Tagline */}
-          <div className="space-y-3">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#F2F2F2] tracking-tight">
-              {project.title}
-            </h1>
-            <p className="text-base text-[#7CFF6B] font-mono leading-relaxed">
-              {project.tagline}
-            </p>
-            <p className="text-sm text-[#8B8F98] leading-relaxed">
-              {project.description}
-            </p>
+          {/* TAB 1: EXPERIENCE INITIALLY + PARALLEL EXPLANATION */}
+          {activeTab === 'experience' && (
+            <div className="space-y-6 animate-fadeIn">
+              {/* 1. INTERACTIVE EXPERIENCE FIRST */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between font-mono text-xs text-[#8B8F98]">
+                  <span className="text-[#7CFF6B] font-semibold flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
+                    STEP 1: EXPERIENCE IN ACTION
+                  </span>
+                  <span>Interact with live parameters below</span>
+                </div>
 
-            {/* Stack chips */}
-            <div className="flex flex-wrap gap-1.5 pt-2">
-              {project.technologies.map((t) => (
-                <span
-                  key={t}
-                  className="px-2.5 py-1 rounded bg-[#101216] border border-[#24272D] font-mono text-xs text-[#F2F2F2]"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
+                <ProjectInteractiveExperience
+                  projectId={project.id}
+                  onOpenVero={project.liveAppView === 'vero' ? () => { onClose(); onOpenVero?.(); } : undefined}
+                />
+              </div>
 
-            {/* Live Interactive Engine Banner */}
-            {project.liveAppView === 'vero' && onOpenVero && (
-              <div className="mt-4 p-4 rounded-xl border border-[#7CFF6B]/40 bg-[#101216] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-md shadow-[#7CFF6B]/5">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-[#7CFF6B]/15 border border-[#7CFF6B]/30 flex items-center justify-center text-[#7CFF6B] shrink-0">
-                    <GitPullRequest className="w-5 h-5" />
+              {/* 2. PARALLEL CONCISE EXPLANATION */}
+              <div className="space-y-4 pt-2 border-t border-[#24272D]/60">
+                <div className="font-mono text-xs text-[#7CFF6B] uppercase font-semibold">
+                  STEP 2: UNDERSTAND THE ARCHITECTURE & EFFORT
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Problem & Motivation */}
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-2">
+                    <span className="font-mono text-[11px] text-[#8B8F98] block uppercase font-bold">
+                      WHAT THIS SOLVES
+                    </span>
+                    <p className="text-xs sm:text-sm text-[#F2F2F2] leading-relaxed">
+                      {project.sections.problem}
+                    </p>
                   </div>
-                  <div>
-                    <div className="font-mono text-sm font-bold text-[#F2F2F2] flex items-center gap-2">
-                      <span>LIVE VERO ENGINE ACTIVE</span>
-                      <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
-                    </div>
-                    <p className="font-mono text-xs text-[#8B8F98]">
-                      Interactive GitHub PR diff ingestion, SonarQube static gates & TypeSafe Jev model choices.
+
+                  {/* Why this engineering approach */}
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-2">
+                    <span className="font-mono text-[11px] text-[#7CFF6B] block uppercase font-bold">
+                      WHY THIS ARCHITECTURE
+                    </span>
+                    <p className="text-xs sm:text-sm text-[#8B8F98] leading-relaxed">
+                      {project.sections.whyApproach}
                     </p>
                   </div>
                 </div>
-                <button
-                  onClick={() => {
-                    onClose();
-                    onOpenVero();
-                  }}
-                  className="px-4 py-2 rounded-lg bg-[#7CFF6B] hover:bg-[#7CFF6B]/90 text-[#08090B] font-mono font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shrink-0"
-                >
-                  <span>LAUNCH ENGINE</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            )}
-          </div>
 
-          {/* 01 / PROBLEM */}
-          <section className="space-y-2 border-t border-[#24272D]/60 pt-6">
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase font-semibold">
-              01 // PROBLEM DEFINITION & MOTIVATION
-            </div>
-            <p className="text-[#F2F2F2] leading-relaxed">
-              {project.sections.problem}
-            </p>
-          </section>
+                {/* Key Metrics & Engineering Decisions */}
+                <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-3">
+                  <span className="font-mono text-[11px] text-[#6EA8FE] block uppercase font-bold">
+                    VERIFIED RESULTS & PRODUCTION DECISIONS
+                  </span>
 
-          {/* 02 / WHY THIS APPROACH */}
-          <section className="space-y-2 border-t border-[#24272D]/60 pt-6">
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase font-semibold">
-              02 // WHY THIS APPROACH
-            </div>
-            <p className="text-[#8B8F98] leading-relaxed">
-              {project.sections.whyApproach}
-            </p>
-          </section>
+                  <div className="flex flex-wrap gap-2">
+                    {project.evaluationMetrics?.map((m) => (
+                      <span
+                        key={m}
+                        className="px-2.5 py-1 rounded bg-[#08090B] border border-[#24272D] font-mono text-xs text-[#7CFF6B]"
+                      >
+                        ✓ {m}
+                      </span>
+                    ))}
+                  </div>
 
-          {/* 03 / DATA & INPUT SPECIFICATION */}
-          <section className="space-y-2 border-t border-[#24272D]/60 pt-6">
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase font-semibold">
-              03 // DATA & INPUT SPECIFICATION
-            </div>
-            <div className="p-3.5 rounded bg-[#101216] border border-[#24272D] font-mono text-xs text-[#F2F2F2]">
-              {project.sections.dataInput}
-            </div>
-          </section>
+                  <ul className="space-y-1.5 pt-1 text-xs text-[#8B8F98]">
+                    {project.sections.engineeringDecisions.slice(0, 2).map((dec, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-[#7CFF6B] shrink-0 mt-0.5" />
+                        <span className="text-[#E6EDF3]">{dec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-          {/* 04 / SYSTEM PIPELINE ARCHITECTURE */}
-          <section className="space-y-3 border-t border-[#24272D]/60 pt-6">
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase font-semibold">
-              04 // SYSTEM PIPELINE ARCHITECTURE
-            </div>
-            <p className="text-[#8B8F98] leading-relaxed">
-              {project.sections.architecture}
-            </p>
-
-            {/* Pipeline Block Sequence */}
-            <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-2">
-              <span className="font-mono text-[10px] text-[#8B8F98] block uppercase">
-                END-TO-END EXECUTION FLOW
-              </span>
-              <div className="flex flex-wrap gap-2 items-center font-mono text-xs">
-                {project.systemFlow.map((stage, sIdx) => (
-                  <React.Fragment key={stage}>
-                    <span className="px-2.5 py-1 rounded bg-[#08090B] border border-[#24272D] text-[#7CFF6B]">
-                      {stage}
-                    </span>
-                    {sIdx < project.systemFlow.length - 1 && (
-                      <span className="text-[#8B8F98]">→</span>
-                    )}
-                  </React.Fragment>
-                ))}
+                {/* Quick toggle to inspect code */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-[#0C0E12] border border-[#24272D] font-mono text-xs">
+                  <span className="text-[#8B8F98]">Want to inspect the exact Python / TypeScript code?</span>
+                  <button
+                    onClick={() => setActiveTab('code')}
+                    className="px-3 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#24272D] text-[#7CFF6B] font-bold transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <Code className="w-3.5 h-3.5" />
+                    <span>VIEW SOURCE CODE</span>
+                  </button>
+                </div>
               </div>
             </div>
-          </section>
+          )}
 
-          {/* 05 / IMPLEMENTATION DETAILS */}
-          <section className="space-y-2 border-t border-[#24272D]/60 pt-6">
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase font-semibold">
-              05 // IMPLEMENTATION & REPRODUCIBILITY
-            </div>
-            <p className="text-[#8B8F98] leading-relaxed">
-              {project.sections.implementation}
-            </p>
-          </section>
+          {/* TAB 2: CLEAN SOURCE CODE & MECHANICS */}
+          {activeTab === 'code' && (
+            <div className="space-y-6 animate-fadeIn">
+              {/* Standalone Repo Info Bar */}
+              {standaloneRepo && (
+                <div className="p-3.5 rounded-xl bg-[#101216] border border-[#24272D] flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
+                  <div className="flex items-center gap-2">
+                    <FolderGit2 className="w-4 h-4 text-[#7CFF6B]" />
+                    <span className="text-[#F2F2F2] font-semibold">{standaloneRepo.repoName}</span>
+                    <span className="text-[10px] text-[#8B8F98]">({standaloneRepo.runtime})</span>
+                  </div>
 
-          {/* 06 / EVALUATION & METRICS */}
-          <section className="space-y-2 border-t border-[#24272D]/60 pt-6">
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase font-semibold">
-              06 // EVALUATION & VERIFIED METRICS
-            </div>
-            <div className="p-4 rounded bg-[#101216] border border-[#24272D] space-y-2 font-mono text-xs">
-              <div className="text-[#F2F2F2]">
-                {project.sections.evaluation}
-              </div>
-              {project.evaluationMetrics && (
-                <div className="pt-2 flex flex-wrap gap-2 text-[11px] text-[#6EA8FE]">
-                  {project.evaluationMetrics.map((m) => (
-                    <span key={m} className="px-2 py-0.5 rounded bg-[#08090B] border border-[#24272D]">
-                      ✓ {m}
-                    </span>
+                  <div className="flex items-center gap-2">
+                    <code className="px-2 py-1 rounded bg-[#08090B] border border-[#24272D] text-[#8B8F98] text-[11px] hidden sm:inline select-all">
+                      {standaloneRepo.cloneCommand}
+                    </code>
+                    <button
+                      onClick={handleCopyClone}
+                      className="px-2.5 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                      title="Copy clone command"
+                    >
+                      {copiedClone ? <Check className="w-3 h-3 text-[#7CFF6B]" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedClone ? 'COPIED' : 'CLONE'}</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Code File Selector (if multiple) */}
+              {codeFiles.length > 1 && (
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
+                  {codeFiles.map((file, idx) => (
+                    <button
+                      key={file.filename}
+                      onClick={() => setActiveFileIndex(idx)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded border transition-colors cursor-pointer ${
+                        activeFileIndex === idx
+                          ? 'bg-[#15181D] border-[#7CFF6B] text-[#7CFF6B]'
+                          : 'bg-[#101216] border-[#24272D] text-[#8B8F98]'
+                      }`}
+                    >
+                      <FileCode className="w-3.5 h-3.5" />
+                      <span>{file.filename}</span>
+                    </button>
                   ))}
                 </div>
               )}
-            </div>
-          </section>
 
-          {/* 07 / KEY ENGINEERING DECISIONS */}
-          <section className="space-y-3 border-t border-[#24272D]/60 pt-6">
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase font-semibold flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-[#7CFF6B]" />
-              <span>07 // KEY ENGINEERING DECISIONS</span>
-            </div>
-            <ul className="space-y-2 text-[#8B8F98]">
-              {project.sections.engineeringDecisions.map((dec, i) => (
-                <li key={i} className="flex items-start gap-2">
-                  <span className="text-[#7CFF6B] font-mono">[{i + 1}]</span>
-                  <span className="text-[#F2F2F2]">{dec}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          {/* 08 / LIMITATIONS & FUTURE IMPROVEMENTS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-[#24272D]/60 pt-6">
-            <div className="p-4 rounded-lg bg-[#101216] border border-[#24272D] space-y-2 font-mono text-xs">
-              <div className="text-[#FFB86B] font-bold flex items-center gap-1.5">
-                <AlertTriangle className="w-3.5 h-3.5" />
-                <span>LIMITATIONS</span>
-              </div>
-              <ul className="space-y-1.5 text-[#8B8F98] text-[11px]">
-                {project.sections.limitations.map((lim, i) => (
-                  <li key={i}>• {lim}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="p-4 rounded-lg bg-[#101216] border border-[#24272D] space-y-2 font-mono text-xs">
-              <div className="text-[#6EA8FE] font-bold flex items-center gap-1.5">
-                <Lightbulb className="w-3.5 h-3.5" />
-                <span>FUTURE ROADMAP</span>
-              </div>
-              <ul className="space-y-1.5 text-[#8B8F98] text-[11px]">
-                {project.sections.futureImprovements.map((imp, i) => (
-                  <li key={i}>• {imp}</li>
-                ))}
-              </ul>
-            </div>
-          </div>
-
-          {/* 09 / RELATED SYSTEMS */}
-          {relatedProjects.length > 0 && (
-            <section className="space-y-3 border-t border-[#24272D]/60 pt-6 font-mono text-xs">
-              <div className="text-[#8B8F98] uppercase">
-                INTERCONNECTED ARCHITECTURES IN PORTFOLIO
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {relatedProjects.map((rel) => (
-                  <button
-                    key={rel.id}
-                    onClick={() => onSelectProject(rel.id)}
-                    className="p-3 rounded border border-[#24272D] bg-[#101216] hover:border-[#7CFF6B] text-left transition-colors flex items-center justify-between group cursor-pointer"
-                  >
-                    <div>
-                      <div className="text-[#7CFF6B] text-[10px]">{rel.number}</div>
-                      <div className="text-[#F2F2F2] font-semibold text-xs">{rel.title}</div>
+              {/* Code Box */}
+              {activeCodeFile && (
+                <div className="space-y-4">
+                  <div className="rounded-xl bg-[#0B0D11] border border-[#24272D] overflow-hidden">
+                    <div className="px-4 py-2 bg-[#101216] border-b border-[#24272D] flex items-center justify-between font-mono text-xs">
+                      <span className="text-[#F2F2F2] font-semibold">{activeCodeFile.filename}</span>
+                      <button
+                        onClick={handleCopyCode}
+                        className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors cursor-pointer text-[11px]"
+                      >
+                        {copiedCode ? <Check className="w-3 h-3 text-[#7CFF6B]" /> : <Copy className="w-3 h-3" />}
+                        <span>{copiedCode ? 'COPIED' : 'COPY'}</span>
+                      </button>
                     </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-[#8B8F98] group-hover:text-[#7CFF6B] group-hover:translate-x-1 transition-all" />
-                  </button>
-                ))}
-              </div>
-            </section>
+
+                    <div className="p-4 overflow-x-auto max-h-[340px] font-mono text-xs leading-relaxed text-[#E6EDF3] bg-[#050608]">
+                      <pre className="table w-full">
+                        {activeCodeFile.code.trim().split('\n').map((line, lIdx) => (
+                          <div key={lIdx} className="table-row hover:bg-[#101216]/50">
+                            <span className="table-cell pr-4 text-right text-[#484F58] select-none text-[11px] w-8">
+                              {lIdx + 1}
+                            </span>
+                            <span className="table-cell font-mono whitespace-pre">
+                              {line.startsWith('#') || line.startsWith('//') ? (
+                                <span className="text-[#8B8F98] italic">{line}</span>
+                              ) : line.includes('import ') || line.includes('from ') || line.includes('export ') || line.includes('class ') || line.includes('def ') || line.includes('async ') ? (
+                                <span className="text-[#FF7B72]">{line}</span>
+                              ) : line.includes('return ') || line.includes('if ') || line.includes('else:') || line.includes('try:') || line.includes('except ') ? (
+                                <span className="text-[#D2A8FF]">{line}</span>
+                              ) : (
+                                line
+                              )}
+                            </span>
+                          </div>
+                        ))}
+                      </pre>
+                    </div>
+                  </div>
+
+                  {/* Step-by-step logic breakdown */}
+                  <div className="space-y-2">
+                    <span className="font-mono text-[11px] text-[#7CFF6B] uppercase font-bold block">
+                      LINE-BY-LINE ENGINEERING MECHANICS
+                    </span>
+                    <div className="grid grid-cols-1 gap-2 font-mono text-xs">
+                      {activeCodeFile.explanation.keyLines.map((item, kIdx) => (
+                        <div
+                          key={kIdx}
+                          className="p-3 rounded-lg bg-[#101216] border border-[#24272D] flex items-start gap-3"
+                        >
+                          <span className="px-2 py-0.5 rounded bg-[#08090B] border border-[#7CFF6B]/40 text-[#7CFF6B] text-[11px] shrink-0 font-bold">
+                            Lines {item.lineNumbers}
+                          </span>
+                          <p className="text-xs text-[#E6EDF3] font-sans leading-relaxed">
+                            {item.description}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           )}
 
         </div>
 
-        {/* Footer Actions */}
-        <div className="p-4 border-t border-[#24272D] bg-[#101216] flex items-center justify-between font-mono text-xs shrink-0">
+        {/* Minimal Clean Footer */}
+        <div className="px-4 py-3 border-t border-[#24272D] bg-[#101216] flex items-center justify-between font-mono text-xs shrink-0">
           <span className="text-[#8B8F98] text-[11px]">
-            STATUS: <span className="text-[#7CFF6B]">{project.status}</span>
+            TECH STACK: <span className="text-[#F2F2F2]">{project.technologies.slice(0, 3).join(', ')}</span>
           </span>
-          <div className="flex items-center space-x-3">
-            <a
-              href={project.repository}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-4 py-2 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-colors flex items-center gap-1.5"
-            >
-              <span>EXPLORE REPO ON GITHUB</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
+          <a
+            href={project.repository}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3 py-1.5 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <span>GITHUB REPO</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </a>
         </div>
 
       </div>

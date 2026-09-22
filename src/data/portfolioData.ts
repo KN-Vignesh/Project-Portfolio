@@ -1,11 +1,12 @@
 import { ProjectItem, ExperienceItem, CertificationItem, AILabNode, StackCategory } from '../types';
 
 export const PERSONAL_INFO = {
-  name: "VIGNESH K N",
+  name: "VIGNESH KN",
   title: "AI SOFTWARE ENGINEER",
   subtitle: "SOFTWARE ENGINEERING → AI ENGINEERING",
   heroStatement: "Building intelligent systems from models to production.",
-  supportingText: "Software engineer with 4+ years of experience in full-stack engineering, cloud automation and API integration, now focused on production-oriented AI, Generative AI, LLM orchestration, RAG, agentic workflows and model engineering.",
+  supportingText: "Software engineer with 4+ years of experience in full-stack engineering, cloud automation, and API integration, now focused on production-oriented AI, Generative AI, LLM orchestration, RAG, agentic workflows, and model engineering.",
+  summary: "Results-driven AI Software Engineer with 4+ years of experience in full-stack engineering, cloud automation, and API integration. Expertise in architecting production-grade Generative AI, LLM orchestration, Agentic workflows, RAG, and NLP pipelines. Skilled in enterprise .NET ecosystems, Sitecore CMS platforms, and secure IAM/PAM infrastructure deployments. Proven track record of designing, scaling, and deploying robust AI and cloud solutions on modern infrastructure.",
   email: "vigneshknagaraj@outlook.com",
   phone: "+91 8861524366",
   location: "Bengaluru - 560045, India",
@@ -17,12 +18,235 @@ export const PERSONAL_INFO = {
   statusSubtext: "AI ENGINEERING CORE ACTIVE",
 };
 
-export const PROJECTS: ProjectItem[] = [
+/**
+ * Exact Resume Data extracted from the official attached PDF
+ */
+export const RESUME_DATA = {
+  header: {
+    name: "VIGNESH KN",
+    phone: "+91 8861524366",
+    email: "vigneshknagaraj@outlook.com",
+    location: "Bengaluru - 560045",
+    linkedin: "linkedin.com/in/vignesh-k-n",
+    github: "github.com/KN-Vignesh",
+    projects: "kn-vignesh.github.io/Projects/#/"
+  },
+  professionalSummary:
+    "Results-driven AI Software Engineer with 4+ years of experience in full-stack engineering, cloud automation, and API integration. Expertise in architecting production-grade Generative AI, LLM orchestration, Agentic workflows, RAG, and NLP pipelines. Skilled in enterprise .NET ecosystems, Sitecore CMS platforms, and secure IAM/PAM infrastructure deployments. Proven track record of designing, scaling, and deploying robust AI and cloud solutions on modern infrastructure.",
+  technicalSkillsTable: [
+    {
+      category: "AI, GenAI & NLP",
+      skills:
+        "Natural Language Processing (NLP), Generative AI (GenAI), Large Language Models (LLMs), Agentic AI Workflows, Prompt Engineering, RLHF Evaluation Frameworks, RAG Architectures"
+    },
+    {
+      category: "AI Frameworks & Tools",
+      skills: "LangChain, LLM APIs (OpenAI, Azure OpenAI), Vector Search (Cosmos DB), FAISS"
+    },
+    {
+      category: "Languages",
+      skills: "C# (.NET Core, ASP.NET MVC), Python, JavaScript, HTML, CSS, SSMS SQL"
+    },
+    {
+      category: "Frameworks & CMS",
+      skills: "Angular (8–19), Entity Framework"
+    },
+    {
+      category: "Cloud & DevOps",
+      skills: "Docker, Azure Functions, Azure Service Bus, Cosmos DB, Git, Jenkins (CI/CD / MLOps), Postman, Swagger"
+    }
+  ],
+  professionalExperience: [
+    {
+      company: "ACL Digital",
+      role: "Software Engineer",
+      period: "Aug 2024 – Present",
+      bullets: [
+        "Architected full-stack modules with Agentic AI and LLM APIs for the TLK Device Configuration App (OnePortal) using .NET Core 8, Angular 18, EF, and MySQL globally.",
+        "Implemented Reinforcement Learning from Human Feedback (RLHF) strategies and developed rigorous evaluation frameworks to optimize the accuracy, performance, and reliability of internal Generative AI and NLP applications.",
+        "Engineered automated data validation and a secure end-to-end scanner implementation designed specifically for client-side Device Registration."
+      ]
+    },
+    {
+      company: "Enmarq Technologies",
+      role: "Software Engineer",
+      period: "Aug 2022 – Aug 2024",
+      bullets: [
+        "Built serverless REST APIs, Azure Functions, and Azure Service Bus triggers utilizing Azure Cosmos DB (Vector Search data management) and SSMS SQL to power low-latency data ingestion pipelines for downstream NLP pipelines and Generative AI RAG architectures.",
+        "Managed Git and Jenkins CI/CD and MLOps pipelines to ensure seamless version control, automated testing, model deployment, and continuous cloud environment operations.",
+        "Spearheaded the automated deployment, building, and testing of BeyondTrust PAM and BeyondInsight for 6,000+ users under a strict 90-day timeline.",
+        "Executed seamless sequential Sitecore CMS upgrades from v8.3 to 10.3, enhancing Content Hub and Experience Editor workflows.",
+        "Developed complex SQL Stored Procedures for Managed Printing Systems to automate multi-stage data integrity alerts."
+      ]
+    },
+    {
+      company: "Enmarq Technologies",
+      role: "Intern Associate",
+      period: "Feb 2022 – Jul 2022",
+      bullets: [
+        "Built automated Python and C# scheduled jobs to extract and clean Cosmos DB user data for analytics and AI workflows.",
+        "Validated microservices endpoints across backend APIs using Postman and Swagger."
+      ]
+    }
+  ],
+  certificationsAndEducation: [
+    {
+      title: "Microsoft Certified: Azure Fundamentals (AZ-900 / DP-900)",
+      period: "2024 - 2026"
+    },
+    {
+      title: "Oracle Cloud Infrastructure (OCI): Generative AI / AI Foundation Certified",
+      period: "2023 - 2024"
+    },
+    {
+      title: "B.E. Graduate — KVG College of Engineering",
+      period: "Graduated 2019"
+    }
+  ]
+};
+
+/**
+ * Projects extracted from GitHub and structured by severity & operational impact
+ */
+export const RESUME_PROJECTS_BY_SEVERITY = [
+  {
+    id: "vero",
+    severityLevel: "SEV-1",
+    severityTier: "CRITICAL" as const,
+    severityLabel: "Production CI/CD Merge Gate & Vulnerability Shield",
+    title: "VERO — AI Code Analysis & Pull Request Intelligence",
+    stack: "TypeScript, Node.js, GitHub API, SonarQube Rules, TypeSafe Jev, LLMs, Deterministic Policy Code",
+    repoUrl: "https://github.com/KN-Vignesh/VERO",
+    impact: "Automated merge gate eliminating LLM hallucinations and intercepting vulnerabilities before production deploy.",
+    bullets: [
+      "Evidence-based GitHub Pull Request engineering analysis platform combining AST diff parsing, SonarQube static quality checks, and structured LLM signals with a deterministic rule engine.",
+      "Delivers automated, hallucination-free merge verdicts without repository checkouts, providing verifiable audit trails and structured Markdown review summaries."
+    ]
+  },
   {
     id: "customer-churn",
+    severityLevel: "SEV-2",
+    severityTier: "HIGH" as const,
+    severityLabel: "Revenue Risk Mitigation & Production Inference API",
+    title: "Intelligent Customer Churn Prediction System",
+    stack: "Python, Scikit-learn, XGBoost, FastAPI, Docker, Pydantic, Tabular ML",
+    repoUrl: "https://github.com/KN-Vignesh/intelligent-customer-churn-prediction",
+    impact: "Forecasts telecom subscription attrition ($100k+ ARR risk) via sub-50ms REST API inference.",
+    bullets: [
+      "End-to-end reproducible classification pipeline transforming raw Telco records into low-latency prediction endpoints.",
+      "Features isolated Scikit-learn preprocessing pipelines, multi-model evaluation (Logistic Regression, Random Forest, XGBoost), cost-sensitive threshold tuning, and Alpine Docker containerization."
+    ]
+  },
+  {
+    id: "qlora",
+    severityLevel: "SEV-3",
+    severityTier: "HIGH" as const,
+    severityLabel: "Hardware Bottleneck & Memory-Efficient LLM Adaptation",
+    title: "Qwen2.5 / LoRA & QLoRA Memory-Efficient LLM Fine-Tuning",
+    stack: "Python, PyTorch, Hugging Face PEFT/TRL, BitsAndBytes 4-bit, LoRA / QLoRA, NF4",
+    repoUrl: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning",
+    impact: "Slashes GPU VRAM memory overhead by >70% during training while preserving coding benchmark scores.",
+    bullets: [
+      "Parameter-Efficient Fine-Tuning (PEFT) on open-weight LLMs using rank-decomposed adapter matrices (LoRA r=8/16, alpha=32) and 4-bit NormalFloat (NF4) quantization.",
+      "Preserves base model frozen weights while optimizing attention projection layers (q_proj, v_proj), generating isolated <50MB adapter weights."
+    ]
+  },
+  {
+    id: "bert",
+    severityLevel: "SEV-4",
+    severityTier: "MEDIUM" as const,
+    severityLabel: "Enterprise NLP Architecture & Representation Learning",
+    title: "BERT Bidirectional Model Engineering & Downstream NLP",
+    stack: "PyTorch, Hugging Face Transformers, WordPiece Tokenizer, Transfer Learning, AdamW",
+    repoUrl: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/BERT_MODEL",
+    impact: "Transfers rich bidirectional linguistic representations to specialized classification heads with warm-up stability.",
+    bullets: [
+      "Adapted pretrained bidirectional Transformer encoders to downstream text classification and entity extraction.",
+      "Engineered pooled CLS linear heads, custom tokenization pipelines, and AdamW linear learning rate warmup with gradient clipping (1.0)."
+    ]
+  },
+  {
+    id: "evaluation",
+    severityLevel: "SEV-5",
+    severityTier: "MEDIUM" as const,
+    severityLabel: "Model Governance & Multi-Metric Risk Verification",
+    title: "Multi-Metric Model Evaluation & Experiment Benchmarking Suite",
+    stack: "Python, Scikit-learn, ROC-AUC, Precision-Recall, Calibration Curves, Bootstrap",
+    repoUrl: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/Combined_metric_Calc",
+    impact: "Prevents deceptive deployment approvals caused by single-metric vanity bias on imbalanced datasets.",
+    bullets: [
+      "Unified model comparison suite synthesizing discrimination metrics, calibration curves (Brier score), and latency metrics across experiments for evidence-based deployment justification."
+    ]
+  }
+];
+
+/**
+ * Full project systems catalog ordered by Project Severity & Operational Impact:
+ * 1. SEV-1 CRITICAL: VERO (Merge Gate & Production Vulnerability Prevention)
+ * 2. SEV-2 HIGH: Customer Churn (Revenue Risk & Low-Latency API)
+ * 3. SEV-3 HIGH: QLoRA & Qwen LoRA (Hardware Bottleneck & Memory Compression)
+ * 4. SEV-4 MEDIUM: BERT (Enterprise NLP & Representation Learning)
+ * 5. SEV-5 MEDIUM: Model Evaluation (Governance & Calibration Curves)
+ * 6. SEV-6 FOUNDATIONAL: House Price, CNN Fundamentals, Titanic
+ */
+export const PROJECTS: ProjectItem[] = [
+  {
+    id: "vero",
     number: "PROJECT_001",
+    title: "VERO — AI CODE ANALYSIS & PR INTELLIGENCE",
+    category: "AI APPLICATION / CODE INTELLIGENCE",
+    severityTier: "CRITICAL",
+    severityLevel: "SEV-1",
+    severityLabel: "Production CI/CD Merge Gate & Vulnerability Shield",
+    severityImpact: "Pre-merge vulnerability gate eliminating LLM hallucination and catching regressions before deployment.",
+    tagline: "Evidence-based GitHub Pull Request engineering analysis platform combining static analysis with structured AI signals.",
+    description: "An evidence-based GitHub Pull Request engineering analysis platform combining GitHub diff data, SonarQube static analysis, structured AI signals and deterministic decision rules. Synthesizes static code diagnostics with LLM architectural reasoning to generate engineering verdicts.",
+    technologies: ["GitHub API", "SonarQube", "LLMs", "Static Analysis", "Rule Engine", "TypeScript", "Node.js"],
+    role: "System Architecture & AI Application Engineering",
+    systemFlow: [
+      "GITHUB PULL REQUEST",
+      "DIFF EXTRACTION & PARSING",
+      "STATIC ANALYSIS (SONARQUBE)",
+      "STRUCTURED AI SIGNAL EXTRACTION",
+      "DETERMINISTIC DECISION ENGINE",
+      "ENGINEERING VERDICT & PR COMMENT"
+    ],
+    repository: "https://github.com/KN-Vignesh/VERO",
+    liveAppView: "vero",
+    status: "APPLICATION_SYSTEM",
+    evaluationMetrics: ["Deterministic Gate Veracity", "0% Hallucinated Vulnerabilities", "100% Audit Trail"],
+    sections: {
+      problem: "Engineering pull request reviews suffer from inconsistent quality, manual overhead on stylistic/static checks, and missed architectural edge cases. Pure LLM code reviews hallucinate security flaws, while pure static linters lack holistic context.",
+      whyApproach: "VERO pairs deterministic static analysis (SonarQube) with structured AI prompts. By grounding LLM evaluation in verified AST diffs and static rule outputs, the system produces actionable, reproducible engineering verdicts without requiring full repository checkouts.",
+      dataInput: "GitHub webhooks providing PR diff chunks, touched files, SonarQube quality gate outputs, and repository rule configurations.",
+      architecture: "Pipeline pattern: GitHub webhook triggers PR fetcher -> AST parser extracts modified functions -> SonarQube runs static security/style checks -> Prompt orchestrator builds grounded context -> LLM provides structured JSON analysis -> Deterministic decision engine combines rules for final merge gate verdict.",
+      implementation: "Structured schema enforcement on LLM outputs via JSON schemas. Strict rule engine preventing merge approvals if high-severity static vulnerabilities exist.",
+      evaluation: "Evaluated against historical PR samples measuring false-positive review commentary rates and precision of caught bugs.",
+      engineeringDecisions: [
+        "Never allowed raw LLM outputs to directly approve PRs without passing deterministic static gate rules.",
+        "Diff chunking strategy to keep prompt tokens within optimal attention budget without truncating critical context.",
+        "Markdown automated reporting formatted with collapsible diagnostic details for developer readability."
+      ],
+      limitations: [
+        "Requires access credentials for private repository webhooks and running SonarQube instance.",
+        "Very large monorepo PRs (100+ files) require incremental commit chunking."
+      ],
+      futureImprovements: [
+        "Interactive bot replies allowing developers to request code refactoring in-line directly from comments.",
+        "Self-hosted local model option (DeepSeek-Coder / CodeLlama) for air-gapped enterprise review."
+      ]
+    },
+    relatedProjectIds: ["customer-churn", "bert", "evaluation"]
+  },
+  {
+    id: "customer-churn",
+    number: "PROJECT_002",
     title: "INTELLIGENT CUSTOMER CHURN PREDICTION",
     category: "TRADITIONAL ML / PRODUCTION API",
+    severityTier: "HIGH",
+    severityLevel: "SEV-2",
+    severityLabel: "Revenue Risk Mitigation & Production Inference API",
+    severityImpact: "Forecasts telecom subscription attrition ($100k+ ARR risk) via sub-50ms REST API inference.",
     tagline: "A reproducible customer-risk workflow that turns tabular data into an API-ready prediction system.",
     description: "End-to-end production ML pipeline analyzing telecom subscription patterns to forecast retention attrition. Features modular data validation, Scikit-learn preprocessing pipelines, multi-model evaluation, and a low-latency FastAPI inference service packaged with Docker.",
     technologies: ["Python", "Pandas", "Scikit-learn", "FastAPI", "Docker", "Classification", "XGBoost"],
@@ -69,10 +293,60 @@ export const PROJECTS: ProjectItem[] = [
     relatedProjectIds: ["evaluation", "house-price", "vero"]
   },
   {
+    id: "qlora",
+    number: "PROJECT_003",
+    title: "QLoRA MEMORY-EFFICIENT TRAINING",
+    category: "LLM / EFFICIENT TRAINING",
+    severityTier: "HIGH",
+    severityLevel: "SEV-3",
+    severityLabel: "Hardware Bottleneck & Memory-Efficient LLM Adaptation",
+    severityImpact: "Slashes GPU VRAM memory overhead by >70% during training while preserving coding benchmark scores.",
+    tagline: "Memory-efficient model adaptation using low-bit quantization and trainable LoRA adapters.",
+    description: "Advanced parameter-efficient fine-tuning combining 4-bit NormalFloat (NF4) base weight quantization, Double Quantization (DQ), and Paged Optimizers with trainable FP16/BF16 LoRA adapters to adapt multi-billion parameter LLMs on consumer GPU hardware.",
+    technologies: ["LLM", "4-bit", "NF4", "BitsAndBytes", "PEFT", "PyTorch", "Transformers"],
+    role: "Quantized Fine-Tuning Engineering",
+    systemFlow: [
+      "BASE LLM WEIGHTS",
+      "NF4 QUANTIZATION",
+      "DOUBLE QUANTIZATION",
+      "FROZEN 4-BIT WEIGHTS",
+      "PAGED OPTIMIZERS",
+      "LoRA ADAPTER TRAINING",
+      "EVALUATION"
+    ],
+    repository: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/QLoraFine-Tuning",
+    status: "RESEARCH_NOTEBOOK",
+    evaluationMetrics: [">70% VRAM Savings", "NormalFloat 4 Precision", "Double Quantization Active"],
+    sections: {
+      problem: "Even with LoRA, storing full-precision base model weights in GPU VRAM limits fine-tuning to enterprise cluster setups. Democratizing adaptation to single-GPU or edge environments requires radical memory compression without degrading output quality.",
+      whyApproach: "QLoRA introduces NormalFloat 4 (an information-theoretically optimal quantile quantization for normally distributed weights), Double Quantization to compress quantization constants, and Paged Optimizers to manage memory spikes during gradient updates.",
+      dataInput: "Domain instructional corpora tokenized with causal language modeling masks.",
+      architecture: "Base weights quantized into 4-bit NF4 using BitsAndBytes. Computations during forward/backward passes dequantize NF4 to BF16 on the fly, calculating gradients only with respect to the LoRA adapters.",
+      implementation: "Configured BitsAndBytesConfig with bnb_4bit_quant_type='nf4', bnb_4bit_use_double_quant=True, and bnb_4bit_compute_dtype=torch.bfloat16.",
+      evaluation: "Loss convergence curves evaluated against standard FP16 LoRA runs, verifying near-identical training dynamics at ~65% reduced memory usage.",
+      engineeringDecisions: [
+        "Selected BF16 compute dtype to avoid numerical underflow during adapter backpropagation.",
+        "Adopted Double Quantization to save an additional 0.37 bits per parameter."
+      ],
+      limitations: [
+        "Slightly slower training step latency due to real-time dequantization overhead on CUDA kernels.",
+        "Adapter merging back into full-precision weights requires dequantization step prior to FP16 export."
+      ],
+      futureImprovements: [
+        "AWQ/GPTQ post-training quantization pipelines for high-throughput production deployment."
+      ]
+    },
+    relatedProjectIds: ["qwen-lora", "bert", "evaluation"]
+  },
+  {
     id: "qwen-lora",
-    number: "PROJECT_002",
+    number: "PROJECT_004",
     title: "QWEN / LoRA ADAPTATION",
     category: "GENERATIVE AI / PEFT",
+    severityTier: "HIGH",
+    severityLevel: "SEV-3",
+    severityLabel: "Model Parameter-Efficient Fine-Tuning & Weight Decoupling",
+    severityImpact: "Adapts multi-billion parameter models with <50MB adapter checkpoints, bypassing monolithic 14GB+ weight re-saves.",
     tagline: "Parameter-efficient adaptation of an open-weight language model using targeted LoRA adapters.",
     description: "Implementation of Low-Rank Adaptation (LoRA) on the Qwen architecture, freezing foundational weights and optimizing low-rank decomposition matrices (A and B) in attention projection layers (q_proj, v_proj) for domain specialization without full-model computational overhead.",
     technologies: ["Qwen", "LoRA", "PEFT", "PyTorch", "Hugging Face", "LLM Fine-Tuning"],
@@ -87,6 +361,7 @@ export const PROJECTS: ProjectItem[] = [
     ],
     repository: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning",
     status: "RESEARCH_NOTEBOOK",
+    evaluationMetrics: ["<50MB Adapter Artifact", "Rank r=16", "Alpha=32"],
     sections: {
       problem: "Full parameter fine-tuning of modern Large Language Models (7B+ parameters) requires immense VRAM and produces massive checkpoint artifacts (14GB+ per task). Deploying specialized agents requires agile adaptation with minimal storage footprints.",
       whyApproach: "Low-Rank Adaptation (LoRA) freezes the pre-trained weights W0 and represents the weight update delta W as the low-rank product B * A, where r << min(d, k). This reduces trainable parameters by over 99% while achieving comparable task accuracy.",
@@ -111,51 +386,14 @@ export const PROJECTS: ProjectItem[] = [
     relatedProjectIds: ["qlora", "bert", "evaluation"]
   },
   {
-    id: "qlora",
-    number: "PROJECT_003",
-    title: "QLoRA EFFICIENT TRAINING",
-    category: "LLM / EFFICIENT TRAINING",
-    tagline: "Memory-efficient model adaptation using low-bit quantization and trainable LoRA adapters.",
-    description: "Advanced parameter-efficient fine-tuning combining 4-bit NormalFloat (NF4) base weight quantization, Double Quantization (DQ), and Paged Optimizers with trainable FP16/BF16 LoRA adapters to adapt multi-billion parameter LLMs on consumer GPU hardware.",
-    technologies: ["LLM", "4-bit", "NF4", "BitsAndBytes", "PEFT", "PyTorch", "Transformers"],
-    role: "Quantized Fine-Tuning Engineering",
-    systemFlow: [
-      "BASE LLM WEIGHTS",
-      "NF4 QUANTIZATION",
-      "DOUBLE QUANTIZATION",
-      "FROZEN 4-BIT WEIGHTS",
-      "PAGED OPTIMIZERS",
-      "LoRA ADAPTER TRAINING",
-      "EVALUATION"
-    ],
-    repository: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/QLoraFine-Tuning",
-    status: "RESEARCH_NOTEBOOK",
-    sections: {
-      problem: "Even with LoRA, storing full-precision base model weights in GPU VRAM limits fine-tuning to enterprise cluster setups. Democratizing adaptation to single-GPU or edge environments requires radical memory compression without degrading output quality.",
-      whyApproach: "QLoRA introduces NormalFloat 4 (an information-theoretically optimal quantile quantization for normally distributed weights), Double Quantization to compress quantization constants, and Paged Optimizers to manage memory spikes during gradient updates.",
-      dataInput: "Domain instructional corpora tokenized with causal language modeling masks.",
-      architecture: "Base weights quantized into 4-bit NF4 using BitsAndBytes. Computations during forward/backward passes dequantize NF4 to BF16 on the fly, calculating gradients only with respect to the LoRA adapters.",
-      implementation: "Configured BitsAndBytesConfig with bnb_4bit_quant_type='nf4', bnb_4bit_use_double_quant=True, and bnb_4bit_compute_dtype=torch.bfloat16.",
-      evaluation: "Loss convergence curves evaluated against standard FP16 LoRA runs, verifying near-identical training dynamics at ~65% reduced memory usage.",
-      engineeringDecisions: [
-        "Selected BF16 compute dtype to avoid numerical underflow during adapter backpropagation.",
-        "Adopted Double Quantization to save an additional 0.37 bits per parameter."
-      ],
-      limitations: [
-        "Slightly slower training step latency due to real-time dequantization overhead on CUDA kernels.",
-        "Adapter merging back into full-precision weights requires dequantization step prior to FP16 export."
-      ],
-      futureImprovements: [
-        "AWQ/GPTQ post-training quantization pipelines for high-throughput production deployment."
-      ]
-    },
-    relatedProjectIds: ["qwen-lora", "bert", "evaluation"]
-  },
-  {
     id: "bert",
-    number: "PROJECT_004",
-    title: "BERT MODEL ENGINEERING",
+    number: "PROJECT_005",
+    title: "BERT MODEL ENGINEERING & DOWNSTREAM NLP",
     category: "MODEL ENGINEERING / NLP",
+    severityTier: "MEDIUM",
+    severityLevel: "SEV-4",
+    severityLabel: "Enterprise NLP Architecture & Representation Learning",
+    severityImpact: "Transfers rich bidirectional linguistic representations to specialized classification heads with warm-up stability.",
     tagline: "Adapting bidirectional pretrained Transformer models to downstream language tasks.",
     description: "Deep exploration of encoder-based Transformer representations. Explores bidirectional masked language modeling, tokenization subword segmentation, CLS token pooling, and task-specific classification head fine-tuning for natural language understanding.",
     technologies: ["BERT", "Transformers", "NLP", "PyTorch", "Classification", "NER"],
@@ -171,6 +409,7 @@ export const PROJECTS: ProjectItem[] = [
     ],
     repository: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/BERT_MODEL",
     status: "IMPLEMENTED_PIPELINE",
+    evaluationMetrics: ["Macro F1 Score", "Linear Warmup", "1.0 Gradient Clipping"],
     sections: {
       problem: "Traditional recurrent architectures (LSTMs, GRUs) struggle with long-range dependencies and cannot process sequential context bidirectionally at scale. Downstream NLP tasks require semantic contextual representations tailored to classification or sequence labeling.",
       whyApproach: "BERT (Bidirectional Encoder Representations from Transformers) leverages self-attention to condition on both left and right context across all layers simultaneously. Pretraining on Masked Language Modeling allows transfer learning to downstream tasks with minimal architecture additions.",
@@ -193,94 +432,14 @@ export const PROJECTS: ProjectItem[] = [
     relatedProjectIds: ["qwen-lora", "vero", "evaluation"]
   },
   {
-    id: "vero",
-    number: "PROJECT_005",
-    title: "VERO — AI CODE ANALYSIS",
-    category: "AI APPLICATION / CODE INTELLIGENCE",
-    tagline: "Evidence-based GitHub Pull Request engineering analysis platform combining static analysis with structured AI signals.",
-    description: "An evidence-based GitHub Pull Request engineering analysis platform combining GitHub diff data, SonarQube static analysis, structured AI signals and deterministic decision rules. Synthesizes static code diagnostics with LLM architectural reasoning to generate engineering verdicts.",
-    technologies: ["GitHub API", "SonarQube", "LLMs", "Static Analysis", "Rule Engine", "TypeScript", "Node.js"],
-    role: "System Architecture & AI Application Engineering",
-    systemFlow: [
-      "GITHUB PULL REQUEST",
-      "DIFF EXTRACTION & PARSING",
-      "STATIC ANALYSIS (SONARQUBE)",
-      "STRUCTURED AI SIGNAL EXTRACTION",
-      "DETERMINISTIC DECISION ENGINE",
-      "ENGINEERING VERDICT & PR COMMENT"
-    ],
-    repository: "https://github.com/KN-Vignesh/VERO",
-    liveAppView: "vero",
-    status: "APPLICATION_SYSTEM",
-    sections: {
-      problem: "Engineering pull request reviews suffer from inconsistent quality, manual overhead on stylistic/static checks, and missed architectural edge cases. Pure LLM code reviews hallucinate security flaws, while pure static linters lack holistic context.",
-      whyApproach: "VERO pairs deterministic static analysis (SonarQube) with structured AI prompts. By grounding LLM evaluation in verified AST diffs and static rule outputs, the system produces actionable, reproducible engineering verdicts.",
-      dataInput: "GitHub webhooks providing PR diff chunks, touched files, SonarQube quality gate outputs, and repository rule configurations.",
-      architecture: "Pipeline pattern: GitHub webhook triggers PR fetcher -> AST parser extracts modified functions -> SonarQube runs static security/style checks -> Prompt orchestrator builds grounded context -> LLM provides structured JSON analysis -> Deterministic decision engine combines rules for final merge gate verdict.",
-      implementation: "Structured schema enforcement on LLM outputs via JSON schemas. Strict rule engine preventing merge approvals if high-severity static vulnerabilities exist.",
-      evaluation: "Evaluated against historical PR samples measuring false-positive review commentary rates and precision of caught bugs.",
-      engineeringDecisions: [
-        "Never allowed raw LLM outputs to directly approve PRs without passing deterministic static gate rules.",
-        "Diff chunking strategy to keep prompt tokens within optimal attention budget without truncating critical context.",
-        "Markdown automated reporting formatted with collapsible diagnostic details for developer readability."
-      ],
-      limitations: [
-        "Requires access credentials for private repository webhooks and running SonarQube instance.",
-        "Very large monorepo PRs (100+ files) require incremental commit chunking."
-      ],
-      futureImprovements: [
-        "Interactive bot replies allowing developers to request code refactoring in-line directly from comments.",
-        "Self-hosted local model option (DeepSeek-Coder / CodeLlama) for air-gapped enterprise review."
-      ]
-    },
-    relatedProjectIds: ["customer-churn", "bert", "evaluation"]
-  },
-  {
-    id: "cnn",
-    number: "PROJECT_006",
-    title: "CNN FUNDAMENTALS",
-    category: "MODEL ENGINEERING / COMPUTER VISION",
-    tagline: "Visual representation learning pipeline from raw pixel normalization to spatial convolutions.",
-    description: "Foundational exploration of spatial feature hierarchies in Computer Vision. Demonstrates 2D convolution kernels, pooling downsampling, activation non-linearities, spatial feature map extraction, and visual classification architectures.",
-    technologies: ["Vision", "PyTorch", "CNN", "Preprocessing", "Computer Vision", "Torchvision"],
-    role: "Computer Vision Foundations",
-    systemFlow: [
-      "RAW IMAGE TENSOR",
-      "PREPROCESSING & RESIZING",
-      "DATA AUGMENTATION",
-      "CONVOLUTIONAL LAYERS (KERNELS)",
-      "FEATURE LEARNING & POOLING",
-      "FULLY CONNECTED CLASSIFIER",
-      "METRICS & ACTIVATION MAPS"
-    ],
-    repository: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/CNN-Fundamentals",
-    status: "EDUCATIONAL_SYSTEM",
-    sections: {
-      problem: "Fully connected dense networks fail when applied directly to high-dimensional image tensors because they discard spatial 2D locality and suffer from parameter explosion.",
-      whyApproach: "Convolutional Neural Networks (CNNs) introduce parameter sharing and translation equivariance via sliding receptive field kernels, enabling hierarchical visual abstraction from low-level edges to semantic shapes.",
-      dataInput: "RGB image datasets normalized with mean and standard deviation scaling.",
-      architecture: "Convolutional layers with ReLU non-linearities, batch normalization for internal covariate shift mitigation, max pooling for translational invariance, and dense linear output heads.",
-      implementation: "Custom PyTorch nn.Module architecture with training loop monitoring train/val loss and top-1 accuracy.",
-      evaluation: "Classification accuracy, confusion matrices, and receptive field visualization.",
-      engineeringDecisions: [
-        "Incorporated Batch Normalization after convolutions to stabilize gradient flow and accelerate convergence.",
-        "Implemented real-time data augmentations (random horizontal flips, rotations) to prevent spatial overfitting."
-      ],
-      limitations: [
-        "Fixed input image dimensions require rigid interpolation during inference preprocessing.",
-        "CNN architectures possess localized inductive biases compared to modern Vision Transformers (ViTs) on massive data."
-      ],
-      futureImprovements: [
-        "Benchmarking against Vision Transformer (ViT) patch tokenizers on larger dataset scales."
-      ]
-    },
-    relatedProjectIds: ["evaluation", "bert", "house-price"]
-  },
-  {
     id: "evaluation",
-    number: "PROJECT_007",
+    number: "PROJECT_006",
     title: "MODEL EVALUATION & METRIC CALCULATION",
     category: "ML FOUNDATIONS / EVALUATION",
+    severityTier: "MEDIUM",
+    severityLevel: "SEV-5",
+    severityLabel: "Model Governance & Multi-Metric Risk Verification",
+    severityImpact: "Prevents deceptive deployment approvals caused by single-metric vanity bias on imbalanced datasets.",
     tagline: "Combined metric calculation framework for rigorous, evidence-based model comparison.",
     description: "Systematic benchmarking framework computing multi-dimensional performance scores. Synthesizes classification metrics, ROC-AUC, precision-recall trade-offs, and computational efficiency into standardized evaluation reports for model selection.",
     technologies: ["Python", "Scikit-learn", "Statistical Metrics", "Model Selection", "Cross Validation"],
@@ -293,8 +452,9 @@ export const PROJECTS: ProjectItem[] = [
       "COMBINED SCORING MATRIX",
       "DECISION JUSTIFICATION"
     ],
-    repository: "https://github.com/KN-Vignesh/Projects",
+    repository: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/Combined_metric_Calc",
     status: "BENCHMARK_FRAMEWORK",
+    evaluationMetrics: ["ROC-AUC Alignment", "Brier Reliability Calibration", "Bootstrap Intervals"],
     sections: {
       problem: "Relying on a single vanity metric (such as raw Accuracy) leads to catastrophic real-world failures, especially under severe class imbalance or asymmetric business misclassification costs.",
       whyApproach: "A multi-faceted evaluation framework standardizes comparisons across models by aggregating discrimination (ROC-AUC), calibrated probability reliability (Brier score), precision-recall trade-offs, and inference latency into unified scorecard reports.",
@@ -317,9 +477,13 @@ export const PROJECTS: ProjectItem[] = [
   },
   {
     id: "house-price",
-    number: "PROJECT_008",
-    title: "HOUSE PRICE PREDICTION",
+    number: "PROJECT_007",
+    title: "HOUSE PRICE PREDICTION (TF-DF)",
     category: "ML FOUNDATIONS / TABULAR PREDICTION",
+    severityTier: "FOUNDATIONAL",
+    severityLevel: "SEV-6",
+    severityLabel: "Supervised Tabular Regression & Feature Imputation",
+    severityImpact: "Tree ensemble modeling with TensorFlow Decision Forests on high-dimensional Ames real estate data.",
     tagline: "Structured machine-learning workflow for predicting property sale prices.",
     description: "Regression modeling pipeline applying TensorFlow Decision Forests to the Ames Housing dataset. Features extensive exploratory data analysis, numerical scaling, categorical encoding, and ensemble regression optimization.",
     technologies: ["Regression", "Tabular ML", "TensorFlow Decision Forests", "Ames Housing", "Python"],
@@ -334,6 +498,7 @@ export const PROJECTS: ProjectItem[] = [
     ],
     repository: "https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/House_Price_Prediction",
     status: "IMPLEMENTED_PIPELINE",
+    evaluationMetrics: ["RMSLE Optimization", "OOB Cross Validation", "Log Target Scaling"],
     sections: {
       problem: "Real estate valuations involve high-dimensional heterogeneous feature sets (lot area, building quality, geographic zoning) with skewness and non-linear interactions.",
       whyApproach: "TensorFlow Decision Forests natively accommodate mixed categorical and numeric data with robust resistance to outliers and minimal preprocessing requirements compared to neural regressors.",
@@ -355,10 +520,60 @@ export const PROJECTS: ProjectItem[] = [
     relatedProjectIds: ["customer-churn", "titanic", "evaluation"]
   },
   {
+    id: "cnn",
+    number: "PROJECT_008",
+    title: "CNN FUNDAMENTALS & SPATIAL CONVOLUTIONS",
+    category: "MODEL ENGINEERING / COMPUTER VISION",
+    severityTier: "FOUNDATIONAL",
+    severityLevel: "SEV-6",
+    severityLabel: "Computer Vision Representation Learning & Spatial Inductive Bias",
+    severityImpact: "Spatial feature extraction, receptive field mathematics, and convolutional layer optimization in PyTorch.",
+    tagline: "Visual representation learning pipeline from raw pixel normalization to spatial convolutions.",
+    description: "Foundational exploration of spatial feature hierarchies in Computer Vision. Demonstrates 2D convolution kernels, pooling downsampling, activation non-linearities, spatial feature map extraction, and visual classification architectures.",
+    technologies: ["Vision", "PyTorch", "CNN", "Preprocessing", "Computer Vision", "Torchvision"],
+    role: "Computer Vision Foundations",
+    systemFlow: [
+      "RAW IMAGE TENSOR",
+      "PREPROCESSING & RESIZING",
+      "DATA AUGMENTATION",
+      "CONVOLUTIONAL LAYERS (KERNELS)",
+      "FEATURE LEARNING & POOLING",
+      "FULLY CONNECTED CLASSIFIER",
+      "METRICS & ACTIVATION MAPS"
+    ],
+    repository: "https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/CNN-Fundamentals",
+    status: "EDUCATIONAL_SYSTEM",
+    evaluationMetrics: ["Translation Equivariance", "Batch Normalization", "Spatial Receptive Fields"],
+    sections: {
+      problem: "Fully connected dense networks fail when applied directly to high-dimensional image tensors because they discard spatial 2D locality and suffer from parameter explosion.",
+      whyApproach: "Convolutional Neural Networks (CNNs) introduce parameter sharing and translation equivariance via sliding receptive field kernels, enabling hierarchical visual abstraction from low-level edges to semantic shapes.",
+      dataInput: "RGB image datasets normalized with mean and standard deviation scaling.",
+      architecture: "Convolutional layers with ReLU non-linearities, batch normalization for internal covariate shift mitigation, max pooling for translational invariance, and dense linear output heads.",
+      implementation: "Custom PyTorch nn.Module architecture with training loop monitoring train/val loss and top-1 accuracy.",
+      evaluation: "Classification accuracy, confusion matrices, and receptive field visualization.",
+      engineeringDecisions: [
+        "Incorporated Batch Normalization after convolutions to stabilize gradient flow and accelerate convergence.",
+        "Implemented real-time data augmentations (random horizontal flips, rotations) to prevent spatial overfitting."
+      ],
+      limitations: [
+        "Fixed input image dimensions require rigid interpolation during inference preprocessing.",
+        "CNN architectures possess localized inductive biases compared to modern Vision Transformers (ViTs) on massive data."
+      ],
+      futureImprovements: [
+        "Benchmarking against Vision Transformer (ViT) patch tokenizers on larger dataset scales."
+      ]
+    },
+    relatedProjectIds: ["evaluation", "bert", "house-price"]
+  },
+  {
     id: "titanic",
     number: "PROJECT_009",
-    title: "TITANIC ML BASELINE",
+    title: "TITANIC ML BASELINE & FEATURE ENGINEERING",
     category: "ML FOUNDATIONS / CLASSIFICATION",
+    severityTier: "FOUNDATIONAL",
+    severityLevel: "SEV-6",
+    severityLabel: "Exploratory Data Analysis Baseline & Feature Extraction",
+    severityImpact: "Systematic EDA, categorical honorific imputation, and feature importance baseline modeling.",
     tagline: "Exploratory data analysis, missing data imputation, and tabular classification baselines.",
     description: "Foundational machine learning pipeline covering rigorous data cleaning, missing value imputation strategies, categorical encoding, and baseline classification modeling on the historical passenger survival dataset.",
     technologies: ["Python", "Pandas", "Scikit-learn", "EDA", "Feature Engineering", "Classification"],
@@ -373,6 +588,7 @@ export const PROJECTS: ProjectItem[] = [
     ],
     repository: "https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/Titanic_Model",
     status: "FOUNDATIONAL_PROJECT",
+    evaluationMetrics: ["Honorific Title Imputation", "Stratified Cross-Validation", "Ensemble Baselines"],
     sections: {
       problem: "Tabular datasets in real-world scenarios arrive with significant missing entries (Age, Cabin), mixed string identifiers (Names, Tickets), and complex socio-economic correlations.",
       whyApproach: "Establishes standard exploratory data analysis (EDA) hygiene: title extraction from names, ticket grouping, and family size engineering to demonstrate structured feature extraction fundamentals.",
@@ -401,13 +617,11 @@ export const EXPERIENCES: ExperienceItem[] = [
     role: "Software Engineer",
     period: "Aug 2024 – Present",
     type: "Full-Time",
-    narrative: "Architecting enterprise applications and integrating Agentic AI capabilities, LLM APIs, and full-stack modules into production systems.",
+    narrative: "Architecting enterprise applications and integrating Agentic AI capabilities, LLM APIs, and full-stack modules into production systems globally.",
     highlights: [
-      "Architected full-stack modules with Agentic AI and LLM APIs for the TLK Device Configuration App (OnePortal).",
-      "Developed high-performance backend microservices using .NET Core 8 and modern frontend interfaces in Angular 18.",
-      "Engineered database operations with Entity Framework and MySQL with optimized query patterns.",
-      "Implemented Reinforcement Learning from Human Feedback (RLHF) strategies and Generative AI / NLP evaluation frameworks.",
-      "Built automated data validation pipelines and a secure scanner implementation for client-side Device Registration."
+      "Architected full-stack modules with Agentic AI and LLM APIs for the TLK Device Configuration App (OnePortal) using .NET Core 8, Angular 18, EF, and MySQL globally.",
+      "Implemented Reinforcement Learning from Human Feedback (RLHF) strategies and developed rigorous evaluation frameworks to optimize the accuracy, performance, and reliability of internal Generative AI and NLP applications.",
+      "Engineered automated data validation and a secure end-to-end scanner implementation designed specifically for client-side Device Registration."
     ],
     technologies: [".NET Core 8", "Angular 18", "Entity Framework", "MySQL", "Agentic AI", "LLM APIs", "RLHF Evaluation", "GenAI / NLP"]
   },
@@ -418,11 +632,11 @@ export const EXPERIENCES: ExperienceItem[] = [
     type: "Full-Time",
     narrative: "Engineered scalable cloud automation, serverless REST APIs, vector database search pipelines, and enterprise identity management systems.",
     highlights: [
-      "Engineered serverless REST APIs using Azure Functions, Azure Service Bus, and Azure Cosmos DB.",
-      "Built Vector Search data management architectures and NLP / Generative AI / RAG data pipelines.",
-      "Maintained robust CI/CD and MLOps automation with Git, Jenkins, and automated testing suites.",
-      "Spearheaded BeyondTrust PAM / BeyondInsight deployment for 6,000+ enterprise users with a 90-day delivery timeline.",
-      "Executed Sitecore CMS upgrades from 8.3 to 10.3, Content Hub, Experience Editor, and SQL stored procedures for managed printing systems."
+      "Built serverless REST APIs, Azure Functions, and Azure Service Bus triggers utilizing Azure Cosmos DB (Vector Search data management) and SSMS SQL to power low-latency data ingestion pipelines for downstream NLP pipelines and Generative AI RAG architectures.",
+      "Managed Git and Jenkins CI/CD and MLOps pipelines to ensure seamless version control, automated testing, model deployment, and continuous cloud environment operations.",
+      "Spearheaded the automated deployment, building, and testing of BeyondTrust PAM and BeyondInsight for 6,000+ users under a strict 90-day timeline.",
+      "Executed seamless sequential Sitecore CMS upgrades from v8.3 to 10.3, enhancing Content Hub and Experience Editor workflows.",
+      "Developed complex SQL Stored Procedures for Managed Printing Systems to automate multi-stage data integrity alerts."
     ],
     technologies: ["Azure Functions", "Azure Service Bus", "Cosmos DB", "Vector Search", "RAG Pipelines", "Jenkins CI/CD", "Sitecore CMS", "SQL Stored Procedures"]
   },
@@ -433,9 +647,8 @@ export const EXPERIENCES: ExperienceItem[] = [
     type: "Internship",
     narrative: "Engineered scheduled data extraction jobs and analytics/AI preparation workflows across enterprise cloud databases.",
     highlights: [
-      "Developed Python and C# scheduled background jobs for automated cloud data workflows.",
-      "Extracted, sanitized, and transformed complex data structures from Cosmos DB for downstream analytics and AI workflows.",
-      "Conducted thorough API validation and contract testing utilizing Postman and Swagger specifications."
+      "Built automated Python and C# scheduled jobs to extract and clean Cosmos DB user data for analytics and AI workflows.",
+      "Validated microservices endpoints across backend APIs using Postman and Swagger."
     ],
     technologies: ["Python", "C#", "Cosmos DB", "ETL Pipelines", "Postman", "Swagger", "REST APIs"]
   }
@@ -445,17 +658,17 @@ export const CERTIFICATIONS: CertificationItem[] = [
   {
     title: "Microsoft Certified: Azure Fundamentals",
     issuer: "Microsoft",
-    period: "2024–2026",
+    period: "2024 - 2026",
     code: "AZ-900 / DP-900"
   },
   {
-    title: "Oracle Cloud Infrastructure: Generative AI / AI Foundation",
+    title: "Oracle Cloud Infrastructure (OCI): Generative AI / AI Foundation Certified",
     issuer: "Oracle",
-    period: "2023–2024",
+    period: "2023 - 2024",
     code: "OCI Generative AI"
   },
   {
-    title: "Bachelor of Engineering (B.E.)",
+    title: "B.E. Graduate — KVG College of Engineering",
     issuer: "KVG College of Engineering",
     period: "Graduated 2019",
     code: "B.E. Degree"
@@ -521,32 +734,32 @@ export const AI_LAB_NODES: AILabNode[] = [
     id: "agents",
     label: "AGENTIC WORKFLOWS",
     type: "GENERATIVE_AI",
-    description: "Autonomous reasoning loops, multi-step tool invocation, deterministic decision gating, and structured schema execution.",
-    connections: ["llms", "applications"],
+    description: "Multi-step tool invocation, deterministic decision trees, self-correction, and structured JSON output contracts.",
+    connections: ["llms", "rag", "applications"],
     relatedProjectIds: ["vero"],
-    coordinates: [1.2, 1.2, 1.2]
+    coordinates: [0.8, 0.8, -1.8]
   },
   {
     id: "evaluation",
-    label: "MODEL EVALUATION",
+    label: "EVALUATION & BENCHMARKING",
     type: "MODEL_ENGINEERING",
-    description: "Multi-dimensional metric scorecards, ROC-AUC, Precision-Recall trade-offs, and RLHF evaluation methodologies.",
-    connections: ["fine-tuning", "ml-foundations", "deep-learning", "applications"],
-    relatedProjectIds: ["evaluation", "customer-churn"],
-    coordinates: [2.5, 0, 0]
+    description: "Multi-metric scorecards, ROC-AUC, calibration reliability, perplexity, and statistical hypothesis testing.",
+    connections: ["ml-foundations", "fine-tuning", "applications"],
+    relatedProjectIds: ["evaluation", "customer-churn", "bert"],
+    coordinates: [-2.5, -0.5, -1]
   },
   {
     id: "applications",
-    label: "AI APPLICATIONS",
+    label: "SYSTEM INTEGRATION",
     type: "SYSTEMS_APPLICATION",
-    description: "Production software integration combining LLM intelligence with domain rules and enterprise context.",
-    connections: ["agents", "rag", "apis", "evaluation"],
+    description: "Connecting intelligence layers to enterprise backends, deterministic gates, and automated code review workflows.",
+    connections: ["rag", "agents", "apis"],
     relatedProjectIds: ["vero", "customer-churn"],
-    coordinates: [1.5, -1, 0.5]
+    coordinates: [2, 0, 0]
   },
   {
     id: "apis",
-    label: "PRODUCTION APIs",
+    label: "FASTAPI & MICROSERVICES",
     type: "SYSTEMS_APPLICATION",
     description: "High-throughput asynchronous REST endpoints, FastAPI microservices, and contract-first Pydantic schemas.",
     connections: ["applications", "ml-foundations", "deployment"],
@@ -575,45 +788,41 @@ export const AI_LAB_NODES: AILabNode[] = [
 
 export const STACK_CATEGORIES: StackCategory[] = [
   {
-    title: "FOUNDATIONS & LANGUAGES",
-    iconName: "Terminal",
-    skills: ["Python", "C#", ".NET Core", "SQL", "JavaScript", "HTML", "CSS", "Git"],
-    summary: "Strong systems programming and analytical language foundation spanning enterprise .NET and modern Python ML ecosystems."
-  },
-  {
-    title: "MACHINE LEARNING",
-    iconName: "Cpu",
-    skills: ["NumPy", "Pandas", "Scikit-learn", "PyCaret", "Classification", "Regression", "Model Evaluation", "Cross Validation"],
-    summary: "Production tabular pipelines, feature engineering, exploratory data analysis, and mathematical validation."
-  },
-  {
-    title: "DEEP LEARNING",
-    iconName: "Layers",
-    skills: ["PyTorch", "TensorFlow", "Transformers", "CNN", "BERT", "Torchvision", "Decision Forests"],
-    summary: "Neural architectures spanning convolutional computer vision and bidirectional Transformer encoders."
-  },
-  {
-    title: "GENERATIVE AI & LLMs",
+    title: "AI, GenAI & NLP",
     iconName: "Sparkles",
-    skills: ["Large Language Models", "Generative AI", "Prompt Engineering", "RAG", "Embeddings", "LoRA", "QLoRA", "PEFT", "LLM APIs"],
-    summary: "Parameter-efficient model adaptation, 4-bit quantization, targeted adapters, and grounded prompt synthesis."
+    skills: [
+      "Natural Language Processing (NLP)",
+      "Generative AI (GenAI)",
+      "Large Language Models (LLMs)",
+      "Agentic AI Workflows",
+      "Prompt Engineering",
+      "RLHF Evaluation Frameworks",
+      "RAG Architectures"
+    ],
+    summary: "Production-grade Generative AI, agentic reasoning, RAG pipelines, and rigorous RLHF evaluation frameworks."
   },
   {
-    title: "AI APPLICATIONS & AGENTS",
+    title: "AI Frameworks & Tools",
     iconName: "Bot",
-    skills: ["FastAPI", "REST APIs", "LangChain", "Agentic Workflows", "Vector Search", "FAISS", "Azure OpenAI", "Decision Engines"],
-    summary: "Building deterministic application backends that orchestrate multi-step agent actions and external static analysis."
+    skills: ["LangChain", "LLM APIs (OpenAI, Azure OpenAI)", "Vector Search (Cosmos DB)", "FAISS"],
+    summary: "Vector database orchestration, retrieval-augmented generation, and enterprise LLM API integration."
   },
   {
-    title: "SOFTWARE ENGINEERING",
+    title: "Languages",
+    iconName: "Terminal",
+    skills: ["C# (.NET Core, ASP.NET MVC)", "Python", "JavaScript", "HTML", "CSS", "SSMS SQL"],
+    summary: "Strong systems programming and analytical language foundation spanning enterprise .NET and modern Python ML."
+  },
+  {
+    title: "Frameworks & CMS",
     iconName: "Code",
-    skills: [".NET Core 8", "ASP.NET MVC", "Angular 8–18", "Entity Framework", "MySQL", "SSMS SQL", "Sitecore CMS", "System Design"],
-    summary: "Over 4+ years of battle-tested enterprise software engineering, global context management, and clean architecture."
+    skills: ["Angular (8–19)", "Entity Framework", "Sitecore CMS (8.3 to 10.3)", "Content Hub"],
+    summary: "Over 4+ years of battle-tested enterprise frontend and CMS engineering, global context management, and clean architecture."
   },
   {
-    title: "CLOUD & DEVOPS / MLOps",
+    title: "Cloud & DevOps",
     iconName: "Cloud",
-    skills: ["Docker", "Azure Functions", "Azure Service Bus", "Cosmos DB", "Git", "Jenkins", "CI/CD", "MLOps", "Postman", "Swagger"],
+    skills: ["Docker", "Azure Functions", "Azure Service Bus", "Cosmos DB", "Git", "Jenkins (CI/CD / MLOps)", "Postman", "Swagger"],
     summary: "Serverless cloud automation, distributed messaging, container orchestration, and continuous integration pipelines."
   }
 ];
@@ -624,7 +833,7 @@ export const ENGINEERING_PIPELINE_STEPS = [
     phase: "UNDERSTAND",
     name: "Problem Definition & Constraints",
     desc: "Rigorous scoping of input data distribution, latency requirements, computational budget, and business failure thresholds.",
-    associatedProjects: ["Customer Churn", "VERO"]
+    associatedProjects: ["VERO", "Customer Churn"]
   },
   {
     step: "02",
@@ -645,7 +854,7 @@ export const ENGINEERING_PIPELINE_STEPS = [
     phase: "SHIP",
     name: "API, Application & Deployment",
     desc: "Packaging models into contract-validated FastAPI endpoints, containerized Docker microservices, or PR bots.",
-    associatedProjects: ["Customer Churn", "VERO"]
+    associatedProjects: ["VERO", "Customer Churn"]
   },
   {
     step: "05",

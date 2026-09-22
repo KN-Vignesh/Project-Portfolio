@@ -1,12 +1,12 @@
 import React from 'react';
-import { Award, GraduationCap, Compass, CheckCircle, FileDown, FileText } from 'lucide-react';
+import { Award, GraduationCap, Compass, CheckCircle } from 'lucide-react';
 import { CERTIFICATIONS } from '../data/portfolioData';
 
 interface EducationCertificationsSectionProps {
   onOpenResume?: () => void;
 }
 
-export const EducationCertificationsSection: React.FC<EducationCertificationsSectionProps> = ({ onOpenResume }) => {
+export const EducationCertificationsSection: React.FC<EducationCertificationsSectionProps> = () => {
   const directions = [
     { title: "AI SOFTWARE ENGINEER", desc: "Building bridge systems connecting deep learning models to robust enterprise web/cloud backends." },
     { title: "GENERATIVE AI ENGINEER", desc: "Fine-tuning open-weight LLMs, low-bit quantization, and orchestrating contextual RAG systems." },
@@ -95,38 +95,6 @@ export const EducationCertificationsSection: React.FC<EducationCertificationsSec
                 </p>
               </div>
             ))}
-          </div>
-
-          {/* Quick Resume Download Banner */}
-          <div className="mt-8 pt-6 border-t border-[#24272D] flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded border border-[#7CFF6B]/40 bg-[#7CFF6B]/10 flex items-center justify-center text-[#7CFF6B]">
-                <FileText className="w-4 h-4" />
-              </div>
-              <div className="text-xs">
-                <span className="text-[#F2F2F2] font-bold block">COMPLETE CURRICULUM VITAE</span>
-                <span className="text-[#8B8F98]">ATS-ready format with detailed engineering systems history</span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              {onOpenResume && (
-                <button
-                  onClick={onOpenResume}
-                  className="flex-1 sm:flex-none px-4 py-2 rounded border border-[#24272D] bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] hover:border-[#7CFF6B] text-xs transition-colors cursor-pointer"
-                >
-                  PREVIEW RESUME
-                </button>
-              )}
-              <a
-                href="/vignesh-k-n-resume.pdf"
-                download="Vignesh_K_N_Resume.pdf"
-                className="flex-1 sm:flex-none px-4 py-2 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 text-xs transition-all flex items-center justify-center gap-2 shadow-sm shadow-[#7CFF6B]/15"
-              >
-                <FileDown className="w-3.5 h-3.5" />
-                <span>DOWNLOAD RESUME (PDF)</span>
-              </a>
-            </div>
           </div>
         </div>
 

@@ -330,6 +330,26 @@ async function startServer() {
     }
   });
 
+  // Dedicated Resume PDF download endpoint with forced attachment disposition
+  app.get("/api/resume/download", (req, res) => {
+    const publicPath = path.join(process.cwd(), "public", "vignesh-k-n-resume.pdf");
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'attachment; filename="Vignesh_K_N_Resume.pdf"');
+    res.download(publicPath, "Vignesh_K_N_Resume.pdf", (err) => {
+      if (err && !res.headersSent) {
+        res.status(404).send("Resume PDF not found");
+      }
+    });
+  });
+
+  // Dedicated Resume PDF inline viewer endpoint for new-tab preview
+  app.get("/api/resume/view", (req, res) => {
+    const publicPath = path.join(process.cwd(), "public", "vignesh-k-n-resume.pdf");
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", 'inline; filename="Vignesh_K_N_Resume.pdf"');
+    res.sendFile(publicPath);
+  });
+
   // Vite middleware setup
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

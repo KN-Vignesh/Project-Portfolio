@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { X, Download, FileText, Printer, Check, ExternalLink, Terminal, Briefcase, GraduationCap, Award, Cpu } from 'lucide-react';
-import { PERSONAL_INFO, EXPERIENCES, CERTIFICATIONS, STACK_CATEGORIES } from '../data/portfolioData';
+import { X, Download, FileText, Printer, Check, ExternalLink, ShieldAlert, Cpu, Terminal, Briefcase, GraduationCap } from 'lucide-react';
+import { RESUME_DATA, RESUME_PROJECTS_BY_SEVERITY } from '../data/portfolioData';
 import { generateAndDownloadResumePdf, getPlainTextResume } from '../utils/resumeGenerator';
 
 interface ResumeModalProps {
@@ -11,22 +11,23 @@ interface ResumeModalProps {
 export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [includeProjects, setIncludeProjects] = useState(true);
 
   if (!isOpen) return null;
 
-  const handleDownload = () => {
+  const handleDownload = (withProjects: boolean = includeProjects) => {
     setDownloading(true);
     try {
-      // First try direct download link to public PDF
+      const fileName = 'Vignesh_K_N_Resume.pdf';
+      generateAndDownloadResumePdf(fileName, { includeProjects: withProjects });
+    } catch (err) {
+      console.warn('Client-side PDF generation fallback:', err);
       const link = document.createElement('a');
-      link.href = '/vignesh-k-n-resume.pdf';
+      link.href = withProjects ? '/api/resume/download' : '/vignesh-k-n-resume-original.pdf';
       link.download = 'Vignesh_K_N_Resume.pdf';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    } catch {
-      // Fallback to client-side jsPDF generator
-      generateAndDownloadResumePdf('Vignesh_K_N_Resume.pdf');
     } finally {
       setTimeout(() => setDownloading(false), 800);
     }
@@ -44,24 +45,53 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#08090B]/85 backdrop-blur-md overflow-y-auto">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#08090B]/90 backdrop-blur-md overflow-y-auto"
+      onClick={onClose}
+    >
       <div 
-        className="relative w-full max-w-4xl bg-[#101216] border border-[#24272D] rounded-xl shadow-2xl overflow-hidden my-auto max-h-[92vh] flex flex-col"
+        className="relative w-full max-w-4xl bg-[#101216] border border-[#24272D] rounded-xl shadow-2xl overflow-hidden my-auto max-h-[94vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Top Control Bar */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#24272D] bg-[#08090B]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#24272D] bg-[#08090B]">
           <div className="flex items-center space-x-3 font-mono text-xs">
             <div className="w-2.5 h-2.5 rounded-sm bg-[#7CFF6B]" />
-            <span className="font-bold text-[#F2F2F2]">CURRICULUM VITAE // ATS-ALIGNED</span>
+            <span className="font-bold text-[#F2F2F2]">CURRICULUM VITAE // ATS FORMAT</span>
             <span className="hidden sm:inline text-[#24272D]">|</span>
-            <span className="hidden sm:inline text-[#8B8F98]">VIGNESH K N (AI SOFTWARE ENGINEER)</span>
+            <span className="hidden sm:inline text-[#8B8F98]">VIGNESH KN</span>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-[#15181D] p-0.5 rounded border border-[#24272D] font-mono text-[11px]">
+              <button
+                onClick={() => setIncludeProjects(true)}
+                className={`px-2.5 py-1 rounded transition-colors ${
+                  includeProjects
+                    ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
+                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                }`}
+                title="Include projects fetched from GitHub ranked by severity"
+              >
+                WITH PROJECTS (2P)
+              </button>
+              <button
+                onClick={() => setIncludeProjects(false)}
+                className={`px-2.5 py-1 rounded transition-colors ${
+                  !includeProjects
+                    ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
+                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                }`}
+                title="Exact 1-page resume matching the attached PDF"
+              >
+                ORIGINAL (1P)
+              </button>
+            </div>
+
             {/* Download PDF Button */}
             <button
-              onClick={handleDownload}
+              onClick={() => handleDownload(includeProjects)}
               disabled={downloading}
               className="px-3.5 py-1.5 rounded bg-[#7CFF6B] text-[#08090B] font-mono text-xs font-bold hover:bg-[#7CFF6B]/90 transition-all flex items-center gap-1.5 shadow-sm shadow-[#7CFF6B]/20 cursor-pointer"
               title="Download PDF version of Resume"
@@ -70,26 +100,36 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
               <span>{downloading ? 'GENERATING...' : 'DOWNLOAD PDF'}</span>
             </button>
 
-            {/* Direct Link to PDF */}
+            {/* Direct Open PDF in New Tab */}
             <a
-              href="/vignesh-k-n-resume.pdf"
+              href={includeProjects ? '/api/resume/view' : '/vignesh-k-n-resume-original.pdf'}
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded border border-[#24272D] bg-[#15181D] text-[#8B8F98] hover:text-[#7CFF6B] font-mono text-xs transition-colors"
-              title="Open raw PDF file in new tab"
+              className="flex items-center gap-1 px-3 py-1.5 rounded border border-[#24272D] bg-[#15181D] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B]/40 font-mono text-xs transition-colors"
+              title="Open PDF file in new browser tab"
             >
               <span>OPEN PDF</span>
               <ExternalLink className="w-3 h-3" />
             </a>
 
+            {/* Print Resume */}
+            <button
+              onClick={handlePrint}
+              className="hidden md:flex items-center gap-1 px-2.5 py-1.5 rounded border border-[#24272D] bg-[#15181D] text-[#8B8F98] hover:text-[#F2F2F2] font-mono text-xs transition-colors cursor-pointer"
+              title="Print or Save as PDF"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>PRINT</span>
+            </button>
+
             {/* Copy Plain Text */}
             <button
               onClick={handleCopyText}
-              className="px-3 py-1.5 rounded border border-[#24272D] bg-[#15181D] text-[#8B8F98] hover:text-[#F2F2F2] font-mono text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
-              title="Copy plain text for ATS screening / paste"
+              className="px-2.5 py-1.5 rounded border border-[#24272D] bg-[#15181D] text-[#8B8F98] hover:text-[#F2F2F2] font-mono text-xs transition-colors flex items-center gap-1 cursor-pointer"
+              title="Copy plain text for ATS screening"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-[#7CFF6B]" /> : <FileText className="w-3.5 h-3.5" />}
-              <span className="hidden md:inline">{copied ? 'COPIED!' : 'COPY TXT'}</span>
+              <span className="hidden md:inline">{copied ? 'COPIED!' : 'TXT'}</span>
             </button>
 
             {/* Close Button */}
@@ -103,194 +143,210 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
           </div>
         </div>
 
-        {/* Scrollable Printable Resume Sheet Preview */}
-        <div className="p-6 sm:p-10 overflow-y-auto space-y-8 text-sm text-[#8B8F98] font-sans selection:bg-[#7CFF6B]/20">
+        {/* Scrollable Printable Resume Sheet (Formatted exactly as the attached PDF) */}
+        <div className="p-6 sm:p-10 overflow-y-auto space-y-6 text-sm text-[#8B8F98] font-sans selection:bg-[#7CFF6B]/20 bg-[#0C0E12]">
           
-          {/* Header */}
-          <div className="pb-6 border-b border-[#24272D]">
-            <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+          {/* Header matching the attached PDF format */}
+          <div className="text-center pb-4 border-b border-[#24272D]">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#F2F2F2] uppercase">
+              {RESUME_DATA.header.name}
+            </h1>
+            <div className="font-mono text-xs text-[#A1A7B5] mt-1.5 space-y-0.5">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#F2F2F2]">
-                  {PERSONAL_INFO.name}
-                </h1>
-                <p className="font-mono text-xs sm:text-sm text-[#7CFF6B] font-semibold mt-1">
-                  AI SOFTWARE ENGINEER | MACHINE LEARNING & BACKEND SYSTEMS
-                </p>
+                {RESUME_DATA.header.phone} &nbsp;|&nbsp; {RESUME_DATA.header.email} &nbsp;|&nbsp; {RESUME_DATA.header.location} &nbsp;|
               </div>
-              <div className="font-mono text-xs text-[#8B8F98] text-left sm:text-right space-y-0.5">
-                <div>{PERSONAL_INFO.location}</div>
-                <div>{PERSONAL_INFO.phone}</div>
-                <div>{PERSONAL_INFO.email}</div>
+              <div className="pt-0.5">
+                <a href={`https://${RESUME_DATA.header.linkedin}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#7CFF6B] underline">
+                  {RESUME_DATA.header.linkedin}
+                </a>
+                &nbsp;|&nbsp;
+                <a href={`https://${RESUME_DATA.header.github}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#7CFF6B] underline">
+                  {RESUME_DATA.header.github}
+                </a>
+                &nbsp;|&nbsp;
+                <a href={`https://${RESUME_DATA.header.projects}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#7CFF6B] underline">
+                  {RESUME_DATA.header.projects}
+                </a>
               </div>
-            </div>
-
-            <div className="flex flex-wrap gap-4 mt-4 pt-3 border-t border-[#24272D]/50 font-mono text-xs">
-              <a href={PERSONAL_INFO.linkedin} target="_blank" rel="noopener noreferrer" className="text-[#6EA8FE] hover:underline flex items-center gap-1">
-                <span>LinkedIn</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <span className="text-[#24272D]">•</span>
-              <a href={PERSONAL_INFO.github} target="_blank" rel="noopener noreferrer" className="text-[#7CFF6B] hover:underline flex items-center gap-1">
-                <span>GitHub</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-              <span className="text-[#24272D]">•</span>
-              <a href={PERSONAL_INFO.projectsRepo} target="_blank" rel="noopener noreferrer" className="text-[#8B8F98] hover:text-[#F2F2F2] flex items-center gap-1">
-                <span>Projects Repository</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
             </div>
           </div>
 
           {/* Section: Professional Summary */}
           <div>
-            <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#24272D]">
-              <Terminal className="w-4 h-4 text-[#7CFF6B]" />
-              <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2F2F2]">
+            <div className="pb-1 mb-2 border-b border-[#24272D]">
+              <h2 className="text-sm font-bold text-[#F2F2F2] uppercase tracking-wide">
                 Professional Summary
               </h2>
             </div>
-            <p className="leading-relaxed text-[#D1D5DB] text-sm">
-              Results-driven AI Software Engineer with <strong className="text-[#F2F2F2]">4+ years of hands-on experience</strong> in full-stack engineering, cloud automation, and high-throughput microservices, now focused on production-oriented AI, Generative AI, LLM orchestration, RAG architectures, parameter-efficient fine-tuning (LoRA/QLoRA), and containerized inference APIs. Proven track record of architecting scalable enterprise modules with .NET Core 8, Angular 18, Azure, and Python, combining rigorous software engineering standards with machine learning and agentic workflows.
+            <p className="leading-relaxed text-[#D1D5DB] text-xs sm:text-sm text-justify">
+              {RESUME_DATA.professionalSummary}
             </p>
           </div>
 
-          {/* Section: Technical Skills */}
+          {/* Section: Technical Skills (exact 2-column bordered table) */}
           <div>
-            <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#24272D]">
-              <Cpu className="w-4 h-4 text-[#7CFF6B]" />
-              <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2F2F2]">
-                Technical Skills & Expertise
+            <div className="pb-1 mb-2 border-b border-[#24272D]">
+              <h2 className="text-sm font-bold text-[#F2F2F2] uppercase tracking-wide">
+                Technical Skills
               </h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-              <div className="p-3 rounded bg-[#08090B] border border-[#24272D]">
-                <span className="font-mono text-[#7CFF6B] block font-semibold mb-1">LANGUAGES & CORE</span>
-                <span className="text-[#D1D5DB]">Python, C#, .NET Core 8, SQL, JavaScript, TypeScript, HTML5, CSS3, Git</span>
-              </div>
-              <div className="p-3 rounded bg-[#08090B] border border-[#24272D]">
-                <span className="font-mono text-[#7CFF6B] block font-semibold mb-1">MACHINE LEARNING & DEEP LEARNING</span>
-                <span className="text-[#D1D5DB]">Scikit-learn, PyTorch, TensorFlow, Transformers, CNN, BERT, Decision Forests, XGBoost, Cross-Validation</span>
-              </div>
-              <div className="p-3 rounded bg-[#08090B] border border-[#24272D]">
-                <span className="font-mono text-[#6EA8FE] block font-semibold mb-1">GENERATIVE AI & LLMs</span>
-                <span className="text-[#D1D5DB]">Large Language Models, PEFT / LoRA, QLoRA (4-bit NF4), RAG Pipelines, Vector Search, FAISS, LangChain, Prompt Design</span>
-              </div>
-              <div className="p-3 rounded bg-[#08090B] border border-[#24272D]">
-                <span className="font-mono text-[#6EA8FE] block font-semibold mb-1">CLOUD, APIS & BACKEND</span>
-                <span className="text-[#D1D5DB]">FastAPI, ASP.NET MVC, RESTful APIs, Azure Functions, Azure Service Bus, Azure Cosmos DB, MySQL, Docker</span>
-              </div>
+            <div className="border border-[#24272D] rounded-lg overflow-hidden text-xs">
+              <table className="w-full border-collapse">
+                <tbody>
+                  {RESUME_DATA.technicalSkillsTable.map((row, idx) => (
+                    <tr key={idx} className="border-b border-[#24272D] last:border-b-0 hover:bg-[#15181D]/50 transition-colors">
+                      <td className="w-1/4 sm:w-1/5 py-2 px-3 font-bold text-[#F2F2F2] bg-[#101216] border-r border-[#24272D] align-top font-mono text-[11px]">
+                        {row.category}
+                      </td>
+                      <td className="py-2 px-3 text-[#D1D5DB] leading-relaxed">
+                        {row.skills}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
           {/* Section: Professional Experience */}
           <div>
-            <div className="flex items-center gap-2 pb-2 mb-4 border-b border-[#24272D]">
-              <Briefcase className="w-4 h-4 text-[#7CFF6B]" />
-              <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2F2F2]">
-                Work Experience
+            <div className="pb-1 mb-3 border-b border-[#24272D]">
+              <h2 className="text-sm font-bold text-[#F2F2F2] uppercase tracking-wide">
+                Professional Experience
               </h2>
             </div>
 
-            <div className="space-y-6">
-              {EXPERIENCES.map((exp, idx) => (
-                <div key={idx} className="space-y-2">
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between">
-                    <div>
-                      <span className="text-base font-bold text-[#F2F2F2]">{exp.role}</span>
-                      <span className="text-[#7CFF6B] font-medium ml-2">— {exp.company}</span>
+            <div className="space-y-4">
+              {RESUME_DATA.professionalExperience.map((exp, idx) => (
+                <div key={idx} className="space-y-1.5">
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                    <div className="font-bold text-xs sm:text-sm text-[#F2F2F2]">
+                      {exp.company} — <span className="font-semibold text-[#A1A7B5]">{exp.role}</span>
                     </div>
-                    <span className="font-mono text-xs text-[#8B8F98]">{exp.period} | Bengaluru, India</span>
+                    <div className="font-mono text-xs text-[#7CFF6B] sm:text-right font-semibold">
+                      {exp.period}
+                    </div>
                   </div>
 
-                  <ul className="list-disc pl-5 space-y-1.5 text-xs text-[#D1D5DB]">
-                    {exp.highlights.map((item, hIdx) => (
-                      <li key={hIdx} className="leading-relaxed">
-                        {item}
+                  <ul className="space-y-1 text-xs text-[#D1D5DB]">
+                    {exp.bullets.map((b, bIdx) => (
+                      <li key={bIdx} className="flex items-start gap-2 leading-relaxed">
+                        <span className="text-[#7CFF6B] mt-0.5 text-[10px]">●</span>
+                        <span>{b}</span>
                       </li>
                     ))}
                   </ul>
-
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {exp.technologies.map((t, tIdx) => (
-                      <span key={tIdx} className="font-mono text-[10px] px-2 py-0.5 rounded bg-[#08090B] border border-[#24272D] text-[#8B8F98]">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Section: Featured Projects */}
+          {/* Section: Certifications & Education */}
           <div>
-            <div className="flex items-center gap-2 pb-2 mb-4 border-b border-[#24272D]">
-              <Award className="w-4 h-4 text-[#7CFF6B]" />
-              <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2F2F2]">
-                Selected Engineering & AI Projects
+            <div className="pb-1 mb-2 border-b border-[#24272D]">
+              <h2 className="text-sm font-bold text-[#F2F2F2] uppercase tracking-wide">
+                Certifications & Education
               </h2>
             </div>
-
-            <div className="space-y-4 text-xs">
-              <div className="p-3.5 rounded bg-[#08090B] border border-[#24272D]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-[#F2F2F2]">Intelligent Customer Churn Prediction</span>
-                  <span className="font-mono text-[10px] text-[#7CFF6B]">FastAPI • Docker • Scikit-learn</span>
-                </div>
-                <p className="text-[#8B8F98] leading-relaxed">
-                  End-to-end production ML pipeline analyzing telecom subscription patterns to forecast retention attrition. Features modular data validation, Scikit-learn preprocessing pipelines, multi-model evaluation, and low-latency FastAPI inference service packaged with Docker.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded bg-[#08090B] border border-[#24272D]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-[#F2F2F2]">Qwen2.5-Coder LoRA Fine-Tuning & Quantization</span>
-                  <span className="font-mono text-[10px] text-[#7CFF6B]">PyTorch • PEFT • LoRA / QLoRA</span>
-                </div>
-                <p className="text-[#8B8F98] leading-relaxed">
-                  Parameter-Efficient Fine-Tuning (PEFT) on open-weight LLMs using rank-decomposed adapter matrices (LoRA) and 4-bit NormalFloat (NF4) quantization. Demonstrated &gt;70% VRAM memory reduction during training with preserved coding benchmark performance.
-                </p>
-              </div>
-
-              <div className="p-3.5 rounded bg-[#08090B] border border-[#24272D]">
-                <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-[#F2F2F2]">VERO — AI Code Analysis & Pull Request Intelligence</span>
-                  <span className="font-mono text-[10px] text-[#7CFF6B]">GitHub API • SonarQube • Rule Engine</span>
-                </div>
-                <p className="text-[#8B8F98] leading-relaxed">
-                  Evidence-based GitHub Pull Request engineering analysis platform combining AST diff parsing, SonarQube static quality checks, and structured LLM signals with a deterministic rule engine to deliver automated merge recommendations.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Section: Education & Certifications */}
-          <div>
-            <div className="flex items-center gap-2 pb-2 mb-3 border-b border-[#24272D]">
-              <GraduationCap className="w-4 h-4 text-[#7CFF6B]" />
-              <h2 className="font-mono text-xs font-bold uppercase tracking-wider text-[#F2F2F2]">
-                Education & Certifications
-              </h2>
-            </div>
-            <div className="space-y-2 text-xs">
-              {CERTIFICATIONS.map((cert, idx) => (
-                <div key={idx} className="flex justify-between items-center py-1">
-                  <div>
-                    <span className="font-medium text-[#F2F2F2]">{cert.title}</span>
-                    <span className="text-[#8B8F98] ml-2">— {cert.issuer}</span>
+            <div className="space-y-1.5 text-xs text-[#D1D5DB]">
+              {RESUME_DATA.certificationsAndEducation.map((item, idx) => (
+                <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#7CFF6B] text-[10px]">●</span>
+                    <span className="text-[#F2F2F2] font-medium">{item.title}</span>
                   </div>
-                  <span className="font-mono text-[11px] text-[#7CFF6B]">{cert.period}</span>
+                  <span className="font-mono text-[11px] text-[#A1A7B5] font-semibold sm:text-right pl-4 sm:pl-0">
+                    {item.period}
+                  </span>
                 </div>
               ))}
             </div>
           </div>
+
+          {/* Section: Projects (Ranked by Severity from GitHub) */}
+          {includeProjects && (
+            <div className="pt-4 border-t-2 border-dashed border-[#24272D]">
+              <div className="flex items-center justify-between pb-1 mb-3 border-b border-[#24272D]">
+                <div className="flex items-center gap-2">
+                  <ShieldAlert className="w-4 h-4 text-[#7CFF6B]" />
+                  <h2 className="text-sm font-bold text-[#F2F2F2] uppercase tracking-wide">
+                    Key Engineering & AI Projects (Ranked by Project Severity)
+                  </h2>
+                </div>
+                <span className="font-mono text-[10px] text-[#7CFF6B]">
+                  SOURCED FROM GITHUB
+                </span>
+              </div>
+
+              <div className="space-y-3.5 text-xs">
+                {RESUME_PROJECTS_BY_SEVERITY.map((p) => {
+                  const isCrit = p.severityTier === 'CRITICAL';
+                  const isHigh = p.severityTier === 'HIGH';
+
+                  return (
+                    <div 
+                      key={p.id} 
+                      className="p-3 rounded-lg bg-[#101216] border border-[#24272D] hover:border-[#7CFF6B]/50 transition-colors space-y-1.5"
+                    >
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="font-bold text-[#F2F2F2] text-xs sm:text-sm">
+                            {p.title}
+                          </span>
+                          <span 
+                            className={`font-mono text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                              isCrit 
+                                ? 'bg-red-500/15 text-red-400 border-red-500/30' 
+                                : isHigh 
+                                ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' 
+                                : 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+                            }`}
+                          >
+                            {p.severityLevel} · {p.severityTier}
+                          </span>
+                        </div>
+
+                        <a 
+                          href={p.repoUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="font-mono text-[11px] text-[#6EA8FE] hover:underline flex items-center gap-1"
+                        >
+                          <span>Repository</span>
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+
+                      <div className="font-mono text-[11px] text-[#8B8F98]">
+                        <span className="text-[#A1A7B5] font-semibold">Tech Stack:</span> {p.stack}
+                      </div>
+
+                      <div className="font-sans text-[11px] text-[#A1A7B5] italic">
+                        <span className="font-semibold text-[#F2F2F2]">Impact:</span> {p.impact}
+                      </div>
+
+                      <ul className="space-y-1 pt-1 text-[#D1D5DB]">
+                        {p.bullets.map((b, bIdx) => (
+                          <li key={bIdx} className="flex items-start gap-2 leading-relaxed">
+                            <span className="text-[#7CFF6B] mt-0.5 text-[10px]">●</span>
+                            <span>{b}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
         </div>
 
-        {/* Footer actions */}
+        {/* Modal Bottom Footer Actions */}
         <div className="flex items-center justify-between px-5 py-3 border-t border-[#24272D] bg-[#08090B] font-mono text-xs">
-          <span className="text-[#8B8F98]">Format: Standard ATS 2-Page PDF</span>
+          <span className="text-[#8B8F98]">
+            Format: {includeProjects ? 'Full 2-Page CV (Projects Included)' : 'Original 1-Page Resume (Matches Attached PDF)'}
+          </span>
           <div className="flex items-center gap-3">
             <button
               onClick={handlePrint}
@@ -300,8 +356,8 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
               <span>PRINT</span>
             </button>
             <button
-              onClick={handleDownload}
-              className="px-4 py-2 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-all flex items-center gap-1.5 cursor-pointer"
+              onClick={() => handleDownload(includeProjects)}
+              className="px-4 py-2 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-[#7CFF6B]/20"
             >
               <Download className="w-3.5 h-3.5" />
               <span>DOWNLOAD RESUME PDF</span>

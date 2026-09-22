@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, ExternalLink, Filter, Terminal, BookOpen } from 'lucide-react';
+import { Play, ExternalLink, ShieldAlert, Sparkles, Filter } from 'lucide-react';
 import { PROJECTS } from '../data/portfolioData';
 import { ProjectItem } from '../types';
 
@@ -12,14 +12,18 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProjec
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
 
   const categories = [
-    { id: 'ALL', label: 'ALL PROJECTS (9)' },
-    { id: 'GENAI', label: 'GENERATIVE AI & PEFT (3)' },
-    { id: 'MODEL', label: 'MODEL ENGINEERING (3)' },
-    { id: 'ML', label: 'ML & PRODUCTION (3)' }
+    { id: 'ALL', label: 'ALL SYSTEMS (9)' },
+    { id: 'SEV_CRITICAL_HIGH', label: 'SEV-1 TO SEV-3 (HIGH / CRITICAL)' },
+    { id: 'GENAI', label: 'GENERATIVE AI & PEFT' },
+    { id: 'MODEL', label: 'MODEL ENGINEERING' },
+    { id: 'ML', label: 'ML & TABULAR' }
   ];
 
   const filteredProjects = PROJECTS.filter((p) => {
     if (filterCategory === 'ALL') return true;
+    if (filterCategory === 'SEV_CRITICAL_HIGH') {
+      return p.severityTier === 'CRITICAL' || p.severityTier === 'HIGH';
+    }
     if (filterCategory === 'GENAI') {
       return p.id === 'qwen-lora' || p.id === 'qlora' || p.id === 'vero';
     }
@@ -33,24 +37,24 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProjec
   });
 
   return (
-    <section id="projects" className="py-24 border-t border-[#24272D] bg-[#08090B] relative">
+    <section id="projects" className="py-20 border-t border-[#24272D] bg-[#08090B] relative">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 pb-4 border-b border-[#24272D]">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-[#24272D]">
           <div>
             <div className="font-mono text-xs text-[#7CFF6B] tracking-widest uppercase mb-1">
-              [03] // PRODUCTION & RESEARCH REPOSITORY
+              [03] // PRODUCTION & RESEARCH PORTFOLIO
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#F2F2F2]">
-              SELECTED PROJECT SYSTEMS
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#F2F2F2]">
+              EXPERIENCE THE SYSTEMS
             </h2>
-            <p className="font-mono text-xs text-[#8B8F98] mt-2">
-              Architectures across Generative AI, PEFT parameter adaptation, NLP Transformers, and production ML microservices.
+            <p className="font-mono text-xs text-[#8B8F98] mt-1.5">
+              Fetched from GitHub &amp; structured by project severity, real-time metrics, and verified production architectures.
             </p>
           </div>
 
-          {/* Filter Pills */}
+          {/* Category Tabs */}
           <div className="flex flex-wrap gap-2 mt-4 md:mt-0 font-mono text-xs">
             {categories.map((cat) => (
               <button
@@ -68,71 +72,86 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProjec
           </div>
         </div>
 
-        {/* Project Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Breathable Project Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredProjects.map((project: ProjectItem) => {
+            const keyMetric = project.evaluationMetrics?.[0] || 'Production Tested';
+            const isCrit = project.severityTier === 'CRITICAL';
+            const isHigh = project.severityTier === 'HIGH';
+            const isMed = project.severityTier === 'MEDIUM';
+
             return (
               <div
                 key={project.id}
-                className="rounded-xl border border-[#24272D] bg-[#101216] p-6 flex flex-col justify-between hover:border-[#7CFF6B]/60 transition-all duration-300 group hover:shadow-xl hover:shadow-black/60 relative overflow-hidden"
+                onClick={() => onSelectProject(project.id)}
+                className="rounded-xl border border-[#24272D] bg-[#101216] p-5 flex flex-col justify-between hover:border-[#7CFF6B]/60 transition-all duration-200 group hover:bg-[#12151B] cursor-pointer"
               >
-                {/* Top status bar */}
                 <div>
-                  <div className="flex items-center justify-between font-mono text-xs pb-3 mb-4 border-b border-[#24272D]">
+                  {/* Top Bar: Number, Severity Badge & Live tag */}
+                  <div className="flex items-center justify-between font-mono text-xs pb-2.5 mb-3 border-b border-[#24272D]/60">
                     <div className="flex items-center gap-2">
-                      <span className="text-[#7CFF6B] font-bold">{project.number}</span>
+                      <span className="text-[#8B8F98] font-bold text-[11px]">{project.number}</span>
+                      
+                      {/* Prominent Severity Badge */}
+                      {project.severityLevel && (
+                        <span 
+                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                            isCrit 
+                              ? 'bg-red-500/15 text-red-400 border-red-500/30' 
+                              : isHigh 
+                              ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' 
+                              : isMed
+                              ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
+                              : 'bg-zinc-800 text-zinc-400 border-zinc-700'
+                          }`}
+                          title={`Severity Rating: ${project.severityLevel} (${project.severityTier})`}
+                        >
+                          {project.severityLevel} · {project.severityTier}
+                        </span>
+                      )}
+
                       {project.liveAppView === 'vero' && (
-                        <span className="flex items-center gap-1 text-[9px] text-[#7CFF6B] bg-[#7CFF6B]/15 border border-[#7CFF6B]/30 px-1.5 py-0.5 rounded font-bold">
+                        <span className="flex items-center gap-1 text-[9px] text-[#7CFF6B] bg-[#7CFF6B]/15 border border-[#7CFF6B]/30 px-1.5 py-0.2 rounded font-bold">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#7CFF6B] animate-pulse"></span>
-                          LIVE APP
+                          LIVE ENGINE
                         </span>
                       )}
                     </div>
-                    <span className="text-[10px] text-[#8B8F98] tracking-wider uppercase">
+
+                    <span className="text-[10px] text-[#8B8F98] uppercase">
                       {project.category}
                     </span>
                   </div>
 
-                  {/* Title & Tagline */}
-                  <h3 className="text-xl font-bold text-[#F2F2F2] group-hover:text-[#7CFF6B] transition-colors mb-2 leading-snug">
+                  {/* Title */}
+                  <h3 className="text-lg font-bold text-[#F2F2F2] group-hover:text-[#7CFF6B] transition-colors mb-1.5 leading-snug">
                     {project.title}
                   </h3>
 
-                  <p className="text-xs text-[#8B8F98] leading-relaxed mb-5">
-                    {project.tagline}
-                  </p>
-
-                  {/* Dataset or Core Subject if applicable */}
-                  {project.dataset && (
-                    <div className="mb-4 p-2.5 rounded bg-[#08090B] border border-[#24272D] font-mono text-[11px]">
-                      <span className="text-[#8B8F98] block text-[10px] uppercase">DATASET / INPUT</span>
-                      <span className="text-[#F2F2F2] font-medium">{project.dataset}</span>
+                  {/* Severity Operational Label */}
+                  {project.severityLabel && (
+                    <div className="text-[11px] font-mono text-[#A1A7B5] mb-2 flex items-center gap-1">
+                      <span className="text-[#7CFF6B]">▸</span>
+                      <span className="font-semibold">{project.severityLabel}</span>
                     </div>
                   )}
 
-                  {/* System Architecture Flow Diagram */}
-                  <div className="mb-5 p-3 rounded bg-[#08090B] border border-[#24272D] font-mono text-[11px] space-y-1.5">
-                    <span className="text-[10px] text-[#7CFF6B] block uppercase font-semibold">
-                      SYSTEM PIPELINE FLOW
+                  {/* 1-Sentence Purpose */}
+                  <p className="text-xs text-[#8B8F98] leading-relaxed mb-4 line-clamp-2">
+                    {project.tagline}
+                  </p>
+
+                  {/* Key Verified Result Box */}
+                  <div className="mb-4 p-2.5 rounded-lg bg-[#08090B] border border-[#24272D] font-mono text-xs flex items-center justify-between">
+                    <span className="text-[10px] text-[#8B8F98] uppercase">VERIFIED RESULT:</span>
+                    <span className="text-[#7CFF6B] font-semibold text-[11px] truncate max-w-[180px]">
+                      {keyMetric}
                     </span>
-                    <div className="text-[#8B8F98] text-[11px] leading-relaxed flex flex-wrap gap-1 items-center">
-                      {project.systemFlow.slice(0, 4).map((stage, sIdx) => (
-                        <React.Fragment key={stage}>
-                          <span className="text-[#F2F2F2] bg-[#15181D] px-1.5 py-0.5 rounded border border-[#24272D]">
-                            {stage}
-                          </span>
-                          {sIdx < 3 && <span className="text-[#7CFF6B]">→</span>}
-                        </React.Fragment>
-                      ))}
-                      {project.systemFlow.length > 4 && (
-                        <span className="text-[#8B8F98] text-[10px]">+{project.systemFlow.length - 4} more</span>
-                      )}
-                    </div>
                   </div>
 
-                  {/* Tech Stack Chips */}
-                  <div className="flex flex-wrap gap-1.5 mb-6">
-                    {project.technologies.slice(0, 5).map((tech) => (
+                  {/* Tech Stack Pills (Clean, max 3) */}
+                  <div className="flex flex-wrap gap-1.5 mb-4">
+                    {project.technologies.slice(0, 3).map((tech) => (
                       <span
                         key={tech}
                         className="px-2 py-0.5 rounded bg-[#15181D] border border-[#24272D] font-mono text-[10px] text-[#8B8F98]"
@@ -140,61 +159,26 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProjec
                         {tech}
                       </span>
                     ))}
-                    {project.technologies.length > 5 && (
-                      <span className="px-1.5 py-0.5 rounded text-[10px] text-[#8B8F98] font-mono">
-                        +{project.technologies.length - 5}
-                      </span>
-                    )}
                   </div>
                 </div>
 
-                {/* Bottom Action Links */}
-                <div className="pt-4 border-t border-[#24272D] flex flex-wrap items-center justify-between gap-2 font-mono text-xs">
-                  <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => onSelectProject(project.id)}
-                      className="text-[#7CFF6B] hover:text-[#7CFF6B]/80 font-bold flex items-center space-x-1 group/btn cursor-pointer"
-                    >
-                      <span>EXPLORE SYSTEM</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                    </button>
-
-                    {project.liveAppView === 'vero' && onOpenVero && (
-                      <button
-                        id="projects-launch-vero-button"
-                        onClick={onOpenVero}
-                        className="px-2 py-0.5 rounded bg-[#7CFF6B] hover:bg-[#7CFF6B]/90 text-[#08090B] font-bold text-[10px] flex items-center gap-1 transition-all cursor-pointer shadow-sm shadow-[#7CFF6B]/20"
-                        title="Launch Live VERO PR Engine"
-                      >
-                        <span>LIVE ENGINE</span>
-                        <ArrowRight className="w-2.5 h-2.5" />
-                      </button>
-                    )}
+                {/* Single Primary Action */}
+                <div className="pt-3 border-t border-[#24272D]/60 flex items-center justify-between font-mono text-xs">
+                  <div className="text-[#7CFF6B] group-hover:translate-x-0.5 transition-transform font-bold flex items-center gap-1.5">
+                    <Play className="w-3 h-3 fill-current" />
+                    <span>EXPERIENCE &amp; INSPECT</span>
                   </div>
 
-                  <div className="flex items-center space-x-2">
-                    {project.notebookUrl && (
-                      <a
-                        href={project.notebookUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded border border-[#24272D] text-[#8B8F98] hover:text-[#F2F2F2] hover:border-[#8B8F98] transition-colors"
-                        title="View Notebook on GitHub"
-                      >
-                        <BookOpen className="w-3.5 h-3.5" />
-                      </a>
-                    )}
-                    <a
-                      href={project.repository}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 rounded border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B] transition-colors flex items-center gap-1"
-                      title="View Source on GitHub"
-                    >
-                      <span className="text-[10px]">REPO</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
+                  <a
+                    href={project.repository}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-[#8B8F98] hover:text-[#F2F2F2] transition-colors p-1"
+                    title="View GitHub Repository"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
                 </div>
               </div>
             );

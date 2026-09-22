@@ -1,308 +1,297 @@
 import { jsPDF } from 'jspdf';
-import { PERSONAL_INFO, EXPERIENCES, CERTIFICATIONS } from '../data/portfolioData';
+import { RESUME_DATA, RESUME_PROJECTS_BY_SEVERITY } from '../data/portfolioData';
 
-export function generateAndDownloadResumePdf(filename = 'Vignesh_K_N_Resume.pdf') {
+export interface ResumePdfOptions {
+  includeProjects?: boolean;
+}
+
+export function generateAndDownloadResumePdf(
+  filename = 'Vignesh_K_N_Resume.pdf',
+  options: ResumePdfOptions = { includeProjects: true }
+) {
   const doc = new jsPDF({
     unit: 'pt',
-    format: 'a4',
+    format: 'a4', // 595.28 x 841.89 pt
   });
 
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
-  const margin = 40;
-  const contentWidth = pageWidth - margin * 2;
+  const margin = 36;
+  const contentWidth = pageWidth - margin * 2; // 523.28 pt
 
-  let y = margin;
+  let y = 34;
 
-  const primaryColor: [number, number, number] = [17, 24, 39];
-  const accentColor: [number, number, number] = [16, 115, 60];
-  const grayColor: [number, number, number] = [75, 85, 99];
-  const darkGray: [number, number, number] = [31, 41, 55];
-  const ruleColor: [number, number, number] = [209, 213, 219];
-
-  function checkPageBreak(neededHeight: number) {
-    if (y + neededHeight > pageHeight - margin) {
-      doc.addPage();
-      y = margin;
-      return true;
-    }
-    return false;
-  }
+  // Exact standard typography and colors matching the official attached PDF
+  const textDark: [number, number, number] = [15, 20, 25]; // #0F1419 Deep Black / Slate
+  const textMuted: [number, number, number] = [75, 85, 99]; // #4B5563 Muted Gray
+  const ruleDark: [number, number, number] = [50, 55, 65]; // Section border line
+  const tableBorder: [number, number, number] = [180, 185, 195]; // Table grid line
+  const badgeCritical: [number, number, number] = [185, 28, 28]; // SEV-1
+  const badgeHigh: [number, number, number] = [180, 83, 9]; // SEV-2 / SEV-3
+  const badgeMedium: [number, number, number] = [29, 78, 216]; // SEV-4 / SEV-5
 
   function addSectionHeader(title: string) {
-    checkPageBreak(30);
-    y += 8;
+    y += 10;
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(11);
-    doc.setTextColor(...primaryColor);
-    doc.text(title.toUpperCase(), margin, y);
+    doc.setTextColor(...textDark);
+    doc.text(title, margin, y);
 
-    y += 4;
-    doc.setDrawColor(...ruleColor);
-    doc.setLineWidth(0.75);
+    y += 3;
+    doc.setDrawColor(...ruleDark);
+    doc.setLineWidth(0.8);
     doc.line(margin, y, margin + contentWidth, y);
-    y += 10;
+    y += 8;
   }
 
-  // Header
+  // ================= PAGE 1 =================
+  // Header matching the exact attached PDF
   doc.setFont('helvetica', 'bold');
-  doc.setFontSize(22);
-  doc.setTextColor(...primaryColor);
-  doc.text(PERSONAL_INFO.name, margin, y);
-  y += 18;
-
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(12);
-  doc.setTextColor(...accentColor);
-  doc.text('AI SOFTWARE ENGINEER | MACHINE LEARNING & BACKEND SYSTEMS', margin, y);
+  doc.setFontSize(18);
+  doc.setTextColor(...textDark);
+  const nameStr = RESUME_DATA.header.name;
+  doc.text(nameStr, pageWidth / 2, y, { align: 'center' });
   y += 14;
 
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  doc.setTextColor(...grayColor);
-  const contactText = `${PERSONAL_INFO.location}  |  ${PERSONAL_INFO.phone}  |  ${PERSONAL_INFO.email}  |  vigneshkn13@gmail.com`;
-  doc.text(contactText, margin, y);
+  doc.setFontSize(8.5);
+  doc.setTextColor(...textDark);
+  const contactLine1 = `${RESUME_DATA.header.phone} | ${RESUME_DATA.header.email} | ${RESUME_DATA.header.location} |`;
+  doc.text(contactLine1, pageWidth / 2, y, { align: 'center' });
   y += 11;
 
-  const linksText = `LinkedIn: ${PERSONAL_INFO.linkedin}  |  GitHub: ${PERSONAL_INFO.github}`;
-  doc.text(linksText, margin, y);
-  y += 10;
-
-  doc.setDrawColor(...ruleColor);
-  doc.setLineWidth(1);
-  doc.line(margin, y, margin + contentWidth, y);
+  const contactLine2 = `${RESUME_DATA.header.linkedin} | ${RESUME_DATA.header.github} | ${RESUME_DATA.header.projects}`;
+  doc.text(contactLine2, pageWidth / 2, y, { align: 'center' });
   y += 6;
 
-  // Professional Summary
+  doc.setDrawColor(...ruleDark);
+  doc.setLineWidth(0.8);
+  doc.line(margin, y, margin + contentWidth, y);
+  y += 2;
+
+  // --- PROFESSIONAL SUMMARY ---
   addSectionHeader('Professional Summary');
   doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9.5);
-  doc.setTextColor(...darkGray);
-  const summary = 'Results-driven AI Software Engineer with 4+ years of hands-on experience in full-stack engineering, cloud automation, and high-throughput microservices, now focused on production-oriented AI, Generative AI, LLM orchestration, RAG architectures, parameter-efficient fine-tuning (LoRA/QLoRA), and containerized inference APIs. Proven track record of architecting scalable enterprise modules with .NET Core 8, Angular 18, Azure, and Python, combining rigorous software engineering standards with machine learning and agentic workflows.';
-  const summaryLines = doc.splitTextToSize(summary, contentWidth);
+  doc.setFontSize(8.5);
+  doc.setTextColor(...textDark);
+  const summaryLines = doc.splitTextToSize(RESUME_DATA.professionalSummary, contentWidth);
   doc.text(summaryLines, margin, y);
-  y += summaryLines.length * 12 + 4;
+  y += summaryLines.length * 11 + 2;
 
-  // Technical Skills
+  // --- TECHNICAL SKILLS (5-row bordered table matching the attached PDF) ---
   addSectionHeader('Technical Skills');
-  const skills = [
-    { label: 'Languages & Core:', val: 'Python, C#, .NET Core 8, SQL, JavaScript, TypeScript, HTML5/CSS3, Git' },
-    { label: 'Machine Learning & DL:', val: 'Scikit-learn, PyTorch, TensorFlow, Transformers, CNN, BERT, Decision Forests, XGBoost, Cross-Validation' },
-    { label: 'Generative AI & LLMs:', val: 'Large Language Models, PEFT / LoRA, QLoRA (4-bit NF4), RAG Pipelines, Vector Search, FAISS, LangChain, Prompt Design' },
-    { label: 'Cloud, APIs & Microservices:', val: 'FastAPI, ASP.NET MVC, RESTful APIs, Azure Functions, Azure Service Bus, Azure Cosmos DB, MySQL, Docker' },
-    { label: 'DevOps & Practices:', val: 'CI/CD (Jenkins, GitHub Actions), Postman, Swagger, MLOps, System Design, SonarQube, Clean Architecture' }
-  ];
 
-  skills.forEach(s => {
-    checkPageBreak(14);
+  const col1Width = 120;
+  const col2Width = contentWidth - col1Width;
+
+  doc.setDrawColor(...tableBorder);
+  doc.setLineWidth(0.6);
+
+  RESUME_DATA.technicalSkillsTable.forEach((row) => {
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(...primaryColor);
-    doc.text(s.label, margin, y);
+    doc.setFontSize(8);
+    const catLines = doc.splitTextToSize(row.category, col1Width - 10);
 
-    const labelWidth = doc.getTextWidth(s.label) + 5;
     doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...darkGray);
-    const valLines = doc.splitTextToSize(s.val, contentWidth - labelWidth);
-    doc.text(valLines, margin + labelWidth, y);
-    y += Math.max(13, valLines.length * 12);
+    doc.setFontSize(8);
+    const skillLines = doc.splitTextToSize(row.skills, col2Width - 10);
+
+    const rowHeight = Math.max(catLines.length * 10, skillLines.length * 10) + 7;
+
+    // Draw row cell boundaries
+    doc.rect(margin, y, col1Width, rowHeight);
+    doc.rect(margin + col1Width, y, col2Width, rowHeight);
+
+    // Write category in col 1
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...textDark);
+    doc.text(catLines, margin + 5, y + 10);
+
+    // Write skills in col 2
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...textDark);
+    doc.text(skillLines, margin + col1Width + 5, y + 10);
+
+    y += rowHeight;
   });
   y += 4;
 
-  // Experience
+  // --- PROFESSIONAL EXPERIENCE ---
   addSectionHeader('Professional Experience');
-  EXPERIENCES.forEach(exp => {
-    checkPageBreak(50);
+
+  RESUME_DATA.professionalExperience.forEach((exp) => {
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(...primaryColor);
-    doc.text(exp.role, margin, y);
+    doc.setFontSize(8.8);
+    doc.setTextColor(...textDark);
+    const expTitle = `${exp.company} — ${exp.role}`;
+    doc.text(expTitle, margin, y);
 
+    const periodWidth = doc.getTextWidth(exp.period);
     doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...accentColor);
-    const atCompany = ` |  ${exp.company}`;
-    const roleWidth = doc.getTextWidth(exp.role);
-    doc.text(atCompany, margin + roleWidth, y);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...grayColor);
-    const periodStr = `${exp.period}  (Bengaluru, India)`;
-    const periodWidth = doc.getTextWidth(periodStr);
-    doc.text(periodStr, margin + contentWidth - periodWidth, y);
-    y += 13;
-
-    exp.highlights.forEach(hl => {
-      checkPageBreak(24);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(9);
-      doc.setTextColor(...darkGray);
-      doc.text('•', margin + 6, y);
-
-      const hlLines = doc.splitTextToSize(hl, contentWidth - 20);
-      doc.text(hlLines, margin + 18, y);
-      y += hlLines.length * 11 + 2;
-    });
-    y += 5;
-  });
-
-  // Featured Projects
-  addSectionHeader('Featured Engineering & AI Projects');
-  const projects = [
-    {
-      title: 'Intelligent Customer Churn Prediction',
-      stack: 'Python, Scikit-learn, XGBoost, FastAPI, Docker, Classification Pipelines',
-      desc: 'End-to-end production ML pipeline analyzing telecom subscription patterns to forecast retention attrition. Features modular data validation, Scikit-learn preprocessing pipelines, multi-model evaluation, and low-latency FastAPI inference service packaged with Docker.'
-    },
-    {
-      title: 'Qwen2.5-Coder LoRA Fine-Tuning & Quantization',
-      stack: 'Python, PyTorch, Hugging Face PEFT/TRL, BitsAndBytes 4-bit, LoRA / QLoRA',
-      desc: 'Parameter-Efficient Fine-Tuning (PEFT) on open-weight LLMs using rank-decomposed adapter matrices (LoRA) and 4-bit NormalFloat (NF4) quantization. Demonstrated >70% VRAM memory reduction during training with preserved coding benchmark performance.'
-    },
-    {
-      title: 'VERO — AI Code Analysis & Pull Request Intelligence',
-      stack: 'GitHub API, SonarQube, LLMs, Static Analysis, Rule Engine, TypeScript, Node.js',
-      desc: 'Evidence-based GitHub Pull Request engineering analysis platform combining AST diff parsing, SonarQube static quality checks, and structured LLM signals with a deterministic rule engine to deliver automated, hallucination-free merge recommendations.'
-    },
-    {
-      title: 'BERT Model Engineering & CNN Spatial Hierarchies',
-      stack: 'PyTorch, Hugging Face Transformers, Computer Vision, WordPiece Tokenization',
-      desc: 'Explored bidirectional self-attention mechanisms, token embedding representation transfer learning, and convolutional feature hierarchy learning with PyTorch training loops, learning rate scheduling, and validation scorecards.'
-    }
-  ];
-
-  projects.forEach(p => {
-    checkPageBreak(40);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.setTextColor(...primaryColor);
-    doc.text(p.title, margin, y);
-
-    const titleWidth = doc.getTextWidth(p.title);
-    doc.setFont('helvetica', 'italic');
     doc.setFontSize(8.5);
-    doc.setTextColor(...grayColor);
-    const stackStr = ` — [${p.stack}]`;
-    doc.text(doc.splitTextToSize(stackStr, contentWidth - titleWidth - 5)[0] || '', margin + titleWidth + 4, y);
-    y += 12;
+    doc.text(exp.period, margin + contentWidth - periodWidth, y);
+    y += 10;
 
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8.5);
-    doc.setTextColor(...darkGray);
-    const descLines = doc.splitTextToSize(p.desc, contentWidth - 6);
-    doc.text(descLines, margin + 6, y);
-    y += descLines.length * 10.5 + 4;
-  });
-
-  // Certifications & Education
-  addSectionHeader('Certifications & Education');
-  CERTIFICATIONS.forEach(c => {
-    checkPageBreak(16);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.setTextColor(...primaryColor);
-    doc.text(`•  ${c.title}`, margin + 4, y);
-
-    const leftWidth = doc.getTextWidth(`•  ${c.title}`) + 8;
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...darkGray);
-    doc.text(`—  ${c.issuer}`, margin + leftWidth, y);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...grayColor);
-    const pWidth = doc.getTextWidth(c.period);
-    doc.text(c.period, margin + contentWidth - pWidth, y);
-    y += 13;
-  });
-
-  const totalPages = (doc as any).getNumberOfPages ? (doc as any).getNumberOfPages() : doc.internal.pages.length - 1;
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
-    doc.setTextColor(...grayColor);
-    const footerText = `Vignesh K N — Resume  |  Page ${i} of ${totalPages}`;
-    const footerWidth = doc.getTextWidth(footerText);
-    doc.text(footerText, (pageWidth - footerWidth) / 2, pageHeight - 20);
+    doc.setTextColor(...textDark);
+
+    exp.bullets.forEach((b) => {
+      doc.text('●', margin + 4, y);
+      const bLines = doc.splitTextToSize(b, contentWidth - 16);
+      doc.text(bLines, margin + 14, y);
+      y += bLines.length * 9.5 + 1.5;
+    });
+    y += 2.5;
+  });
+
+  // --- CERTIFICATIONS & EDUCATION ---
+  addSectionHeader('Certifications & Education');
+
+  RESUME_DATA.certificationsAndEducation.forEach((item) => {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...textDark);
+    doc.text('●', margin + 4, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.text(item.title, margin + 14, y);
+
+    doc.setFont('helvetica', 'bold');
+    const pWidth = doc.getTextWidth(item.period);
+    doc.text(item.period, margin + contentWidth - pWidth, y);
+    y += 10.5;
+  });
+
+  // ================= PAGE 2: PROJECTS FROM GITHUB RANKED BY SEVERITY =================
+  if (options.includeProjects) {
+    doc.addPage();
+    y = 34;
+
+    // Page 2 Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(...textDark);
+    doc.text('VIGNESH KN', margin, y);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...textMuted);
+    const p2Sub = 'KEY ENGINEERING & AI PROJECTS (RANKED BY PROJECT SEVERITY)';
+    const p2SubWidth = doc.getTextWidth(p2Sub);
+    doc.text(p2Sub, margin + contentWidth - p2SubWidth, y);
+    y += 5;
+
+    doc.setDrawColor(...ruleDark);
+    doc.setLineWidth(0.8);
+    doc.line(margin, y, margin + contentWidth, y);
+    y += 4;
+
+    addSectionHeader('Projects & System Architectures (Sourced from GitHub)');
+
+    RESUME_PROJECTS_BY_SEVERITY.forEach((p) => {
+      // Determine badge color
+      let badgeColor = badgeMedium;
+      if (p.severityTier === 'CRITICAL') badgeColor = badgeCritical;
+      else if (p.severityTier === 'HIGH') badgeColor = badgeHigh;
+
+      // Title and Severity Badge
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(9.2);
+      doc.setTextColor(...textDark);
+      doc.text(p.title, margin, y);
+
+      const titleWidth = doc.getTextWidth(p.title);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.8);
+      doc.setTextColor(...badgeColor);
+      doc.text(`[${p.severityLevel} · ${p.severityTier}]`, margin + titleWidth + 6, y);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...textMuted);
+      const repoWidth = doc.getTextWidth(p.repoUrl);
+      doc.text(p.repoUrl, margin + contentWidth - repoWidth, y);
+      y += 10.5;
+
+      // Tech Stack line
+      doc.setFont('helvetica', 'italic');
+      doc.setFontSize(7.8);
+      doc.setTextColor(...textMuted);
+      const stackText = `Tech Stack: ${p.stack}`;
+      const stackLines = doc.splitTextToSize(stackText, contentWidth - 8);
+      doc.text(stackLines, margin + 6, y);
+      y += stackLines.length * 9.5;
+
+      // Bullets
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(...textDark);
+      p.bullets.forEach((b) => {
+        doc.text('●', margin + 6, y);
+        const bLines = doc.splitTextToSize(b, contentWidth - 20);
+        doc.text(bLines, margin + 16, y);
+        y += bLines.length * 9.5 + 1.5;
+      });
+
+      y += 3.5;
+    });
+
+    // Page footers
+    const totalPages = 2;
+    for (let i = 1; i <= totalPages; i++) {
+      doc.setPage(i);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...textMuted);
+      const footerText = `Vignesh KN — Resume | Page ${i} of ${totalPages}`;
+      const footerWidth = doc.getTextWidth(footerText);
+      doc.text(footerText, (pageWidth - footerWidth) / 2, pageHeight - 16);
+    }
   }
 
   doc.save(filename);
 }
 
 export function getPlainTextResume(): string {
-  return `VIGNESH K N
-AI Software Engineer | Full-Stack & Machine Learning Systems
-Bengaluru, India | +91 8861524366
-vigneshknagaraj@outlook.com | vigneshkn13@gmail.com
-LinkedIn: https://www.linkedin.com/in/vignesh-k-n/
-GitHub: https://github.com/KN-Vignesh
-Portfolio: https://kn-vignesh.github.io/Projects/#/
+  return `${RESUME_DATA.header.name}
+${RESUME_DATA.header.phone} | ${RESUME_DATA.header.email} | ${RESUME_DATA.header.location}
+${RESUME_DATA.header.linkedin} | ${RESUME_DATA.header.github} | ${RESUME_DATA.header.projects}
 
 =======================================================
 PROFESSIONAL SUMMARY
 =======================================================
-Results-driven AI Software Engineer with 4+ years of experience in full-stack engineering, cloud automation, and API integration, now focused on production-oriented AI, Generative AI, LLM orchestration, RAG architectures, parameter-efficient fine-tuning (LoRA/QLoRA), and containerized inference APIs. Proven track record of architecting scalable enterprise modules with .NET Core 8, Angular 18, Azure, and Python, combining rigorous software engineering standards with machine learning and agentic workflows.
+${RESUME_DATA.professionalSummary}
 
 =======================================================
 TECHNICAL SKILLS
 =======================================================
-- Languages & Core: Python, C#, .NET Core 8, SQL, JavaScript, TypeScript, HTML5, CSS3, Git
-- Machine Learning & DL: Scikit-learn, PyTorch, TensorFlow, Transformers, CNN, BERT, Decision Forests, XGBoost, Cross-Validation
-- Generative AI & LLMs: Large Language Models, PEFT / LoRA, QLoRA (4-bit NF4), RAG Pipelines, Vector Search, FAISS, LangChain, Prompt Design
-- Cloud, APIs & Microservices: FastAPI, ASP.NET MVC, RESTful APIs, Azure Functions, Azure Service Bus, Azure Cosmos DB, MySQL, Docker
-- DevOps & Engineering: CI/CD (Jenkins, GitHub Actions), Postman, Swagger, MLOps, System Design, SonarQube, Clean Architecture
+${RESUME_DATA.technicalSkillsTable.map((r) => `${r.category}:\n  ${r.skills}`).join('\n\n')}
 
 =======================================================
 PROFESSIONAL EXPERIENCE
 =======================================================
-Software Engineer | ACL Digital
-Aug 2024 – Present | Bengaluru, India
-• Architected full-stack modules integrating Agentic AI and LLM APIs for the enterprise TLK Device Configuration App (OnePortal).
-• Developed high-performance backend microservices using .NET Core 8 and responsive frontend user interfaces in Angular 18.
-• Engineered database operations and optimized query patterns with Entity Framework Core and MySQL.
-• Implemented Reinforcement Learning from Human Feedback (RLHF) strategies and Generative AI / NLP evaluation scorecards.
-• Built automated data validation pipelines and secure client-side scanner implementation for hardware Device Registration.
-
-Software Engineer | Enmarq Technologies
-Aug 2022 – Aug 2024 | Bengaluru, India
-• Engineered scalable serverless REST APIs using Azure Functions, Azure Service Bus, and Azure Cosmos DB.
-• Built Vector Search data management architectures and NLP / Generative AI / RAG data ingestion pipelines.
-• Maintained robust CI/CD and MLOps automation with Git, Jenkins, and automated testing suites.
-• Spearheaded BeyondTrust PAM / BeyondInsight deployment for 6,000+ enterprise users with a 90-day delivery deadline.
-• Executed Sitecore CMS upgrades from 8.3 to 10.3, Content Hub, Experience Editor, and SQL stored procedures for managed enterprise printing systems.
-
-Intern Associate | Enmarq Technologies
-Feb 2022 – Jul 2022 | Bengaluru, India
-• Developed Python and C# scheduled background jobs for automated cloud data workflows.
-• Extracted, sanitized, and transformed complex data structures from Cosmos DB for downstream analytics and AI workflows.
-• Conducted thorough API validation and contract testing utilizing Postman and Swagger specifications.
-
-=======================================================
-FEATURED AI & ENGINEERING PROJECTS
-=======================================================
-1. Intelligent Customer Churn Prediction
-Stack: Python, Scikit-learn, XGBoost, FastAPI, Docker
-• End-to-end production ML pipeline analyzing telecom subscription patterns to forecast retention attrition.
-• Features modular data validation, Scikit-learn preprocessing pipelines, multi-model evaluation, and low-latency FastAPI inference service packaged with Docker.
-
-2. Qwen2.5-Coder LoRA Fine-Tuning & Quantization
-Stack: Python, PyTorch, Hugging Face PEFT/TRL, BitsAndBytes 4-bit, LoRA / QLoRA
-• Parameter-Efficient Fine-Tuning (PEFT) on open-weight LLMs using rank-decomposed adapter matrices (LoRA) and 4-bit NormalFloat (NF4) quantization.
-• Demonstrated >70% VRAM memory reduction during training with preserved coding benchmark performance.
-
-3. VERO — AI Code Analysis & Pull Request Intelligence
-Stack: GitHub API, SonarQube, LLMs, Static Analysis, Rule Engine, TypeScript, Node.js
-• Evidence-based GitHub Pull Request engineering analysis platform combining AST diff parsing, SonarQube static quality checks, and structured LLM signals with a deterministic rule engine to deliver automated merge recommendations.
-
-4. BERT Model Engineering & CNN Spatial Hierarchies
-Stack: PyTorch, Hugging Face Transformers, Computer Vision
-• Explored bidirectional self-attention mechanisms, token embedding representation transfer learning, and convolutional feature hierarchy learning with PyTorch training loops and validation scorecards.
+${RESUME_DATA.professionalExperience
+  .map(
+    (exp) => `${exp.company} — ${exp.role} (${exp.period})
+${exp.bullets.map((b) => `● ${b}`).join('\n')}`
+  )
+  .join('\n\n')}
 
 =======================================================
 CERTIFICATIONS & EDUCATION
 =======================================================
-• Microsoft Certified: Azure Fundamentals (AZ-900 / DP-900) — Microsoft (2024–2026)
-• Oracle Cloud Infrastructure: Generative AI / AI Foundation — Oracle (2023–2024)
-• Bachelor of Engineering (B.E.) — KVG College of Engineering (Graduated 2019)
+${RESUME_DATA.certificationsAndEducation.map((c) => `● ${c.title} — ${c.period}`).join('\n')}
+
+=======================================================
+KEY ENGINEERING & AI PROJECTS (RANKED BY PROJECT SEVERITY)
+=======================================================
+${RESUME_PROJECTS_BY_SEVERITY.map(
+  (p) => `[${p.severityLevel} · ${p.severityTier}] ${p.title}
+Repository: ${p.repoUrl}
+Tech Stack: ${p.stack}
+Impact: ${p.impact}
+${p.bullets.map((b) => `● ${b}`).join('\n')}`
+).join('\n\n')}
 `;
 }

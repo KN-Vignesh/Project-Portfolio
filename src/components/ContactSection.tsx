@@ -1,12 +1,12 @@
 import React from 'react';
-import { Mail, Phone, MapPin, ExternalLink, Github, Linkedin, ArrowRight, Terminal, FileDown, FileText } from 'lucide-react';
+import { Mail, Phone, MapPin, ExternalLink, Github, Linkedin, ArrowRight, Terminal } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/portfolioData';
 
 interface ContactSectionProps {
   onOpenResume?: () => void;
 }
 
-export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenResume }) => {
+export const ContactSection: React.FC<ContactSectionProps> = () => {
   return (
     <section id="contact" className="py-24 border-t border-[#24272D] bg-[#08090B] relative overflow-hidden">
       {/* Background Subtle Ambient Glow */}
@@ -94,60 +94,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({ onOpenResume }) 
                     <span className="font-medium text-[#7CFF6B]">AVAILABLE FOR IMPACT</span>
                   </div>
                 </div>
-
-                {/* Resume Download Card */}
-                <div className="p-3 rounded bg-[#08090B] border border-[#7CFF6B]/30 text-[#F2F2F2] flex items-center justify-between col-span-1 sm:col-span-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded border border-[#7CFF6B]/40 bg-[#7CFF6B]/10 flex items-center justify-center text-[#7CFF6B]">
-                      <FileText className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-[#7CFF6B] block font-mono font-semibold">CURRICULUM VITAE</span>
-                      <span className="font-medium text-xs">Vignesh_K_N_Resume.pdf (ATS-Aligned)</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {onOpenResume && (
-                      <button
-                        onClick={onOpenResume}
-                        className="px-3 py-1.5 rounded border border-[#24272D] bg-[#15181D] hover:bg-[#24272D] text-[#8B8F98] hover:text-[#F2F2F2] font-mono text-xs transition-colors cursor-pointer"
-                      >
-                        PREVIEW
-                      </button>
-                    )}
-                    <a
-                      href="/vignesh-k-n-resume.pdf"
-                      download="Vignesh_K_N_Resume.pdf"
-                      className="px-3 py-1.5 rounded bg-[#7CFF6B] text-[#08090B] font-mono text-xs font-bold hover:bg-[#7CFF6B]/90 transition-all flex items-center gap-1 shadow-sm shadow-[#7CFF6B]/20"
-                    >
-                      <FileDown className="w-3.5 h-3.5" />
-                      <span>DOWNLOAD</span>
-                    </a>
-                  </div>
-                </div>
               </div>
             </div>
 
             {/* CTAs */}
             <div className="flex flex-wrap gap-4 pt-2 font-mono text-xs">
-              {onOpenResume ? (
-                <button
-                  onClick={onOpenResume}
-                  className="px-6 py-3 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-all flex items-center space-x-2 shadow-md shadow-[#7CFF6B]/15 cursor-pointer"
-                >
-                  <FileDown className="w-4 h-4" />
-                  <span>DOWNLOAD RESUME (PDF)</span>
-                </button>
-              ) : (
-                <a
-                  href="/vignesh-k-n-resume.pdf"
-                  download="Vignesh_K_N_Resume.pdf"
-                  className="px-6 py-3 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-all flex items-center space-x-2 shadow-md shadow-[#7CFF6B]/15"
-                >
-                  <FileDown className="w-4 h-4" />
-                  <span>DOWNLOAD RESUME (PDF)</span>
-                </a>
-              )}
+              <a
+                href={`mailto:${PERSONAL_INFO.email}`}
+                className="px-6 py-3 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-all flex items-center space-x-2 shadow-md shadow-[#7CFF6B]/15"
+              >
+                <Mail className="w-4 h-4" />
+                <span>SEND DIRECT EMAIL</span>
+              </a>
 
               <a
                 href={PERSONAL_INFO.github}

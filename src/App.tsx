@@ -61,9 +61,9 @@ export default function App() {
 
     const sections = [
       'hero',
-      'about',
-      'engineering-system',
       'projects',
+      'engineering-system',
+      'about',
       'ai-lab',
       'stack',
       'experience',
@@ -170,19 +170,19 @@ export default function App() {
           onOpenVero={handleOpenVero}
         />
 
-        {/* 02 / ABOUT */}
-        <AboutSection />
+        {/* 02 / PROJECTS (EXPERIENCE INITIALLY) */}
+        <ProjectsSection
+          onSelectProject={handleOpenProject}
+          onOpenVero={handleOpenVero}
+        />
 
         {/* 03 / ENGINEERING SYSTEM */}
         <EngineeringSystemSection
           onSelectProject={handleOpenProject}
         />
 
-        {/* 04 / PROJECTS */}
-        <ProjectsSection
-          onSelectProject={handleOpenProject}
-          onOpenVero={handleOpenVero}
-        />
+        {/* 04 / ABOUT */}
+        <AboutSection />
 
         {/* 05 / AI LAB */}
         <AILabSection
@@ -196,21 +196,16 @@ export default function App() {
         <ExperienceSection />
 
         {/* 08 / EDUCATION + CERTIFICATIONS */}
-        <EducationCertificationsSection
-          onOpenResume={() => setIsResumeOpen(true)}
-        />
+        <EducationCertificationsSection />
 
         {/* 09 / CONTACT */}
-        <ContactSection
-          onOpenResume={() => setIsResumeOpen(true)}
-        />
+        <ContactSection />
       </main>
 
       {/* Mobile App Navigation Bottom Dock */}
       <MobileAppDock
         activeSection={activeSection}
         onNavigate={handleNavigate}
-        onOpenResume={() => setIsResumeOpen(true)}
         onOpenVero={handleOpenVero}
       />
 

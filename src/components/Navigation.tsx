@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { Menu, X, ArrowUpRight, FileDown, GitPullRequest } from 'lucide-react';
-import { PWAInstallButton } from './PWAInstallButton';
 
 interface NavigationProps {
   activeSection: string;
@@ -23,13 +22,13 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
   }, []);
 
   const navLinks = [
-    { label: '[01] ABOUT', href: '#about', id: 'about' },
-    { label: '[02] SYSTEM', href: '#engineering-system', id: 'engineering-system' },
-    { label: '[03] PROJECTS', href: '#projects', id: 'projects' },
-    { label: '[04] AI LAB', href: '#ai-lab', id: 'ai-lab' },
-    { label: '[05] STACK', href: '#stack', id: 'stack' },
-    { label: '[06] EXPERIENCE', href: '#experience', id: 'experience' },
-    { label: '[07] CONTACT', href: '#contact', id: 'contact' },
+    { label: 'PROJECTS', href: '#projects', id: 'projects' },
+    { label: 'SYSTEM', href: '#engineering-system', id: 'engineering-system' },
+    { label: 'ABOUT', href: '#about', id: 'about' },
+    { label: 'AI LAB', href: '#ai-lab', id: 'ai-lab' },
+    { label: 'STACK', href: '#stack', id: 'stack' },
+    { label: 'EXPERIENCE', href: '#experience', id: 'experience' },
+    { label: 'CONTACT', href: '#contact', id: 'contact' },
   ];
 
   return (
@@ -54,10 +53,10 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
             </span>
           </a>
 
-          {/* System Status Pill */}
+          {/* Professional Status Pill */}
           <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded bg-[#101216] border border-[#24272D] font-mono text-[11px] text-[#8B8F98]">
-            <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
-            <span className="text-[#F2F2F2]">AI CORE // ONLINE</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#7CFF6B]"></span>
+            <span className="text-[#D1D5DB]">AI SOFTWARE ENGINEER</span>
           </div>
         </div>
 
@@ -68,6 +67,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
             return (
               <a
                 key={link.id}
+                id={`nav-link-${link.id}`}
                 href={link.href}
                 onClick={(e) => {
                   e.preventDefault();
@@ -124,9 +124,6 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
               <span className="h-1.5 w-1.5 rounded-full bg-[#7CFF6B] animate-pulse"></span>
             </button>
           )}
-
-          {/* In-App PWA Install Button */}
-          <PWAInstallButton variant="compact" />
 
           {/* Download Resume Button */}
           {onOpenResume ? (
@@ -197,11 +194,6 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
                 <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
               </button>
             )}
-            {/* Mobile App Install Button */}
-            <div className="w-full">
-              <PWAInstallButton variant="full" className="w-full py-2.5 justify-center" />
-            </div>
-
             <button
               onClick={() => {
                 setMobileMenuOpen(false);
