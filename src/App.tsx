@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import { Navigation } from './components/Navigation';
 import { HeroSection } from './components/HeroSection';
 import { AboutSection } from './components/AboutSection';
@@ -171,6 +172,7 @@ export default function App() {
       <div className="min-h-screen bg-[#08090B] text-[#F2F2F2] selection:bg-[#7CFF6B]/20 selection:text-[#7CFF6B]">
         <VeroApp onBackToPortfolio={handleBackToPortfolio} />
         <Analytics />
+        <SpeedInsights />
       </div>
     );
   }
@@ -259,6 +261,9 @@ export default function App() {
 
       {/* Vercel Web Analytics */}
       <Analytics />
+
+      {/* Vercel Speed Insights */}
+      <SpeedInsights />
     </div>
   );
 }
