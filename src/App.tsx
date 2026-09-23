@@ -15,8 +15,8 @@ import { ResumeModal } from './components/ResumeModal';
 import { Footer } from './components/Footer';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { MobileAppDock } from './components/MobileAppDock';
-import { PROJECTS } from './data/portfolioData';
 import { ProjectItem } from './types';
+import { useProjects } from './hooks/useProjects';
 import VeroApp from './vero/VeroApp';
 
 export default function App() {
@@ -24,6 +24,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState<string>('hero');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isResumeOpen, setIsResumeOpen] = useState<boolean>(false);
+  const { projects, loading: projectsLoading, error: projectsError } = useProjects();
 
   // Check URL hash on initial load and navigation for direct project deep-linking or VERO engine
   useEffect(() => {
@@ -41,7 +42,7 @@ export default function App() {
       
       if (hash.startsWith('project-')) {
         const projId = hash.replace('project-', '');
-        const exists = PROJECTS.find((p) => p.id === projId);
+        const exists = projects.find((p) => p.id === projId);
         if (exists) {
           setSelectedProjectId(projId);
         } else {
@@ -67,7 +68,7 @@ export default function App() {
       window.removeEventListener('hashchange', handleUrlChange);
       window.removeEventListener('popstate', handleUrlChange);
     };
-  }, []);
+  }, [projects]);
 
   // Update active section based on scroll position (when in portfolio view)
   useEffect(() => {
@@ -163,7 +164,7 @@ export default function App() {
   };
 
   const currentProject: ProjectItem | null =
-    PROJECTS.find((p) => p.id === selectedProjectId) || null;
+    projects.find((p) => p.id === selectedProjectId) || null;
 
   if (currentView === 'vero') {
     return (
@@ -198,6 +199,9 @@ export default function App() {
 
         {/* 02 / PROJECTS (EXPERIENCE INITIALLY) */}
         <ProjectsSection
+          projects={projects}
+          loading={projectsLoading}
+          error={projectsError}
           onSelectProject={handleOpenProject}
           onOpenVero={handleOpenVero}
         />
@@ -212,6 +216,8 @@ export default function App() {
 
         {/* 05 / AI LAB */}
         <AILabSection
+          projects={projects}
+          loading={projectsLoading}
           onSelectProject={handleOpenProject}
         />
 
@@ -247,6 +253,8 @@ export default function App() {
       <ResumeModal
         isOpen={isResumeOpen}
         onClose={() => setIsResumeOpen(false)}
+        projects={projects}
+        projectsLoading={projectsLoading}
       />
 
       {/* Gemini AI Assistant Floating Widget */}

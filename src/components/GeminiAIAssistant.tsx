@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, Sparkles, Brain, RefreshCw, ChevronDown, Terminal, MessageSquare } from 'lucide-react';
 import { generatePortfolioKnowledgeResponse } from '../utils/portfolioKnowledgeEngine';
+import { useProjects } from '../hooks/useProjects';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -8,6 +9,7 @@ interface Message {
 }
 
 export const GeminiAIAssistant: React.FC = () => {
+  const { projects } = useProjects();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -76,7 +78,7 @@ export const GeminiAIAssistant: React.FC = () => {
       throw new Error('EMPTY_REPLY');
     } catch (err) {
       // Seamless fallback to built-in Portfolio Knowledge Engine
-      const fallbackReply = generatePortfolioKnowledgeResponse(query, updatedMessages);
+      const fallbackReply = generatePortfolioKnowledgeResponse(query, updatedMessages, projects);
       setMessages((prev) => [
         ...prev,
         { role: 'assistant', content: fallbackReply }

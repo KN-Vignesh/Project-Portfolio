@@ -1,20 +1,23 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { ArrowRight, Sparkles, Network, ExternalLink, Cpu, Layers } from 'lucide-react';
-import { AI_LAB_NODES, PROJECTS } from '../data/portfolioData';
+import { AI_LAB_NODES } from '../data/portfolioData';
 import { AILabNode } from '../types';
+import { ProjectItem } from '../types';
 
 interface AILabSectionProps {
+  projects: ProjectItem[];
+  loading: boolean;
   onSelectProject: (projectId: string) => void;
 }
 
-export const AILabSection: React.FC<AILabSectionProps> = ({ onSelectProject }) => {
+export const AILabSection: React.FC<AILabSectionProps> = ({ projects, loading, onSelectProject }) => {
   const [selectedNodeId, setSelectedNodeId] = useState<string>('llms');
   const canvasMountRef = useRef<HTMLDivElement>(null);
 
   const selectedNode = AI_LAB_NODES.find((n) => n.id === selectedNodeId) || AI_LAB_NODES[0];
   const connectedNodes = AI_LAB_NODES.filter((n) => selectedNode.connections.includes(n.id));
-  const relatedProjects = PROJECTS.filter((p) => selectedNode.relatedProjectIds.includes(p.id));
+  const relatedProjects = projects.filter((p) => selectedNode.relatedProjectIds.includes(p.id));
 
   useEffect(() => {
     const mount = canvasMountRef.current;
