@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, Sparkles, Brain, RefreshCw, ChevronDown, Terminal, MessageSquare } from 'lucide-react';
+import { generatePortfolioKnowledgeResponse } from '../utils/portfolioKnowledgeEngine';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -57,22 +58,27 @@ export const GeminiAIAssistant: React.FC = () => {
         })
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP_${response.status}`);
+      }
+
+      const contentType = response.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) {
+        throw new Error('NON_JSON_RESPONSE');
+      }
+
       const data = await response.json();
       if (data.reply) {
         setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
-      } else {
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: "I encountered an error generating a response. Please try again." }
-        ]);
+        return;
       }
+      throw new Error('EMPTY_REPLY');
     } catch (err) {
+      // Seamless fallback to built-in Portfolio Knowledge Engine
+      const fallbackReply = generatePortfolioKnowledgeResponse(query, updatedMessages);
       setMessages((prev) => [
         ...prev,
-        {
-          role: 'assistant',
-          content: "Network error communicating with the portfolio assistant backend. Please check your connection."
-        }
+        { role: 'assistant', content: fallbackReply }
       ]);
     } finally {
       setIsLoading(false);
@@ -145,7 +151,7 @@ export const GeminiAIAssistant: React.FC = () => {
 
           {/* Model Status Bar */}
           <div className="px-3 py-1 bg-[#101216]/60 border-b border-[#24272D] text-[10px] text-[#8B8F98] flex items-center justify-between">
-            <span>MODEL: {isThinkingMode ? 'gemini-3.1-pro-preview (Thinking: HIGH)' : 'gemini-3.5-flash'}</span>
+            <span>MODEL: {isThinkingMode ? 'gemini-3.1-pro-preview (Thinking: HIGH)' : 'gemini-3.8-flash'}</span>
             <span className="text-[#7CFF6B]">CONNECTED</span>
           </div>
 
