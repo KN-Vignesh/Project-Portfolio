@@ -1,3 +1,5 @@
+import { RESUME_DATA, EXPERIENCES, PROJECTS } from '../data/portfolioData';
+
 /**
  * Resilient Portfolio Knowledge Engine
  * 
@@ -57,6 +59,20 @@ export function generatePortfolioKnowledgeResponse(
 
   if (outOfScopePatterns.some((pattern) => normalized.includes(pattern))) {
     return `I am specifically designed to assist with questions regarding Vignesh K N's technical portfolio, systems architecture, and engineering projects. I cannot assist with topics outside this portfolio scope. Please feel free to ask about his work on VERO, QLoRA fine-tuning, Customer Churn prediction, or his 4+ years of professional engineering experience!`;
+  }
+
+  // 0.2 Model Constraint Inquiries (Free Model & Pro Restriction)
+  if (
+    normalized.includes('pro model') ||
+    normalized.includes('switch to pro') ||
+    normalized.includes('use pro') ||
+    normalized.includes('gemini pro') ||
+    normalized.includes('what model') ||
+    normalized.includes('which model') ||
+    normalized.includes('model constraint') ||
+    normalized.includes('model are you')
+  ) {
+    return `This portfolio assistant is strictly constrained to use only the latest free text generation model (**gemini-3.8-flash**). Pro models (such as gemini-3.1-pro-preview or any paid tier models) are restricted and cannot be used.\n\nI am fully equipped to walk you through any technical details of Vignesh's software engineering experience, AI/ML pipelines (LoRA/QLoRA, BERT, VERO), or systems architecture.`;
   }
 
   // 1. Did he really build this site / authenticity / authorship
@@ -184,20 +200,12 @@ He is currently open to AI Software Engineer and Senior Software Engineer roles 
     normalized.includes('role') ||
     normalized.includes('job')
   ) {
-    return `Vignesh has **4+ years of professional engineering experience**:
+    const expBlocks = EXPERIENCES.map((item, idx) => {
+      const bulletSummary = item.highlights.map(h => `   - ${h}`).join('\n');
+      return `${idx + 1}. **${item.role} @ ${item.company}** *(${item.period})*\n${bulletSummary}`;
+    }).join('\n\n');
 
-1. **Software Engineer @ ACL Digital** *(Aug 2024 – Present | Bengaluru, India)*
-   - Architected full-stack modules incorporating Agentic AI and LLM APIs for enterprise device configuration (OnePortal) using .NET Core 8, Angular 18, and MySQL.
-   - Designed Reinforcement Learning from Human Feedback (RLHF) and evaluation frameworks to optimize accuracy, safety, and reliability of internal GenAI/NLP workflows.
-   - Built automated data validation and end-to-end scanner pipelines for client-side device registration.
-
-2. **Software Engineer @ Enmarq Technologies** *(Aug 2022 – Aug 2024 | Bengaluru, India)*
-   - Built serverless REST APIs, Azure Functions, and Service Bus triggers with Azure Cosmos DB (vector search management), powering low-latency data ingestion for downstream NLP and RAG pipelines.
-   - Spearheaded automated deployment and building of BeyondTrust PAM and BeyondInsight for 6,000+ enterprise users under a 90-day timeline.
-   - Executed sequential Sitecore CMS enterprise migrations (v8.3 to v10.3).
-
-3. **Intern Associate @ Enmarq Technologies** *(Feb 2022 – Jul 2022)*
-   - Built automated Python and C# data pipelines for cleaning Cosmos DB data used in analytics and ML workflows.`;
+    return `Vignesh has **4+ years of professional engineering experience** across enterprise full-stack systems and production GenAI pipelines:\n\n${expBlocks}`;
   }
 
   // 8. Skills / Tech Stack
@@ -210,11 +218,11 @@ He is currently open to AI Software Engineer and Senior Software Engineer roles 
     normalized.includes('angular') ||
     normalized.includes('azure')
   ) {
-    return `Vignesh's core technical stack spans:
-- **AI & GenAI:** Large Language Models (LLMs), Agentic AI Workflows, RAG Architectures, PEFT (LoRA/QLoRA), RLHF Evaluation Frameworks, Vector DBs (FAISS, Cosmos DB Vector).
-- **AI Frameworks:** PyTorch, Hugging Face (Transformers, PEFT, TRL), Scikit-learn, XGBoost, BitsAndBytes 4-bit NF4.
-- **Languages:** Python, C# (.NET Core, ASP.NET), TypeScript, JavaScript, SQL.
-- **Enterprise & Cloud:** Microsoft Azure (Functions, Service Bus, Cosmos DB), .NET Core 8, Angular 18, Docker, Jenkins CI/CD, REST APIs.`;
+    const skillsList = RESUME_DATA.technicalSkillsTable
+      .map(row => `- **${row.category}:** ${row.skills}`)
+      .join('\n');
+
+    return `Vignesh's core technical stack spans:\n${skillsList}`;
   }
 
   // 9. Systems Architecture & Engineering Methodology
@@ -243,18 +251,12 @@ He is currently open to AI Software Engineer and Senior Software Engineer roles 
     normalized.includes('project') ||
     normalized.includes('vignesh')
   ) {
-    return `Vignesh's portfolio includes 9 verified machine learning and AI engineering systems:
-1. **Intelligent Customer Churn Prediction:** FastAPI + Docker + XGBoost microservice.
-2. **Qwen / LoRA Adaptation:** Parameter-efficient low-rank adaptation on attention projection matrices.
-3. **QLoRA 4-bit Quantization:** NF4 double quantization with BitsAndBytes.
-4. **BERT Model Engineering:** Custom bidirectional encoder with classification heads.
-5. **VERO (PR Sentinel):** Multi-agent PR diff intelligence with deterministic merge gates.
-6. **CNN Fundamentals:** Spatial convolutions and receptive field optimization in PyTorch.
-7. **Model Evaluation Framework:** Hallucination scoring and ROC-AUC benchmarking.
-8. **House Price Prediction:** TensorFlow Decision Forests on tabular data.
-9. **Titanic ML Baseline:** Exploratory feature engineering.
+    const projectSummary = PROJECTS.map((proj, idx) => {
+      const shortDesc = proj.description.length > 80 ? `${proj.description.slice(0, 80)}...` : proj.description;
+      return `${idx + 1}. **${proj.title}:** ${shortDesc}`;
+    }).join('\n');
 
-You can inspect interactive simulators and source code repositories for each project right here on this site!`;
+    return `Vignesh's portfolio includes 9 verified machine learning and AI engineering systems:\n\n${projectSummary}\n\nYou can inspect interactive simulators, live models, and source code repositories for each project right here on this site!`;
   }
 
   // 11. Polite decline for non-portfolio / unrelated requests

@@ -54,7 +54,8 @@ export const GeminiAIAssistant: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: updatedMessages,
-          thinking: isThinkingMode
+          thinking: isThinkingMode,
+          model: 'gemini-3.8-flash',
         })
       });
 
@@ -124,18 +125,18 @@ export const GeminiAIAssistant: React.FC = () => {
             </div>
 
             <div className="flex items-center space-x-1">
-              {/* High Thinking Toggle */}
+              {/* Reasoning Toggle strictly constrained to gemini-3.8-flash (free tier) */}
               <button
                 onClick={() => setIsThinkingMode(!isThinkingMode)}
-                title={isThinkingMode ? "High Thinking Mode (gemini-3.1-pro-preview)" : "Standard Fast Mode (gemini-3.5-flash)"}
+                title={isThinkingMode ? "Reasoning Mode Active (gemini-3.8-flash). Pro models are strictly restricted." : "Standard Mode Active (gemini-3.8-flash). Pro models are strictly restricted."}
                 className={`p-1.5 rounded text-xs transition-colors flex items-center gap-1 ${
                   isThinkingMode
-                    ? 'bg-[#6EA8FE]/20 text-[#6EA8FE] border border-[#6EA8FE]/40'
+                    ? 'bg-[#7CFF6B]/15 text-[#7CFF6B] border border-[#7CFF6B]/40'
                     : 'text-[#8B8F98] hover:text-[#F2F2F2]'
                 }`}
               >
                 <Brain className="w-3.5 h-3.5" />
-                <span className="text-[10px] hidden sm:inline">{isThinkingMode ? "HIGH THINK" : "FAST"}</span>
+                <span className="text-[10px] hidden sm:inline">{isThinkingMode ? "REASONING" : "STANDARD"}</span>
               </button>
 
               {/* Close */}
@@ -149,10 +150,14 @@ export const GeminiAIAssistant: React.FC = () => {
             </div>
           </div>
 
-          {/* Model Status Bar */}
+          {/* Model Status Bar - Explicit Free-Tier & Pro Restriction Constraint */}
           <div className="px-3 py-1 bg-[#101216]/60 border-b border-[#24272D] text-[10px] text-[#8B8F98] flex items-center justify-between">
-            <span>MODEL: {isThinkingMode ? 'gemini-3.1-pro-preview (Thinking: HIGH)' : 'gemini-3.8-flash'}</span>
-            <span className="text-[#7CFF6B]">CONNECTED</span>
+            <span className="truncate">
+              MODEL: <span className="text-[#F2F2F2] font-semibold">gemini-3.8-flash</span>
+              <span className="text-[#7CFF6B] ml-1.5 text-[9px] px-1 py-0.2 bg-[#7CFF6B]/10 rounded border border-[#7CFF6B]/30">LATEST FREE TIER</span>
+              <span className="text-[#8B8F98] ml-1 text-[9px] hidden sm:inline">(PRO RESTRICTED)</span>
+            </span>
+            <span className="text-[#7CFF6B] shrink-0 ml-2">CONNECTED</span>
           </div>
 
           {/* Messages Area */}
@@ -184,7 +189,7 @@ export const GeminiAIAssistant: React.FC = () => {
                 <div className="p-3 rounded-lg bg-[#101216] border border-[#24272D] flex items-center space-x-2">
                   <RefreshCw className="w-3.5 h-3.5 text-[#7CFF6B] animate-spin" />
                   <span>
-                    {isThinkingMode ? "Synthesizing deep architectural reasoning..." : "Consulting knowledge repository..."}
+                    {isThinkingMode ? "Synthesizing architectural reasoning via gemini-3.8-flash..." : "Consulting knowledge repository via gemini-3.8-flash..."}
                   </span>
                 </div>
               </div>

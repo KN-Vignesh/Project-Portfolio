@@ -10,7 +10,7 @@
 endobj
 4 0 obj
 <<
-/Length 9465
+/Length 9456
 >>
 stream
 0.200025 w
@@ -384,14 +384,14 @@ BT
 9.1999999999999993 TL
 0.059 0.078 0.098 rg
 40. 350.8899999999999864 Td
-(%Ï   M i c r o s o f t   C e r t i f i e d :) Tj
+(%Ï) Tj
 ET
 BT
 /F1 8 Tf
 9.1999999999999993 TL
 0.059 0.078 0.098 rg
-123.7599999999999909 350.8899999999999864 Td
-(Azure Fundamentals \(AZ-900 / DP-900\)) Tj
+50. 350.8899999999999864 Td
+(Microsoft Certified: Azure Fundamentals \(AZ-900 / DP-900\)) Tj
 ET
 BT
 /F2 8 Tf
@@ -405,14 +405,14 @@ BT
 9.1999999999999993 TL
 0.059 0.078 0.098 rg
 40. 340.3899999999999864 Td
-(%Ï   O r a c l e   C l o u d   I n f r a s t r u c t u r e   \( O C I \) :) Tj
+(%Ï) Tj
 ET
 BT
 /F1 8 Tf
 9.1999999999999993 TL
 0.059 0.078 0.098 rg
-178.8000000000000114 340.3899999999999864 Td
-(Generative AI / AI Foundation Certified) Tj
+50. 340.3899999999999864 Td
+(Oracle Cloud Infrastructure \(OCI\): Generative AI / AI Foundation Certified) Tj
 ET
 BT
 /F2 8 Tf
@@ -426,14 +426,14 @@ BT
 9.1999999999999993 TL
 0.059 0.078 0.098 rg
 40. 329.8899999999999864 Td
-(%Ï   B . E .   G r a d u a t e   —) Tj
+(%Ï) Tj
 ET
 BT
 /F1 8 Tf
 9.1999999999999993 TL
 0.059 0.078 0.098 rg
-113.6800000000000068 329.8899999999999864 Td
-(KVG College of Engineering) Tj
+50. 329.8899999999999864 Td
+(B.E. Graduate — KVG College of Engineering) Tj
 ET
 BT
 /F2 8 Tf
@@ -441,6 +441,13 @@ BT
 0.059 0.078 0.098 rg
 499.5999999999999659 329.8899999999999864 Td
 (Graduated 2019) Tj
+ET
+BT
+/F1 7.5 Tf
+8.625 TL
+0.294 0.333 0.388 rg
+236.1399999999999864 16. Td
+(Vignesh KN — Resume | Page 1 of 2) Tj
 ET
 endstream
 endobj
@@ -454,7 +461,7 @@ endobj
 endobj
 6 0 obj
 <<
-/Length 6885
+/Length 6985
 >>
 stream
 0.8 w
@@ -516,7 +523,7 @@ BT
 8.9699999999999989 TL
 0.294 0.333 0.388 rg
 42. 767.3899999999999864 Td
-(Tech Stack: TypeScript, Node.js, GitHub API, SonarQube Rules, TypeSafe Jev, LLM Prompting, Deterministic Policy Code) Tj
+(Tech Stack: TypeScript, Node.js, GitHub API, SonarQube Rules, TypeSafe Jev, LLMs, Deterministic Policy Code) Tj
 ET
 BT
 /F1 8 Tf
@@ -758,8 +765,15 @@ BT
 9.1999999999999993 TL
 0.059 0.078 0.098 rg
 52. 537.8899999999999864 Td
-(Unified model comparison suite synthesizing discrimination metrics, calibration curves \(Brier score\), and latency metrics across candidate) Tj
-T* (models for evidence-based deployment justification.) Tj
+(Unified model comparison suite synthesizing discrimination metrics, calibration curves \(Brier score\), and latency metrics across experiments) Tj
+T* (for evidence-based deployment justification.) Tj
+ET
+BT
+/F1 7.5 Tf
+8.625 TL
+0.294 0.333 0.388 rg
+236.1399999999999864 16. Td
+(Vignesh KN — Resume | Page 2 of 2) Tj
 ET
 endstream
 endobj
@@ -933,7 +947,7 @@ endobj
 21 0 obj
 <<
 /Producer (jsPDF 4.2.1)
-/CreationDate (D:20260922174919-00'00')
+/CreationDate (D:20260923034521-00'00')
 >>
 endobj
 22 0 obj
@@ -947,35 +961,35 @@ endobj
 xref
 0 23
 0000000000 65535 f 
-0000016743 00000 n 
-0000018568 00000 n 
+0000016834 00000 n 
+0000018659 00000 n 
 0000000015 00000 n 
 0000000152 00000 n 
-0000009669 00000 n 
-0000009806 00000 n 
-0000016806 00000 n 
-0000016931 00000 n 
-0000017061 00000 n 
-0000017194 00000 n 
-0000017332 00000 n 
-0000017456 00000 n 
-0000017585 00000 n 
-0000017717 00000 n 
-0000017853 00000 n 
-0000017981 00000 n 
-0000018108 00000 n 
-0000018237 00000 n 
-0000018370 00000 n 
-0000018472 00000 n 
-0000018818 00000 n 
-0000018904 00000 n 
+0000009660 00000 n 
+0000009797 00000 n 
+0000016897 00000 n 
+0000017022 00000 n 
+0000017152 00000 n 
+0000017285 00000 n 
+0000017423 00000 n 
+0000017547 00000 n 
+0000017676 00000 n 
+0000017808 00000 n 
+0000017944 00000 n 
+0000018072 00000 n 
+0000018199 00000 n 
+0000018328 00000 n 
+0000018461 00000 n 
+0000018563 00000 n 
+0000018909 00000 n 
+0000018995 00000 n 
 trailer
 <<
 /Size 23
 /Root 22 0 R
 /Info 21 0 R
-/ID [ <D2380AFE445BDFC651E2648F2501640A> <D2380AFE445BDFC651E2648F2501640A> ]
+/ID [ <F144641096AE860909DC32A2600FBC5D> <F144641096AE860909DC32A2600FBC5D> ]
 >>
 startxref
-19008
+19099
 %%EOF

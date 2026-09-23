@@ -58,6 +58,7 @@ export const GeminiChatModal: React.FC = () => {
         body: JSON.stringify({
           messages: newMessages,
           thinking: thinkingMode,
+          model: 'gemini-3.8-flash',
         }),
       });
 
@@ -124,26 +125,27 @@ export const GeminiChatModal: React.FC = () => {
                 <h3 id="gemini-chat-title" className="font-bold text-sm text-[#F2F2F2]">
                   PORTFOLIO INTELLIGENCE
                 </h3>
-                <p className="font-mono text-[10px] text-[#8B8F98]">
-                  {thinkingMode ? 'GEMINI 3.1 PRO (HIGH THINKING)' : 'GEMINI 3.5 FLASH'}
+                <p className="font-mono text-[10px] text-[#7CFF6B] flex items-center gap-1">
+                  <span>GEMINI 3.8 FLASH</span>
+                  <span className="text-[#8B8F98]">• LATEST FREE TIER</span>
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Thinking Mode Toggle */}
+              {/* Reasoning Mode Toggle strictly constrained to gemini-3.8-flash */}
               <button
                 type="button"
                 onClick={() => setThinkingMode(!thinkingMode)}
                 className={`font-mono text-[10px] px-2 py-1 rounded border transition-colors flex items-center gap-1 ${
                   thinkingMode
-                    ? 'bg-[#6EA8FE]/20 border-[#6EA8FE] text-[#6EA8FE]'
+                    ? 'bg-[#7CFF6B]/15 border-[#7CFF6B]/50 text-[#7CFF6B]'
                     : 'bg-[#08090B] border-[#24272D] text-[#8B8F98] hover:text-[#F2F2F2]'
                 }`}
-                title="Toggle High Thinking Mode (Uses gemini-3.1-pro-preview with ThinkingLevel.HIGH for deep architectural analysis)"
+                title="Reasoning Mode on gemini-3.8-flash (Latest Free Text Model). Pro models are restricted."
               >
                 <Sparkles className="w-3 h-3" />
-                <span>THINKING: {thinkingMode ? 'ON' : 'OFF'}</span>
+                <span>REASONING: {thinkingMode ? 'ON' : 'OFF'}</span>
               </button>
 
               <button
@@ -219,8 +221,8 @@ export const GeminiChatModal: React.FC = () => {
                 <Loader2 className="w-4 h-4 animate-spin text-[#7CFF6B]" />
                 <span>
                   {thinkingMode
-                    ? 'Executing high thinking mode via Gemini 3.1 Pro...'
-                    : 'Querying portfolio knowledge base...'}
+                    ? 'Executing reasoning via gemini-3.8-flash (latest free tier)...'
+                    : 'Querying portfolio knowledge base via gemini-3.8-flash...'}
                 </span>
               </div>
             )}

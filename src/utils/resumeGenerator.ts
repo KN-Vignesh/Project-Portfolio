@@ -5,10 +5,7 @@ export interface ResumePdfOptions {
   includeProjects?: boolean;
 }
 
-export function generateAndDownloadResumePdf(
-  filename = 'Vignesh_K_N_Resume.pdf',
-  options: ResumePdfOptions = { includeProjects: true }
-) {
+export function buildResumeDoc(options: ResumePdfOptions = { includeProjects: true }): jsPDF {
   const doc = new jsPDF({
     unit: 'pt',
     format: 'a4', // 595.28 x 841.89 pt
@@ -250,6 +247,14 @@ export function generateAndDownloadResumePdf(
     }
   }
 
+  return doc;
+}
+
+export function generateAndDownloadResumePdf(
+  filename = 'Vignesh_K_N_Resume.pdf',
+  options: ResumePdfOptions = { includeProjects: true }
+) {
+  const doc = buildResumeDoc(options);
   doc.save(filename);
 }
 

@@ -11,97 +11,101 @@ export interface StandaloneRepoDetails {
   driveColabUrl?: string;
 }
 
+function defineRepo(
+  repoName: string,
+  githubUrl: string,
+  runtime: string,
+  entryPoint: string,
+  deploymentType: string,
+  subDir?: string,
+  driveColabUrl?: string
+): StandaloneRepoDetails {
+  return {
+    repoName,
+    githubUrl,
+    cloneCommand: subDir
+      ? `git clone https://github.com/KN-Vignesh/Projects.git && cd Projects/${subDir}`
+      : `git clone ${githubUrl}.git`,
+    ciStatus: 'passing',
+    runtime,
+    entryPoint,
+    deploymentType,
+    driveColabUrl: driveColabUrl || githubUrl,
+  };
+}
+
 export const PROJECT_STANDALONE_REPOS: Record<string, StandaloneRepoDetails> = {
-  'customer-churn': {
-    repoName: 'intelligent-customer-churn-prediction',
-    githubUrl: 'https://github.com/KN-Vignesh/intelligent-customer-churn-prediction',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/intelligent-customer-churn-prediction.git',
-    ciStatus: 'passing',
-    runtime: 'Python 3.11 / FastAPI / Docker',
-    entryPoint: 'app/main.py',
-    deploymentType: 'Docker Container / Cloud Run API',
-    driveColabUrl: 'https://github.com/KN-Vignesh/Projects/blob/main/Customer_Churn_Prediction_with_ML.ipynb',
-  },
-  'qwen-lora': {
-    repoName: 'qwen-lora-adaptation',
-    githubUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/Projects.git && cd Projects/Ai-Cookbook/LoraFine-tuning',
-    ciStatus: 'passing',
-    runtime: 'PyTorch 2.2 / Hugging Face PEFT / CUDA 12.1',
-    entryPoint: 'fine_tune_lora.py',
-    deploymentType: 'PyTorch Checkpoint / Hugging Face Hub Adapter',
-    driveColabUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning',
-  },
-  'qlora': {
-    repoName: 'qlora-efficient-training',
-    githubUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/QLoraFine-Tuning',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/Projects.git && cd Projects/Ai-Cookbook/QLoraFine-Tuning',
-    ciStatus: 'passing',
-    runtime: 'BitsAndBytes 0.43 / PyTorch / Transformers',
-    entryPoint: 'qlora_train.py',
-    deploymentType: '4-bit Quantized Artifact / vLLM LoRA Serving',
-    driveColabUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/QLoraFine-Tuning',
-  },
-  'bert': {
-    repoName: 'bert-model-engineering',
-    githubUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/BERT_MODEL',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/Projects.git && cd Projects/Ai-Cookbook/BERT_MODEL',
-    ciStatus: 'passing',
-    runtime: 'Python 3.10 / PyTorch / Transformers',
-    entryPoint: 'bert_classifier.py',
-    deploymentType: 'ONNX Runtime / TorchScript Microservice',
-    driveColabUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/BERT_MODEL',
-  },
-  'vero': {
-    repoName: 'VERO',
-    githubUrl: 'https://github.com/KN-Vignesh/VERO',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/VERO.git',
-    ciStatus: 'passing',
-    runtime: 'Node.js 20 / TypeScript / GitHub Actions',
-    entryPoint: 'src/engine/decisionEngine.ts',
-    deploymentType: 'GitHub App / Cloud Function Webhook Service',
-    driveColabUrl: 'https://github.com/KN-Vignesh/VERO',
-  },
-  'cnn': {
-    repoName: 'cnn-fundamentals',
-    githubUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/CNN-Fundamentals',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/Projects.git && cd Projects/Ai-Cookbook/CNN-Fundamentals',
-    ciStatus: 'passing',
-    runtime: 'PyTorch / Torchvision / Python 3.10',
-    entryPoint: 'cnn_model.py',
-    deploymentType: 'TorchVision Pipeline / Exportable Weights',
-    driveColabUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/CNN-Fundamentals',
-  },
-  'evaluation': {
-    repoName: 'model-evaluation-matrix',
-    githubUrl: 'https://github.com/KN-Vignesh/Projects',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/Projects.git',
-    ciStatus: 'passing',
-    runtime: 'Python 3.10 / Scikit-learn / NumPy',
-    entryPoint: 'evaluator.py',
-    deploymentType: 'Evaluation Benchmark Harness CLI',
-    driveColabUrl: 'https://github.com/KN-Vignesh/Projects',
-  },
-  'house-price': {
-    repoName: 'house-price-prediction-tfdf',
-    githubUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/House_Price_Prediction',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/Projects.git && cd Projects/Data-recipe/House_Price_Prediction',
-    ciStatus: 'passing',
-    runtime: 'Python 3.10 / TensorFlow Decision Forests / Pandas',
-    entryPoint: 'train_forest.py',
-    deploymentType: 'TF SavedModel / TF-Serving Container',
-    driveColabUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/House_Price_Prediction',
-  },
-  'titanic': {
-    repoName: 'titanic-ml-baseline',
-    githubUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/Titanic_Model',
-    cloneCommand: 'git clone https://github.com/KN-Vignesh/Projects.git && cd Projects/Data-recipe/Titanic_Model',
-    ciStatus: 'passing',
-    runtime: 'Python 3.10 / Pandas / Scikit-learn',
-    entryPoint: 'pipeline.py',
-    deploymentType: 'Reproducible Jupyter Research Pipeline',
-    driveColabUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/Titanic_Model',
-  },
+  'customer-churn': defineRepo(
+    'intelligent-customer-churn-prediction',
+    'https://github.com/KN-Vignesh/intelligent-customer-churn-prediction',
+    'Python 3.11 / FastAPI / Docker',
+    'app/main.py',
+    'Docker Container / Cloud Run API',
+    undefined,
+    'https://github.com/KN-Vignesh/Projects/blob/main/Customer_Churn_Prediction_with_ML.ipynb'
+  ),
+  'qwen-lora': defineRepo(
+    'qwen-lora-adaptation',
+    'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning',
+    'PyTorch 2.2 / Hugging Face PEFT / CUDA 12.1',
+    'fine_tune_lora.py',
+    'PyTorch Checkpoint / Hugging Face Hub Adapter',
+    'Ai-Cookbook/LoraFine-tuning'
+  ),
+  'qlora': defineRepo(
+    'qlora-efficient-training',
+    'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/QLoraFine-Tuning',
+    'BitsAndBytes 0.43 / PyTorch / Transformers',
+    'qlora_train.py',
+    '4-bit Quantized Artifact / vLLM LoRA Serving',
+    'Ai-Cookbook/QLoraFine-Tuning'
+  ),
+  'bert': defineRepo(
+    'bert-model-engineering',
+    'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/BERT_MODEL',
+    'Python 3.10 / PyTorch / Transformers',
+    'bert_classifier.py',
+    'ONNX Runtime / TorchScript Microservice',
+    'Ai-Cookbook/BERT_MODEL'
+  ),
+  'vero': defineRepo(
+    'VERO',
+    'https://github.com/KN-Vignesh/VERO',
+    'Node.js 20 / TypeScript / GitHub Actions',
+    'src/engine/decisionEngine.ts',
+    'GitHub App / Cloud Function Webhook Service'
+  ),
+  'cnn': defineRepo(
+    'cnn-fundamentals',
+    'https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/CNN-Fundamentals',
+    'PyTorch / Torchvision / Python 3.10',
+    'cnn_model.py',
+    'TorchVision Pipeline / Exportable Weights',
+    'Ai-Cookbook/CNN-Fundamentals'
+  ),
+  'evaluation': defineRepo(
+    'model-evaluation-matrix',
+    'https://github.com/KN-Vignesh/Projects',
+    'Python 3.10 / Scikit-learn / NumPy',
+    'evaluator.py',
+    'Evaluation Benchmark Harness CLI'
+  ),
+  'house-price': defineRepo(
+    'house-price-prediction-tfdf',
+    'https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/House_Price_Prediction',
+    'Python 3.10 / TensorFlow Decision Forests / Pandas',
+    'train_forest.py',
+    'TF SavedModel / TF-Serving Container',
+    'Data-recipe/House_Price_Prediction'
+  ),
+  'titanic': defineRepo(
+    'titanic-ml-baseline',
+    'https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/Titanic_Model',
+    'Python 3.10 / Pandas / Scikit-learn',
+    'pipeline.py',
+    'Reproducible Jupyter Research Pipeline',
+    'Data-recipe/Titanic_Model'
+  ),
 };
 
 export const PROJECT_CODE_RESOURCES: Record<string, ProjectCodeFile[]> = {
