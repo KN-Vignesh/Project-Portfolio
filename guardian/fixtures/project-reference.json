@@ -1,0 +1,7 @@
+{
+  "id": "qlora",
+  "title": "QLoRA efficient training",
+  "repository": "KN-Vignesh/Projects",
+  "path": "Ai-Cookbook/QLoraFine-Tuning-LEGACY",
+  "expectedPath": "Ai-Cookbook/QLoraFine-Tuning"
+}

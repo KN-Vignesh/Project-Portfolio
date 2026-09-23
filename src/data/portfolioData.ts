@@ -239,6 +239,56 @@ export const PROJECTS: ProjectItem[] = [
     relatedProjectIds: ["customer-churn", "bert", "evaluation"]
   },
   {
+    id: "ai-portfolio-guardian",
+    number: "PROJECT_GUARDIAN",
+    title: "AI PORTFOLIO GUARDIAN",
+    category: "AI RELIABILITY / REPOSITORY AUTOMATION",
+    severityTier: "HIGH",
+    severityLevel: "SEV-2",
+    severityLabel: "Evidence-Based Repair & Human-Reviewed Remediation",
+    severityImpact: "Detects portfolio drift and prepares constrained, validated pull requests without autonomous merge.",
+    tagline: "A working prototype for detecting project-reference failures, diagnosing them, and preparing safe human-reviewed repairs.",
+    description: "An AI-assisted reliability system that validates this portfolio against the external KN-Vignesh/Projects repository, collects structured evidence, fingerprints failures, proposes finite repair operations, validates changes, and prepares a pull request for human review.",
+    technologies: ["TypeScript", "Node.js", "GitHub API", "LLM Provider Abstraction", "Deterministic Policy Engine", "GitHub Actions"],
+    role: "System Architecture, Reliability Engineering & AI Safety Boundaries",
+    systemFlow: [
+      "DETECT FAILURE",
+      "COLLECT EVIDENCE",
+      "FINGERPRINT",
+      "AI DIAGNOSIS OR FALLBACK",
+      "POLICY VALIDATION",
+      "CONTROLLED REPAIR",
+      "VALIDATE",
+      "BRANCH & HUMAN-REVIEWED PR"
+    ],
+    repository: "https://github.com/KN-Vignesh/Project-Portfolio/tree/main/guardian",
+    status: "PROTOTYPE",
+    evaluationMetrics: ["Deterministic Failure Fingerprints", "Protected Repair Paths", "Validation Before PR"],
+    sections: {
+      problem: "Project references can drift from the external Projects repository, while unrestricted AI repair would create unacceptable repository and credential risk.",
+      whyApproach: "The Guardian separates detection, evidence, diagnosis, policy, execution, validation, and Git. The AI proposes structured operations; deterministic code decides whether an exact replacement is allowed.",
+      dataInput: "Portfolio project-reference fixtures, GitHub repository and Contents API responses, sanitized failure evidence, and optional structured AI diagnosis.",
+      architecture: "A small TypeScript CLI runs a layered pipeline from validation to evidence, fingerprinting, optional GitHub issue, provider-backed diagnosis, policy-checked repair plan, controlled fixture repair, post-repair validation, branch push, and pull request creation.",
+      implementation: "The prototype supports dry-run and explicit prototype modes, fallback diagnosis, three known repair operations, protected paths, confidence and file limits, no force push, and no auto-merge.",
+      evaluation: "Automated tests cover fingerprinting, evidence normalization, fallback diagnosis, simulated repair, protected paths, and unknown operation rejection. A live read-only check validates the external Projects path.",
+      engineeringDecisions: [
+        "Kept the Guardian out of browser JavaScript so GitHub and AI credentials never reach visitors.",
+        "Chose a finite repair operation set instead of implementing a generic autonomous coding agent.",
+        "Made dry-run the default and require explicit write mode before issue, branch, or pull request actions."
+      ],
+      limitations: [
+        "The current detector uses one controlled project-reference fixture.",
+        "Rollback, sandboxed execution, distributed locks, and production deployment verification are not implemented.",
+        "Real issue, branch, and PR execution requires repository credentials and human review."
+      ],
+      futureImprovements: [
+        "Add stronger schema validation, secret scanning, policy-as-code, isolated worktrees, signed repair plans, and richer risk scoring.",
+        "Add deployment-aware rollback, canary verification, multi-repository support, and a review dashboard."
+      ]
+    },
+    relatedProjectIds: ["vero", "qlora"]
+  },
+  {
     id: "customer-churn",
     number: "PROJECT_002",
     title: "INTELLIGENT CUSTOMER CHURN PREDICTION",

@@ -1,0 +1,6 @@
+import crypto from 'node:crypto';
+import type { FailureEvidence, ProjectReference } from './types';
+
+export function normalizeEvidence(evidence: FailureEvidence): FailureEvidence { return { ...evidence, actual: evidence.actual.trim(), expected: evidence.expected.trim(), repository: evidence.repository.trim().toLowerCase(), projectPath: evidence.projectPath.trim() }; }
+export function fingerprintFailure(evidence: FailureEvidence): string { const normalized = normalizeEvidence(evidence); return crypto.createHash('sha256').update(JSON.stringify({ check: normalized.check, repository: normalized.repository, actual: normalized.actual, expected: normalized.expected })).digest('hex').slice(0, 12); }
+export function createEvidence(reference: ProjectReference, repository: string, actual: string, expected: string): FailureEvidence { return normalizeEvidence({ check: 'project-reference-check', failure: `Project ${reference.id} points to a path that does not match the validated repository path.`, expected, actual, repository, projectPath: reference.path, environment: process.env.CI ? 'github-actions' : 'local', detectedAt: new Date().toISOString() }); }
