@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import { X, Download, FileText, Printer, Check, ExternalLink, ShieldAlert, Cpu, Terminal, Briefcase, GraduationCap } from 'lucide-react';
-import { RESUME_DATA, RESUME_PROJECTS_BY_SEVERITY } from '../data/portfolioData';
+import { RESUME_DATA } from '../data/portfolioData';
+import { ProjectItem } from '../types';
 import { generateAndDownloadResumePdf, getPlainTextResume } from '../utils/resumeGenerator';
 
 interface ResumeModalProps {
   isOpen: boolean;
   onClose: () => void;
+  projects: ProjectItem[];
+  projectsLoading: boolean;
 }
 
-export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => {
+export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, projects, projectsLoading }) => {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [includeProjects, setIncludeProjects] = useState(true);
@@ -19,7 +22,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
     setDownloading(true);
     try {
       const fileName = 'Vignesh_K_N_Resume.pdf';
-      generateAndDownloadResumePdf(fileName, { includeProjects: withProjects });
+      generateAndDownloadResumePdf(fileName, { includeProjects: withProjects, projects });
     } catch (err) {
       console.warn('Client-side PDF generation fallback:', err);
       const link = document.createElement('a');
@@ -34,7 +37,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
   };
 
   const handleCopyText = () => {
-    const text = getPlainTextResume();
+    const text = getPlainTextResume(projects);
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -279,7 +282,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
               </div>
 
               <div className="space-y-3.5 text-xs">
-                {RESUME_PROJECTS_BY_SEVERITY.map((p) => {
+                {projectsLoading ? <div className="font-mono text-xs text-[#7CFF6B]">PROJECT REGISTRY // LOADING...</div> : projects.map((p) => {
                   const isCrit = p.severityTier === 'CRITICAL';
                   const isHigh = p.severityTier === 'HIGH';
 
@@ -307,7 +310,7 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
                         </div>
 
                         <a 
-                          href={p.repoUrl} 
+                          href={p.repository} 
                           target="_blank" 
                           rel="noopener noreferrer"
                           className="font-mono text-[11px] text-[#6EA8FE] hover:underline flex items-center gap-1"
@@ -318,15 +321,15 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose }) => 
                       </div>
 
                       <div className="font-mono text-[11px] text-[#8B8F98]">
-                        <span className="text-[#A1A7B5] font-semibold">Tech Stack:</span> {p.stack}
+                        <span className="text-[#A1A7B5] font-semibold">Tech Stack:</span> {p.technologies.join(', ')}
                       </div>
 
                       <div className="font-sans text-[11px] text-[#A1A7B5] italic">
-                        <span className="font-semibold text-[#F2F2F2]">Impact:</span> {p.impact}
+                        <span className="font-semibold text-[#F2F2F2]">Impact:</span> {p.severityImpact || p.description}
                       </div>
 
                       <ul className="space-y-1 pt-1 text-[#D1D5DB]">
-                        {p.bullets.map((b, bIdx) => (
+                        {(p.sections?.engineeringDecisions || []).slice(0, 2).map((b, bIdx) => (
                           <li key={bIdx} className="flex items-start gap-2 leading-relaxed">
                             <span className="text-[#7CFF6B] mt-0.5 text-[10px]">●</span>
                             <span>{b}</span>
