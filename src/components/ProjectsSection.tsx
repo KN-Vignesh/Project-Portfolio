@@ -1,25 +1,27 @@
 import React, { useState } from 'react';
 import { Play, ExternalLink, ShieldAlert, Sparkles, Filter } from 'lucide-react';
-import { PROJECTS } from '../data/portfolioData';
 import { ProjectItem } from '../types';
 
 interface ProjectsSectionProps {
+  projects: ProjectItem[];
+  loading: boolean;
+  error: Error | null;
   onSelectProject: (projectId: string) => void;
   onOpenVero?: () => void;
 }
 
-export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProject, onOpenVero }) => {
+export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ projects, loading, error, onSelectProject, onOpenVero }) => {
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
 
   const categories = [
-    { id: 'ALL', label: 'ALL SYSTEMS (9)' },
+    { id: 'ALL', label: `ALL SYSTEMS (${projects.length})` },
     { id: 'SEV_CRITICAL_HIGH', label: 'SEV-1 TO SEV-3 (HIGH / CRITICAL)' },
     { id: 'GENAI', label: 'GENERATIVE AI & PEFT' },
     { id: 'MODEL', label: 'MODEL ENGINEERING' },
     { id: 'ML', label: 'ML & TABULAR' }
   ];
 
-  const filteredProjects = PROJECTS.filter((p) => {
+  const filteredProjects = projects.filter((p) => {
     if (filterCategory === 'ALL') return true;
     if (filterCategory === 'SEV_CRITICAL_HIGH') {
       return p.severityTier === 'CRITICAL' || p.severityTier === 'HIGH';
@@ -73,6 +75,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ onSelectProjec
         </div>
 
         {/* Breathable Project Grid */}
+        {loading && <div className="font-mono text-xs text-[#7CFF6B] border border-[#24272D] bg-[#101216] p-5">PROJECT REGISTRY // LOADING...</div>}
+        {error && <div className="font-mono text-xs text-[#FF7B72] border border-[#FF7B72]/30 bg-[#101216] p-5">PROJECT REGISTRY UNAVAILABLE<br /><span className="text-[#8B8F98]">Project information could not be retrieved from the source repository.</span></div>}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredProjects.map((project: ProjectItem) => {
             const keyMetric = project.evaluationMetrics?.[0] || 'Production Tested';

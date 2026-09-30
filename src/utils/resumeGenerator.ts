@@ -1,8 +1,10 @@
 import { jsPDF } from 'jspdf';
-import { RESUME_DATA, RESUME_PROJECTS_BY_SEVERITY } from '../data/portfolioData';
+import { RESUME_DATA } from '../data/portfolioData';
+import { ProjectItem } from '../types';
 
 export interface ResumePdfOptions {
   includeProjects?: boolean;
+  projects?: ProjectItem[];
 }
 
 export function buildResumeDoc(options: ResumePdfOptions = { includeProjects: true }): jsPDF {
@@ -186,7 +188,7 @@ export function buildResumeDoc(options: ResumePdfOptions = { includeProjects: tr
 
     addSectionHeader('Projects & System Architectures (Sourced from GitHub)');
 
-    RESUME_PROJECTS_BY_SEVERITY.forEach((p) => {
+    (options.projects || []).forEach((p) => {
       // Determine badge color
       let badgeColor = badgeMedium;
       if (p.severityTier === 'CRITICAL') badgeColor = badgeCritical;
@@ -207,15 +209,15 @@ export function buildResumeDoc(options: ResumePdfOptions = { includeProjects: tr
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7.5);
       doc.setTextColor(...textMuted);
-      const repoWidth = doc.getTextWidth(p.repoUrl);
-      doc.text(p.repoUrl, margin + contentWidth - repoWidth, y);
+      const repoWidth = doc.getTextWidth(p.repository);
+      doc.text(p.repository, margin + contentWidth - repoWidth, y);
       y += 10.5;
 
       // Tech Stack line
       doc.setFont('helvetica', 'italic');
       doc.setFontSize(7.8);
       doc.setTextColor(...textMuted);
-      const stackText = `Tech Stack: ${p.stack}`;
+      const stackText = `Tech Stack: ${p.technologies.join(', ')}`;
       const stackLines = doc.splitTextToSize(stackText, contentWidth - 8);
       doc.text(stackLines, margin + 6, y);
       y += stackLines.length * 9.5;
@@ -224,7 +226,7 @@ export function buildResumeDoc(options: ResumePdfOptions = { includeProjects: tr
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8);
       doc.setTextColor(...textDark);
-      p.bullets.forEach((b) => {
+      (p.sections?.engineeringDecisions || []).slice(0, 2).forEach((b) => {
         doc.text('●', margin + 6, y);
         const bLines = doc.splitTextToSize(b, contentWidth - 20);
         doc.text(bLines, margin + 16, y);
@@ -258,7 +260,7 @@ export function generateAndDownloadResumePdf(
   doc.save(filename);
 }
 
-export function getPlainTextResume(): string {
+export function getPlainTextResume(projects: ProjectItem[] = []): string {
   return `${RESUME_DATA.header.name}
 ${RESUME_DATA.header.phone} | ${RESUME_DATA.header.email} | ${RESUME_DATA.header.location}
 ${RESUME_DATA.header.linkedin} | ${RESUME_DATA.header.github} | ${RESUME_DATA.header.projects}
@@ -291,12 +293,12 @@ ${RESUME_DATA.certificationsAndEducation.map((c) => `● ${c.title} — ${c.peri
 =======================================================
 KEY ENGINEERING & AI PROJECTS (RANKED BY PROJECT SEVERITY)
 =======================================================
-${RESUME_PROJECTS_BY_SEVERITY.map(
+${projects.map(
   (p) => `[${p.severityLevel} · ${p.severityTier}] ${p.title}
-Repository: ${p.repoUrl}
-Tech Stack: ${p.stack}
-Impact: ${p.impact}
-${p.bullets.map((b) => `● ${b}`).join('\n')}`
+Repository: ${p.repository}
+Tech Stack: ${p.technologies.join(', ')}
+Impact: ${p.severityImpact || p.description}
+${(p.sections?.engineeringDecisions || []).slice(0, 2).map((b) => `● ${b}`).join('\n')}`
 ).join('\n\n')}
 `;
 }

@@ -25,16 +25,17 @@ export interface ProjectItem {
   severityLevel?: 'SEV-1' | 'SEV-2' | 'SEV-3' | 'SEV-4' | 'SEV-5' | 'SEV-6';
   severityLabel?: string;
   severityImpact?: string;
-  systemFlow: string[];
+  systemFlow?: string[];
   dataset?: string;
   models?: string[];
   evaluationMetrics?: string[];
   repository: string;
+  projectPath?: string;
   notebookUrl?: string;
   documentationUrl?: string;
   liveAppView?: string;
-  status: string;
-  sections: {
+  status?: string;
+  sections?: {
     problem: string;
     whyApproach: string;
     dataInput: string;
@@ -53,7 +54,7 @@ export interface ProjectItem {
     deploymentType: string;
     entryPoint: string;
   };
-  relatedProjectIds: string[];
+  relatedProjectIds?: string[];
 }
 
 export interface ExperienceItem {

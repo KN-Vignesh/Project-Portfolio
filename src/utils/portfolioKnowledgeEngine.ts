@@ -1,4 +1,5 @@
-import { RESUME_DATA, EXPERIENCES, PROJECTS } from '../data/portfolioData';
+import { RESUME_DATA, EXPERIENCES } from '../data/portfolioData';
+import { ProjectItem } from '../types';
 
 /**
  * Resilient Portfolio Knowledge Engine
@@ -14,7 +15,8 @@ interface ChatMessage {
 
 export function generatePortfolioKnowledgeResponse(
   query: string,
-  _history: ChatMessage[] = []
+  _history: ChatMessage[] = [],
+  projects: ProjectItem[] = []
 ): string {
   const normalized = query.toLowerCase().trim();
 
@@ -187,7 +189,7 @@ He is currently open to AI Software Engineer and Senior Software Engineer roles 
 - **Machine Learning Core:** Scikit-learn feature pipeline with SMOTE class balancing and optimized XGBoost classification, achieving a high ROC-AUC on customer retention signals.
 - **Inference Server:** Packaged into a high-performance **FastAPI** REST API with strict Pydantic input validation schemas.
 - **Containerization:** Self-contained **Docker** container ready for zero-downtime deployment on cloud container runtimes.
-- **Repository:** Available with complete source, evaluation benchmarks, and Dockerfile at github.com/KN-Vignesh/intelligent-customer-churn-prediction.`;
+- **Repository:** Available with complete source and evaluation artifacts in github.com/KN-Vignesh/Projects.`;
   }
 
   // 7. Experience / Work History / ACL Digital / Enmarq
@@ -251,7 +253,7 @@ He is currently open to AI Software Engineer and Senior Software Engineer roles 
     normalized.includes('project') ||
     normalized.includes('vignesh')
   ) {
-    const projectSummary = PROJECTS.map((proj, idx) => {
+    const projectSummary = projects.map((proj, idx) => {
       const shortDesc = proj.description.length > 80 ? `${proj.description.slice(0, 80)}...` : proj.description;
       return `${idx + 1}. **${proj.title}:** ${shortDesc}`;
     }).join('\n');

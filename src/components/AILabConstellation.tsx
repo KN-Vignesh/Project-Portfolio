@@ -1,16 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { AI_LAB_NODES, PROJECTS } from '../data/portfolioData';
-import { AILabNode } from '../types';
+import { AI_LAB_NODES } from '../data/portfolioData';
+import { AILabNode, ProjectItem } from '../types';
 import { Sparkles, ArrowRight, Layers, Network, Activity } from 'lucide-react';
 
 interface AILabConstellationProps {
+  projects: ProjectItem[];
   onSelectProject: (projectId: string) => void;
   reducedMotion?: boolean;
 }
 
 export const AILabConstellation: React.FC<AILabConstellationProps> = ({
   onSelectProject,
+  projects,
   reducedMotion = false,
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -18,7 +20,7 @@ export const AILabConstellation: React.FC<AILabConstellationProps> = ({
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
 
   const activeNode = AI_LAB_NODES.find((n) => n.id === selectedNodeId) || AI_LAB_NODES[3];
-  const relatedProjects = PROJECTS.filter((p) => activeNode.relatedProjectIds.includes(p.id));
+  const relatedProjects = projects.filter((p) => activeNode.relatedProjectIds.includes(p.id));
 
   useEffect(() => {
     const container = mountRef.current;

@@ -17,21 +17,11 @@
 
 ---
 
-## 🚀 Featured AI Systems & Production Projects
+## Project Registry
 
-All systems are developed with reproducible datasets, standalone repository architectures, and verified evaluation metrics.
+Project metadata is loaded at runtime from the authoritative [Projects repository](https://github.com/KN-Vignesh/Projects/blob/main/portfolio/projects.json). The portfolio intentionally does not keep a local project catalog or source-code snapshot.
 
-| # | System | Focus Area | Core Stack | Repository |
-| :-: | :--- | :--- | :--- | :--- |
-| **01** | **[VERO (PR-Sentinel)](https://github.com/KN-Vignesh/VERO)** | Production PR Intelligence & Automated Merge Gate | TypeScript, Node.js, SonarQube Rules, TypeSafe Jev, LLM Signals | [Code & Architecture](https://github.com/KN-Vignesh/VERO) |
-| **02** | **[Qwen-2.5-Coder LoRA](https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning)** | Parameter-Efficient Fine-Tuning (PEFT) on Open LLMs | Python, PyTorch, Hugging Face PEFT/TRL, Unsloth, LoRA (r=16, α=32) | [Code & Architecture](https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning) |
-| **03** | **[QLoRA 4-bit Adaptation](https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning)** | Memory-Efficient Quantized Fine-Tuning (<70% VRAM) | Python, BitsAndBytes 4-bit NF4, Hugging Face Transformers | [Code & Architecture](https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/LoraFine-tuning) |
-| **04** | **[BERT Downstream NLP](https://github.com/KN-Vignesh/Projects/tree/main/NLP/BERT)** | Bidirectional Representation Learning & Transfer Learning | PyTorch, Transformers, WordPiece Tokenizer, AdamW | [Code & Architecture](https://github.com/KN-Vignesh/Projects/tree/main/NLP/BERT) |
-| **05** | **[CNN Computer Vision](https://github.com/KN-Vignesh/Projects/tree/main/DeepLearning/CNN)** | Multi-Class Image Feature Extraction & Classification | PyTorch / TensorFlow, CNN Layers, Batch Normalization, Dropout | [Code & Architecture](https://github.com/KN-Vignesh/Projects/tree/main/DeepLearning/CNN) |
-| **06** | **[LLM Evaluation Harness](https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/Evaluation)** | Quantitative Evaluation Matrix & Hallucination Scoring | Python, Custom Benchmarking Harness, Perplexity & Accuracy | [Code & Architecture](https://github.com/KN-Vignesh/Projects/tree/main/Ai-Cookbook/Evaluation) |
-| **07** | **[Customer Churn Engine](https://github.com/KN-Vignesh/intelligent-customer-churn-prediction)** | Production ML Tabular Pipeline & REST Inference API | Python, Scikit-learn, XGBoost, FastAPI, Docker, Pydantic | [Code & Architecture](https://github.com/KN-Vignesh/intelligent-customer-churn-prediction) |
-| **08** | **[House Price Regression](https://github.com/KN-Vignesh/Projects/tree/main/MachineLearning/HousePrices)** | Advanced Tabular Feature Engineering & Regularization | Python, Scikit-learn, Ridge/Lasso, Gradient Boosting | [Code & Architecture](https://github.com/KN-Vignesh/Projects/tree/main/MachineLearning/HousePrices) |
-| **09** | **[Titanic Classification](https://github.com/KN-Vignesh/Projects/tree/main/MachineLearning/Titanic)** | Foundational ML EDA, Imputation & Classification | Python, Pandas, Scikit-learn, Random Forest, Cross-Validation | [Code & Architecture](https://github.com/KN-Vignesh/Projects/tree/main/MachineLearning/Titanic) |
+Set `VITE_PROJECT_DATA_URL` to override the public registry URL during development or deployment. It defaults to `https://raw.githubusercontent.com/KN-Vignesh/Projects/main/portfolio/projects.json`.
 
 ---
 

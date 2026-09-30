@@ -13,9 +13,7 @@ import {
   GitPullRequest,
   ArrowLeft
 } from 'lucide-react';
-import { ProjectItem } from '../types';
-import { PROJECTS } from '../data/portfolioData';
-import { PROJECT_CODE_RESOURCES, PROJECT_STANDALONE_REPOS } from '../data/projectCodeData';
+import { ProjectCodeFile, ProjectItem } from '../types';
 import { ProjectInteractiveExperience } from './ProjectInteractiveExperience';
 
 interface ProjectDetailModalProps {
@@ -44,27 +42,22 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [onClose]);
 
-  // Reset file tab when project changes
   useEffect(() => {
-    setActiveFileIndex(0);
     setActiveTab('experience');
   }, [project?.id]);
 
   if (!project) return null;
 
-  const codeFiles = PROJECT_CODE_RESOURCES[project.id] || [];
-  const activeCodeFile = codeFiles[activeFileIndex] || codeFiles[0];
-  const standaloneRepo = PROJECT_STANDALONE_REPOS[project.id];
+  const standaloneRepo = {
+    repoName: project.title,
+    runtime: 'Authoritative source repository',
+    cloneCommand: `git clone ${project.repository}.git`,
+  };
 
+  const codeFiles: ProjectCodeFile[] = [];
+  const activeCodeFile = codeFiles[activeFileIndex];
   const handleCopyCode = async () => {
-    if (!activeCodeFile) return;
-    try {
-      await navigator.clipboard.writeText(activeCodeFile.code);
-      setCopiedCode(true);
-      setTimeout(() => setCopiedCode(false), 2000);
-    } catch {
-      // fallback
-    }
+    setCopiedCode(false);
   };
 
   const handleCopyClone = async () => {
@@ -224,7 +217,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                       WHAT THIS SOLVES
                     </span>
                     <p className="text-xs sm:text-sm text-[#F2F2F2] leading-relaxed">
-                      {project.sections.problem}
+                      {project.sections?.problem || 'Project details are maintained in the source repository.'}
                     </p>
                   </div>
 
@@ -234,7 +227,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                       WHY THIS ARCHITECTURE
                     </span>
                     <p className="text-xs sm:text-sm text-[#8B8F98] leading-relaxed">
-                      {project.sections.whyApproach}
+                      {project.sections?.whyApproach || 'Architecture details are maintained in the source repository.'}
                     </p>
                   </div>
                 </div>
@@ -257,7 +250,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
 
                   <ul className="space-y-1.5 pt-1 text-xs text-[#8B8F98]">
-                    {project.sections.engineeringDecisions.slice(0, 2).map((dec, idx) => (
+                    {(project.sections?.engineeringDecisions || []).slice(0, 2).map((dec, idx) => (
                       <li key={idx} className="flex items-start gap-2">
                         <CheckCircle2 className="w-3.5 h-3.5 text-[#7CFF6B] shrink-0 mt-0.5" />
                         <span className="text-[#E6EDF3]">{dec}</span>
@@ -294,6 +287,14 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <a
+                      href={project.repository}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-colors"
+                    >
+                      OPEN SOURCE REPOSITORY
+                    </a>
                     <code className="px-2 py-1 rounded bg-[#08090B] border border-[#24272D] text-[#8B8F98] text-[11px] hidden sm:inline select-all">
                       {standaloneRepo.cloneCommand}
                     </code>
