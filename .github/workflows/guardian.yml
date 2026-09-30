@@ -1,0 +1,52 @@
+name: AI Portfolio Guardian
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: Guardian mode
+        required: true
+        default: dry-run
+        type: choice
+        options: [dry-run, prototype]
+permissions:
+  contents: read
+jobs:
+  guardian-dry-run:
+    if: inputs.mode == 'dry-run'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run guardian:test
+      - run: npm run guardian
+        env:
+          GUARDIAN_MODE: dry-run
+
+  guardian-prototype:
+    if: inputs.mode == 'prototype'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run guardian:test
+      - run: npm run guardian
+        env:
+          GUARDIAN_MODE: prototype
+          GUARDIAN_GITHUB_WRITE: 'true'
+          GITHUB_TOKEN: ${{ secrets.GUARDIAN_GITHUB_TOKEN }}
+          AI_API_KEY: ${{ secrets.GUARDIAN_AI_API_KEY }}
+          AI_MODEL: ${{ vars.GUARDIAN_AI_MODEL }}

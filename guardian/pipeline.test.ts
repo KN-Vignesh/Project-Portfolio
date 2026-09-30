@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import path from 'node:path';
+import { getConfig } from './config';
+import { detectFixtureFailure } from './detector';
+import { fingerprintFailure } from './evidence';
+import { createRepairPlan } from './policy';
+import { diagnose } from './ai';
+import { applyRepair } from './repair';
+const config = getConfig({ GUARDIAN_MODE: 'dry-run', GUARDIAN_FIXTURE_PATH: path.join(process.cwd(), 'guardian/fixtures/project-reference.json'), GUARDIAN_EXPECTED_FIXTURE_PATH: path.join(process.cwd(), 'guardian/fixtures/project-reference.expected.json') });
+test('detects and fingerprints the controlled project reference failure', async () => { const evidence = await detectFixtureFailure(config); assert.ok(evidence); assert.equal(evidence.expected, 'Ai-Cookbook/QLoraFine-Tuning'); assert.equal(fingerprintFailure(evidence), fingerprintFailure(evidence)); });
+test('fallback diagnosis becomes a constrained simulated repair', async () => { const evidence = await detectFixtureFailure(config); assert.ok(evidence); const diagnosis = await diagnose(config, evidence); const plan = createRepairPlan(config, diagnosis); const result = await applyRepair(config, plan); assert.equal(result.simulated, true); assert.deepEqual(result.filesChanged, ['guardian/fixtures/project-reference.json']); });
+test('policy rejects protected paths and unknown operations', () => { assert.throws(() => createRepairPlan(config, { diagnosis: 'x', rootCause: 'x', confidence: 1, severity: 'low', recommendedAction: 'x', provider: 'test', validationRequired: [], repairOperations: [{ operation: 'replaceExactText', file: '.env', oldValue: 'a', newValue: 'b', reason: 'test' }] }), /protected path/); assert.throws(() => createRepairPlan(config, { diagnosis: 'x', rootCause: 'x', confidence: 1, severity: 'low', recommendedAction: 'x', provider: 'test', validationRequired: [], repairOperations: [{ operation: 'runCommand' as never, file: 'test.json', oldValue: 'a', newValue: 'b', reason: 'test' }] }), /unknown operation/); });

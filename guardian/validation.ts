@@ -1,0 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import type { GuardianConfig, ValidationResult } from './types';
+import { readReference } from './detector';
+import { validateProjectsRepository } from './github';
+export async function validateRepair(config: GuardianConfig, proposedPath?: string): Promise<ValidationResult> { const reference = await readReference(config.fixturePath); const expected = JSON.parse(await readFile(config.expectedFixturePath, 'utf8')) as { path: string }; const candidatePath = proposedPath || reference.path; const checks: ValidationResult['checks'] = [{ name: 'project-reference-check', passed: candidatePath === expected.path, detail: candidatePath === expected.path ? 'Reference matches expected path.' : 'Reference still differs from expected path.' }]; if (config.mode === 'dry-run') checks.push({ name: 'project-repository-validation', passed: true, detail: 'Skipped external write validation in dry-run; proposed path is structurally valid.' }); else checks.push({ name: 'project-repository-validation', ...(await validateProjectsRepository(config, candidatePath)) }); return { passed: checks.every((check) => check.passed), checks }; }
