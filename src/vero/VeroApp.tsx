@@ -13,6 +13,7 @@ import { JevArchitectureGuide } from './components/JevArchitectureGuide.js';
 import { PortfolioIntegrationGuide } from './components/PortfolioIntegrationGuide.js';
 import { TokenSettingsModal } from './components/TokenSettingsModal.js';
 import { TrialHistoryBanner } from './components/TrialHistoryBanner.js';
+import { downloadMarkdownDossier, downloadPdfDossier } from './utils/exportDossier.js';
 import {
   AnalysisResult,
   SonarIssue,
@@ -245,6 +246,16 @@ ${assessment.activePolicies
     setTimeout(() => setHasCopiedMarkdown(false), 2500);
   };
 
+  const handleDownloadMarkdown = () => {
+    if (!analysis) return;
+    downloadMarkdownDossier(analysis);
+  };
+
+  const handleDownloadPdf = () => {
+    if (!analysis) return;
+    downloadPdfDossier(analysis);
+  };
+
   return (
     <div className="min-h-screen bg-[#08090B] text-[#F2F2F2] selection:bg-[#7CFF6B]/20 selection:text-[#7CFF6B] tech-grid">
       {/* Top Navbar with Settings Button and Back to Portfolio */}
@@ -316,6 +327,8 @@ ${assessment.activePolicies
                   assessment={analysis.assessment}
                   onCopyMarkdown={handleCopyMarkdown}
                   hasCopied={hasCopiedMarkdown}
+                  onDownloadMarkdown={handleDownloadMarkdown}
+                  onDownloadPdf={handleDownloadPdf}
                 />
 
                 {/* 2. PR Summary & Ingestion Metadata */}
@@ -369,6 +382,7 @@ ${assessment.activePolicies
         onSaveGithubToken={handleSaveGithubToken}
         userTypesafeKey={userTypesafeKey}
         onSaveTypesafeKey={handleSaveTypesafeKey}
+        history={trialHistory}
       />
 
       {/* Footer */}

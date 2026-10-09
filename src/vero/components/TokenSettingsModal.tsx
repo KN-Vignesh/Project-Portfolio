@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Key, Shield, AlertCircle, Check, X, ExternalLink, RefreshCw } from 'lucide-react';
+import { Key, Shield, AlertCircle, Check, X, ExternalLink, RefreshCw, Download, FileJson } from 'lucide-react';
+import { TrialHistoryItem } from '../types.js';
+import { exportSessionHistoryJson } from '../utils/exportDossier.js';
 
 interface TokenSettingsModalProps {
   isOpen: boolean;
@@ -8,6 +10,7 @@ interface TokenSettingsModalProps {
   onSaveGithubToken: (token: string) => void;
   userTypesafeKey: string;
   onSaveTypesafeKey: (key: string) => void;
+  history?: TrialHistoryItem[];
 }
 
 export const TokenSettingsModal: React.FC<TokenSettingsModalProps> = ({
@@ -17,6 +20,7 @@ export const TokenSettingsModal: React.FC<TokenSettingsModalProps> = ({
   onSaveGithubToken,
   userTypesafeKey,
   onSaveTypesafeKey,
+  history = [],
 }) => {
   const [ghTokenInput, setGhTokenInput] = useState(userGithubToken);
   const [tsKeyInput, setTsKeyInput] = useState(userTypesafeKey);
@@ -157,6 +161,39 @@ export const TokenSettingsModal: React.FC<TokenSettingsModalProps> = ({
               <p className="mt-0.5 leading-relaxed">
                 If you do not specify your own TypeSafe API key, <strong>the default built-in system key will automatically be used</strong> for Jev System 1 probabilistic inference. You only need to enter a key if you have your own TypeSafe Console account.
               </p>
+            </div>
+          </div>
+
+          {/* Audit History Export Section */}
+          <div className="space-y-2 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                Session Audit History
+              </span>
+              <span className="text-[11px] text-zinc-500">
+                {history.length} cached assessment{history.length === 1 ? '' : 's'}
+              </span>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-zinc-200 bg-zinc-50/70 p-3 dark:border-zinc-800 dark:bg-zinc-800/40">
+              <div className="text-xs text-zinc-600 dark:text-zinc-300">
+                <p className="font-semibold text-zinc-800 dark:text-zinc-200 flex items-center gap-1.5">
+                  <FileJson className="h-4 w-4 text-indigo-500" />
+                  <span>Export Audit History (JSON)</span>
+                </p>
+                <p className="text-[11px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                  Download all evaluated pull requests stored in local browser history as a structured JSON archive.
+                </p>
+              </div>
+              <button
+                type="button"
+                id="export-audit-history-json-btn"
+                disabled={history.length === 0}
+                onClick={() => exportSessionHistoryJson(history)}
+                className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-xs font-medium text-zinc-800 shadow-sm transition hover:bg-zinc-50 disabled:opacity-40 disabled:cursor-not-allowed dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+              >
+                <Download className="h-3.5 w-3.5 text-zinc-500 dark:text-zinc-400" />
+                <span>Export JSON</span>
+              </button>
             </div>
           </div>
 

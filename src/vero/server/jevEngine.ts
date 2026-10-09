@@ -56,7 +56,10 @@ export async function runJevInference(
 
   for (const f of files) {
     const p = (f.patch || '').toLowerCase();
-    if (p.includes('token') || p.includes('key') || p.includes('auth') || p.includes('password') || p.includes('sql') || p.includes('cert')) {
+    const hasSecuritySignal =
+      /(api[_-]?key|secret[_-]?key|private[_-]?key|\bauth\b|password|passwd|credentials?|raw_?sql|executesql|unparameterized|decrypt|bearer|\bcert\b|\bcertificate\b)/i.test(p) ||
+      (f.isSecuritySensitive && /(token|key|cert|hash|crypto|permission)/i.test(p));
+    if (hasSecuritySignal) {
       securityTokenCount += 3;
     }
     if (p.includes('retry') || p.includes('delay') || p.includes('timeout') || p.includes('task') || p.includes('async')) {

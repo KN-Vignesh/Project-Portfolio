@@ -1,4 +1,5 @@
 import { ProjectItem } from '../types';
+import { VERIFIED_PROJECTS } from './defaultProjects';
 
 export const DEFAULT_PROJECT_DATA_URL =
   'https://raw.githubusercontent.com/KN-Vignesh/Projects/main/portfolio/projects.json';
@@ -17,44 +18,35 @@ function isProjectItem(value: unknown): value is ProjectItem {
 }
 
 export async function fetchProjects(): Promise<ProjectItem[]> {
-  let response: Response;
-
   try {
-    response = await fetch(projectDataUrl);
-  } catch (error) {
-    throw new Error(
-      `Unable to reach the project registry at ${projectDataUrl}: ${
-        error instanceof Error ? error.message : 'network request failed'
-      }`
-    );
-  }
+    const response = await fetch(projectDataUrl);
+    if (!response.ok) {
+      console.info(`[Project Registry] Remote registry returned HTTP ${response.status}. Using verified local registry.`);
+      return VERIFIED_PROJECTS;
+    }
 
-  if (!response.ok) {
-    throw new Error(`Project registry request failed with HTTP ${response.status}.`);
-  }
+    const payload = await response.json();
+    if (!payload || typeof payload !== 'object' || !Array.isArray((payload as { projects?: unknown }).projects)) {
+      console.info('[Project Registry] Remote registry returned unexpected payload format. Using verified local registry.');
+      return VERIFIED_PROJECTS;
+    }
 
-  let payload: unknown;
-  try {
-    payload = await response.json();
-  } catch {
-    throw new Error('Project registry returned malformed JSON.');
-  }
+    const remoteProjects = (payload as { projects: unknown[] }).projects;
+    if (!remoteProjects.every(isProjectItem)) {
+      console.info('[Project Registry] One or more remote project entries malformed. Using verified local registry.');
+      return VERIFIED_PROJECTS;
+    }
 
-  if (!payload || typeof payload !== 'object' || !Array.isArray((payload as { projects?: unknown }).projects)) {
-    throw new Error('Project registry is invalid: expected a projects array.');
+    return remoteProjects.map((project) => {
+      if (project.repository) return project;
+      const projectPath = project.projectPath as string;
+      return {
+        ...project,
+        repository: `https://github.com/KN-Vignesh/Projects/tree/main/${projectPath.replace(/^\/+/, '')}`,
+      };
+    });
+  } catch (err) {
+    console.info('[Project Registry] Remote fetch failed. Serving verified local project registry.', err);
+    return VERIFIED_PROJECTS;
   }
-
-  const projects = (payload as { projects: unknown[] }).projects;
-  if (!projects.every(isProjectItem)) {
-    throw new Error('Project registry is invalid: one or more projects are malformed.');
-  }
-
-  return projects.map((project) => {
-    if (project.repository) return project;
-    const projectPath = project.projectPath as string;
-    return {
-      ...project,
-      repository: `https://github.com/KN-Vignesh/Projects/tree/main/${projectPath.replace(/^\/+/, '')}`,
-    };
-  });
 }
