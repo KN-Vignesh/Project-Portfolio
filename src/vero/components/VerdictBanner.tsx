@@ -1,17 +1,21 @@
 import React from 'react';
-import { CheckCircle2, AlertTriangle, ShieldX, Copy, Check } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ShieldX, Copy, Check, Download, FileText } from 'lucide-react';
 import { FinalAssessment } from '../types.js';
 
 interface VerdictBannerProps {
   assessment: FinalAssessment;
   onCopyMarkdown: () => void;
   hasCopied: boolean;
+  onDownloadMarkdown?: () => void;
+  onDownloadPdf?: () => void;
 }
 
 export const VerdictBanner: React.FC<VerdictBannerProps> = ({
   assessment,
   onCopyMarkdown,
   hasCopied,
+  onDownloadMarkdown,
+  onDownloadPdf,
 }) => {
   const isBlocked =
     assessment.verdict === 'MERGE_BLOCKED' || assessment.verdict === 'SECURITY_REVIEW_REQUIRED';
@@ -27,7 +31,7 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({
           : 'border-[#FFB020]/40 bg-[#FFB020]/10 text-[#F2F2F2]'
       }`}
     >
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Left Verdict Title & Status */}
         <div className="flex items-start gap-3.5">
           <div
@@ -75,25 +79,47 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({
           </div>
         </div>
 
-        {/* Action button */}
-        <div className="shrink-0">
+        {/* Action buttons */}
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
           <button
             id="copy-report-markdown-button"
             onClick={onCopyMarkdown}
-            className="inline-flex items-center gap-2 rounded-lg border border-[#24272D] bg-[#101216] px-3.5 py-2 text-xs font-mono text-[#8B8F98] hover:border-[#7CFF6B]/40 hover:text-[#7CFF6B] transition-colors"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#24272D] bg-[#101216] px-3 py-1.5 text-xs font-mono text-[#8B8F98] hover:border-[#7CFF6B]/40 hover:text-[#7CFF6B] transition-colors"
           >
             {hasCopied ? (
               <>
                 <Check className="h-3.5 w-3.5 text-[#7CFF6B]" />
-                <span className="text-[#7CFF6B]">COPIED TO CLIPBOARD</span>
+                <span className="text-[#7CFF6B]">COPIED</span>
               </>
             ) : (
               <>
                 <Copy className="h-3.5 w-3.5 text-[#5A5E67]" />
-                <span>COPY REVIEW MARKDOWN</span>
+                <span>COPY MD</span>
               </>
             )}
           </button>
+
+          {onDownloadMarkdown && (
+            <button
+              onClick={onDownloadMarkdown}
+              title="Download full Markdown audit dossier"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#24272D] bg-[#101216] px-3 py-1.5 text-xs font-mono text-[#8B8F98] hover:border-[#7CFF6B]/40 hover:text-[#7CFF6B] transition-colors"
+            >
+              <Download className="h-3.5 w-3.5 text-[#5A5E67]" />
+              <span>DOSSIER .MD</span>
+            </button>
+          )}
+
+          {onDownloadPdf && (
+            <button
+              onClick={onDownloadPdf}
+              title="Download formatted engineering PDF report"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#7CFF6B]/40 bg-[#7CFF6B]/10 px-3 py-1.5 text-xs font-mono text-[#7CFF6B] hover:bg-[#7CFF6B]/20 transition-colors font-semibold"
+            >
+              <FileText className="h-3.5 w-3.5 text-[#7CFF6B]" />
+              <span>DOSSIER .PDF</span>
+            </button>
+          )}
         </div>
       </div>
 

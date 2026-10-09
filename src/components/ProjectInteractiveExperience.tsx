@@ -50,9 +50,14 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
     }
   ];
 
-  // 03: QLoRA Quantization State
+  // 03: QLoRA Quantization State & PEFT VRAM Calculator
   const [qloraModelSize, setQloraModelSize] = useState<'7B' | '13B' | '70B'>('7B');
   const [qloraFormat, setQloraFormat] = useState<'fp16' | 'int8' | 'nf4'>('nf4');
+  const [qloraRank, setQloraRank] = useState<number>(16);
+  const [qloraTargetModules, setQloraTargetModules] = useState<'qv' | 'all-linear'>('qv');
+  const [qloraSeqLength, setQloraSeqLength] = useState<number>(2048);
+  const [qloraGradientCheckpointing, setQloraGradientCheckpointing] = useState<boolean>(true);
+  const [qloraPagedOptimizer, setQloraPagedOptimizer] = useState<boolean>(true);
 
   // 04: BERT Classifier State
   const [bertInput, setBertInput] = useState('Production database connection pool exhausted during peak traffic');
@@ -90,16 +95,66 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
   const churnProb = calculateChurn();
   const isHighRisk = churnProb >= 0.45; // Cost-sensitive threshold 0.45
 
-  // 03: QLoRA VRAM Calculation
+  // 03: QLoRA VRAM & Parameter-Efficiency Calculation
   const getQloraStats = () => {
-    const baseParams = qloraModelSize === '7B' ? 7 : qloraModelSize === '13B' ? 13 : 70;
-    if (qloraFormat === 'fp16') {
-      return { vram: (baseParams * 2 * 1.25).toFixed(1) + ' GB', bits: '16-bit float', fits16GB: baseParams <= 7 ? 'Needs A100' : 'Multi-GPU Only' };
+    const baseParamsBillions = qloraModelSize === '7B' ? 7 : qloraModelSize === '13B' ? 13 : 70;
+    const hiddenDim = qloraModelSize === '7B' ? 4096 : qloraModelSize === '13B' ? 5120 : 8192;
+    const numLayers = qloraModelSize === '7B' ? 32 : qloraModelSize === '13B' ? 40 : 80;
+
+    // 1. Base weights in GB
+    const bytesPerParam = qloraFormat === 'fp16' ? 2 : qloraFormat === 'int8' ? 1 : 0.5;
+    const baseVramGb = baseParamsBillions * bytesPerParam;
+
+    // 2. Trainable parameters
+    // q_proj + v_proj = 2 matrices per layer, in+out = 4 * d * r
+    // all-linear = 7 matrices (q, k, v, o, gate, up, down) = 14 * d * r
+    const matrixMultiplier = qloraTargetModules === 'qv' ? 4 : 14;
+    const trainableParams = matrixMultiplier * hiddenDim * qloraRank * numLayers;
+    const trainableParamsMillion = (trainableParams / 1_000_000).toFixed(2);
+    const trainablePercent = ((trainableParams / (baseParamsBillions * 1_000_000_000)) * 100).toFixed(3);
+
+    // 3. Adapter weights & Optimizer memory (GB)
+    // FP16 weights (2 bytes) + FP32 grads (4 bytes) = 6 bytes/param
+    // AdamW optimizer states = 8 bytes/param. Paged optimizer offloads ~70% to CPU RAM
+    const optimizerBytesPerParam = qloraPagedOptimizer ? 2.5 : 8;
+    const adapterVramGb = (trainableParams * (6 + optimizerBytesPerParam)) / 1_000_000_000;
+
+    // 4. Activations memory (GB)
+    // Scale with context length
+    const rawActivationVram = (numLayers * qloraSeqLength * hiddenDim * 16) / 1_000_000_000;
+    const activationVramGb = qloraGradientCheckpointing ? rawActivationVram * 0.18 : rawActivationVram;
+
+    // 5. CUDA runtime & context overhead
+    const cudaOverheadGb = 0.8;
+
+    const totalVramGb = baseVramGb + adapterVramGb + activationVramGb + cudaOverheadGb;
+
+    let hardwareCompatibility = 'Single 16GB GPU (RTX 4080 / T4)';
+    let badgeColor = 'text-[#7CFF6B] bg-[#7CFF6B]/15 border-[#7CFF6B]/30';
+    if (totalVramGb > 48) {
+      hardwareCompatibility = 'Multi-GPU Cluster / A100 80GB';
+      badgeColor = 'text-[#FF5449] bg-[#FF5449]/15 border-[#FF5449]/30';
+    } else if (totalVramGb > 24) {
+      hardwareCompatibility = 'High-Memory GPU / A6000 48GB';
+      badgeColor = 'text-[#FFB020] bg-[#FFB020]/15 border-[#FFB020]/30';
+    } else if (totalVramGb > 15.5) {
+      hardwareCompatibility = 'Single 24GB GPU (RTX 4090 / A10G)';
+      badgeColor = 'text-[#6EA8FE] bg-[#6EA8FE]/15 border-[#6EA8FE]/30';
     }
-    if (qloraFormat === 'int8') {
-      return { vram: (baseParams * 1 * 1.2).toFixed(1) + ' GB', bits: '8-bit integer', fits16GB: baseParams <= 7 ? 'Marginal' : 'Multi-GPU' };
-    }
-    return { vram: (baseParams * 0.5 * 1.15).toFixed(1) + ' GB', bits: '4-bit NormalFloat (NF4)', fits16GB: baseParams <= 13 ? 'Fits Single 16GB GPU' : 'Single 48GB GPU' };
+
+    return {
+      totalVram: totalVramGb.toFixed(1) + ' GB',
+      baseVram: baseVramGb.toFixed(1) + ' GB',
+      adapterVram: (adapterVramGb * 1024).toFixed(0) + ' MB',
+      activationVram: activationVramGb.toFixed(1) + ' GB',
+      cudaOverhead: cudaOverheadGb.toFixed(1) + ' GB',
+      bits: qloraFormat === 'fp16' ? '16-bit Float' : qloraFormat === 'int8' ? '8-bit Int' : '4-bit NormalFloat (NF4)',
+      trainableParamsMillion: trainableParamsMillion + 'M',
+      trainablePercent: trainablePercent + '%',
+      hardwareCompatibility,
+      badgeColor,
+      totalVramGb,
+    };
   };
   const qloraStats = getQloraStats();
 
@@ -330,13 +385,14 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
         )}
 
         {/* ====================================================================
-            PROJECT 03: QLORA 4-BIT QUANTIZATION
+            PROJECT 03: QLORA 4-BIT QUANTIZATION & PEFT CALCULATOR
         ==================================================================== */}
         {projectId === 'qlora' && (
           <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-mono text-xs">
-              <div className="space-y-2 p-3 rounded-lg bg-[#101216] border border-[#24272D]">
-                <span className="text-[#8B8F98] block">TARGET MODEL SIZE:</span>
+            {/* Primary Model Architecture Inputs */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
+              <div className="space-y-1.5 p-3 rounded-lg bg-[#101216] border border-[#24272D]">
+                <span className="text-[#8B8F98] block text-[11px]">TARGET MODEL SIZE:</span>
                 <div className="grid grid-cols-3 gap-1">
                   {(['7B', '13B', '70B'] as const).map((s) => (
                     <button
@@ -354,8 +410,8 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
                 </div>
               </div>
 
-              <div className="space-y-2 p-3 rounded-lg bg-[#101216] border border-[#24272D]">
-                <span className="text-[#8B8F98] block">QUANTIZATION PRECISION:</span>
+              <div className="space-y-1.5 p-3 rounded-lg bg-[#101216] border border-[#24272D]">
+                <span className="text-[#8B8F98] block text-[11px]">QUANTIZATION PRECISION:</span>
                 <div className="grid grid-cols-3 gap-1">
                   {(['fp16', 'int8', 'nf4'] as const).map((fmt) => (
                     <button
@@ -374,19 +430,148 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
               </div>
             </div>
 
-            {/* Visual Telemetry Card */}
-            <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] grid grid-cols-1 sm:grid-cols-3 gap-4 font-mono text-xs">
-              <div>
-                <span className="text-[#8B8F98] block text-[10px]">REQUIRED VRAM:</span>
-                <span className="text-2xl font-bold text-[#7CFF6B]">{qloraStats.vram}</span>
+            {/* PEFT Tuning Hyperparameters Grid */}
+            <div className="p-3.5 rounded-lg bg-[#101216] border border-[#24272D] space-y-3 font-mono text-xs">
+              <div className="flex items-center justify-between pb-1.5 border-b border-[#24272D]">
+                <span className="text-[#7CFF6B] font-bold text-[11px] uppercase">// PEFT ADAPTATION PARAMETERS</span>
+                <span className="text-[10px] text-[#8B8F98]">DYNAMIC VRAM &amp; PARAM ESTIMATOR</span>
               </div>
-              <div>
-                <span className="text-[#8B8F98] block text-[10px]">PRECISION FORMAT:</span>
-                <span className="text-sm font-semibold text-[#F2F2F2]">{qloraStats.bits}</span>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* LoRA Rank Selector */}
+                <div>
+                  <span className="text-[#8B8F98] block text-[10px] mb-1">LORA RANK (r):</span>
+                  <div className="grid grid-cols-5 gap-1">
+                    {[4, 8, 16, 32, 64].map((r) => (
+                      <button
+                        key={r}
+                        onClick={() => setQloraRank(r)}
+                        className={`py-1 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                          qloraRank === r
+                            ? 'bg-[#7CFF6B]/20 border-[#7CFF6B] text-[#7CFF6B]'
+                            : 'bg-[#08090B] border-[#24272D] text-[#8B8F98]'
+                        }`}
+                      >
+                        r={r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Target Modules */}
+                <div>
+                  <span className="text-[#8B8F98] block text-[10px] mb-1">TARGET PROJECTIONS:</span>
+                  <div className="grid grid-cols-2 gap-1">
+                    <button
+                      onClick={() => setQloraTargetModules('qv')}
+                      className={`py-1 px-1 rounded text-[10px] font-bold border transition-colors cursor-pointer truncate ${
+                        qloraTargetModules === 'qv'
+                          ? 'bg-[#6EA8FE]/20 border-[#6EA8FE] text-[#6EA8FE]'
+                          : 'bg-[#08090B] border-[#24272D] text-[#8B8F98]'
+                      }`}
+                      title="q_proj, v_proj (Minimum footprint)"
+                    >
+                      q_proj + v_proj
+                    </button>
+                    <button
+                      onClick={() => setQloraTargetModules('all-linear')}
+                      className={`py-1 px-1 rounded text-[10px] font-bold border transition-colors cursor-pointer truncate ${
+                        qloraTargetModules === 'all-linear'
+                          ? 'bg-[#6EA8FE]/20 border-[#6EA8FE] text-[#6EA8FE]'
+                          : 'bg-[#08090B] border-[#24272D] text-[#8B8F98]'
+                      }`}
+                      title="All 7 linear projection layers"
+                    >
+                      All Linear Layers
+                    </button>
+                  </div>
+                </div>
+
+                {/* Sequence Length */}
+                <div>
+                  <span className="text-[#8B8F98] block text-[10px] mb-1">CONTEXT LENGTH (L):</span>
+                  <div className="grid grid-cols-4 gap-1">
+                    {[512, 1024, 2048, 4096].map((l) => (
+                      <button
+                        key={l}
+                        onClick={() => setQloraSeqLength(l)}
+                        className={`py-1 rounded text-[10px] font-bold border transition-colors cursor-pointer ${
+                          qloraSeqLength === l
+                            ? 'bg-[#FFB86B]/20 border-[#FFB86B] text-[#FFB86B]'
+                            : 'bg-[#08090B] border-[#24272D] text-[#8B8F98]'
+                        }`}
+                      >
+                        {l}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div>
-                <span className="text-[#8B8F98] block text-[10px]">HARDWARE ACCESSIBILITY:</span>
-                <span className="text-sm font-semibold text-[#6EA8FE]">{qloraStats.fits16GB}</span>
+
+              {/* Memory Optimization Toggles */}
+              <div className="pt-2 border-t border-[#24272D]/60 flex flex-wrap items-center gap-4 text-[11px]">
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={qloraGradientCheckpointing}
+                    onChange={(e) => setQloraGradientCheckpointing(e.target.checked)}
+                    className="accent-[#7CFF6B]"
+                  />
+                  <span className={qloraGradientCheckpointing ? 'text-[#F2F2F2]' : 'text-[#8B8F98]'}>
+                    Gradient Checkpointing (-75% Activation VRAM)
+                  </span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    checked={qloraPagedOptimizer}
+                    onChange={(e) => setQloraPagedOptimizer(e.target.checked)}
+                    className="accent-[#7CFF6B]"
+                  />
+                  <span className={qloraPagedOptimizer ? 'text-[#F2F2F2]' : 'text-[#8B8F98]'}>
+                    Paged AdamW Optimizer (Offloads Spikes to CPU RAM)
+                  </span>
+                </label>
+              </div>
+            </div>
+
+            {/* Comprehensive Memory Telemetry Card */}
+            <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-3 font-mono text-xs">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pb-2 border-b border-[#24272D]">
+                <div>
+                  <span className="text-[#8B8F98] block text-[10px] uppercase">TOTAL ESTIMATED VRAM BUDGET:</span>
+                  <span className="text-2xl font-bold text-[#7CFF6B]">{qloraStats.totalVram}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[#8B8F98] block text-[10px] uppercase">DEPLOYMENT COMPATIBILITY:</span>
+                  <span className={`inline-block px-2.5 py-1 rounded text-xs font-bold border mt-0.5 ${qloraStats.badgeColor}`}>
+                    {qloraStats.hardwareCompatibility}
+                  </span>
+                </div>
+              </div>
+
+              {/* Granular Memory Allocation Breakdown */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-[11px]">
+                <div className="p-2 rounded bg-[#08090B] border border-[#24272D]">
+                  <span className="text-[#8B8F98] block text-[10px]">BASE MODEL:</span>
+                  <span className="text-sm font-semibold text-[#F2F2F2]">{qloraStats.baseVram}</span>
+                  <span className="text-[10px] text-[#5A5E67] block">{qloraStats.bits}</span>
+                </div>
+                <div className="p-2 rounded bg-[#08090B] border border-[#24272D]">
+                  <span className="text-[#8B8F98] block text-[10px]">ACTIVATION MEMORY:</span>
+                  <span className="text-sm font-semibold text-[#FFB86B]">{qloraStats.activationVram}</span>
+                  <span className="text-[10px] text-[#5A5E67] block">{qloraSeqLength} tokens seq</span>
+                </div>
+                <div className="p-2 rounded bg-[#08090B] border border-[#24272D]">
+                  <span className="text-[#8B8F98] block text-[10px]">ADAPTER &amp; OPTIMIZER:</span>
+                  <span className="text-sm font-semibold text-[#6EA8FE]">{qloraStats.adapterVram}</span>
+                  <span className="text-[10px] text-[#5A5E67] block">r={qloraRank} weights</span>
+                </div>
+                <div className="p-2 rounded bg-[#08090B] border border-[#24272D]">
+                  <span className="text-[#8B8F98] block text-[10px]">TRAINABLE PARAMS:</span>
+                  <span className="text-sm font-semibold text-[#7CFF6B]">{qloraStats.trainableParamsMillion}</span>
+                  <span className="text-[10px] text-[#5A5E67] block">{qloraStats.trainablePercent} of model</span>
+                </div>
               </div>
             </div>
           </div>

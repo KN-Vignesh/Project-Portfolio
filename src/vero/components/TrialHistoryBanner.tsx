@@ -12,8 +12,10 @@ import {
   RotateCcw,
   CheckCircle2,
   Trash2,
+  Download,
 } from 'lucide-react';
 import { TrialStatus, TrialHistoryItem } from '../types.js';
+import { exportSessionHistoryJson } from '../utils/exportDossier.js';
 
 interface TrialHistoryBannerProps {
   trialStatus: TrialStatus | null;
@@ -205,14 +207,26 @@ export const TrialHistoryBanner: React.FC<TrialHistoryBannerProps> = ({
               </p>
             </div>
             {history.length > 0 && (
-              <button
-                type="button"
-                onClick={onClearHistory}
-                className="flex items-center gap-1 text-[11px] font-medium text-zinc-500 hover:text-red-600 dark:hover:text-red-400"
-              >
-                <Trash2 className="h-3 w-3" />
-                <span>Clear History</span>
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  id="export-trial-history-json-banner-btn"
+                  onClick={() => exportSessionHistoryJson(history)}
+                  className="flex items-center gap-1 text-[11px] font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+                  title="Download all analyzed PRs as JSON archive"
+                >
+                  <Download className="h-3 w-3 text-indigo-500" />
+                  <span>Export JSON</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={onClearHistory}
+                  className="flex items-center gap-1 text-[11px] font-medium text-zinc-500 hover:text-red-600 dark:hover:text-red-400"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  <span>Clear History</span>
+                </button>
+              </div>
             )}
           </div>
 
