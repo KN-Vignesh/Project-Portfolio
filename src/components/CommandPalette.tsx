@@ -122,7 +122,7 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'SYSTEMS',
       icon: ShieldCheck,
       handler: () => {
-        window.open('https://sonarcloud.io/dashboard?id=KN-Vignesh_Project-Portfolio', '_blank');
+        window.open('https://sonarcloud.io/dashboard?id=KN-Vignesh_Project-Portfolio', '_blank', 'noopener,noreferrer');
         onClose();
       }
     },
