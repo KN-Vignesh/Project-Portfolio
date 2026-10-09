@@ -1,7 +1,26 @@
 import { readFile } from 'node:fs/promises';
+import { readFileSync, existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { GuardianConfig, FailureEvidence, ProjectReference } from './types';
 import { createEvidence } from './evidence';
-import { VERIFIED_PROJECTS } from '../src/data/defaultProjects';
+
+function loadProjectsList(): Array<{ id: string; title: string; repository: string; projectPath?: string }> {
+  try {
+    const candidates = [
+      resolve(process.cwd(), 'public/projects.json'),
+      resolve(import.meta.dirname ?? '.', '../public/projects.json'),
+    ];
+    for (const p of candidates) {
+      if (existsSync(p)) {
+        const raw = JSON.parse(readFileSync(p, 'utf8'));
+        if (raw && Array.isArray(raw.projects)) return raw.projects;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return [];
+}
 
 export async function readReference(filePath: string): Promise<ProjectReference> {
   return JSON.parse(await readFile(filePath, 'utf8')) as ProjectReference;
@@ -29,7 +48,8 @@ export function scanPortfolioRegistry(): {
   monorepoPaths: number;
   projects: ProjectRegistryScanItem[];
 } {
-  const scanned = VERIFIED_PROJECTS.map((p) => {
+  const projectsList = loadProjectsList();
+  const scanned = projectsList.map((p) => {
     const isStandalone = !p.repository.endsWith('/Projects');
     return {
       id: p.id,
