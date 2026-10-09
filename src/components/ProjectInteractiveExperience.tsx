@@ -433,7 +433,7 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
             {/* PEFT Tuning Hyperparameters Grid */}
             <div className="p-3.5 rounded-lg bg-[#101216] border border-[#24272D] space-y-3 font-mono text-xs">
               <div className="flex items-center justify-between pb-1.5 border-b border-[#24272D]">
-                <span className="text-[#7CFF6B] font-bold text-[11px] uppercase">// PEFT ADAPTATION PARAMETERS</span>
+                <span className="text-[#7CFF6B] font-bold text-[11px] uppercase">PEFT ADAPTATION PARAMETERS</span>
                 <span className="text-[10px] text-[#8B8F98]">DYNAMIC VRAM &amp; PARAM ESTIMATOR</span>
               </div>
 

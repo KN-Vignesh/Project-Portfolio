@@ -10,9 +10,11 @@ console.log(`[guardian] Portfolio Registry Scan: ${registrySummary.total} projec
 
 try {
   const result = await runGuardian(config);
-  console.log(JSON.stringify(result, null, 2));
+  // Log execution status summary without exposing untrusted raw payloads
+  console.log(`[guardian] pipeline status: ${result.status}, runId=${result.runId}`);
   process.exitCode = result.status === 'VALIDATION_FAILED' || result.status === 'REPAIR_REJECTED' ? 1 : 0;
 } catch (error) {
-  console.error(`[guardian] failed closed: ${error instanceof Error ? error.message : String(error)}`);
+  const safeMessage = error instanceof Error ? error.message.replace(/[\r\n]/g, ' ') : 'Unknown error';
+  console.error(`[guardian] failed closed: ${safeMessage}`);
   process.exitCode = 1;
 }
