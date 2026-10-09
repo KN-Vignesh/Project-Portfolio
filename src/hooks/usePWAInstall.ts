@@ -24,10 +24,12 @@ export function usePWAInstall() {
 
     // Clean up any stale or conflicting development service workers to prevent 400/401 Cloud Run proxy errors
     if ('serviceWorker' in navigator && (window.location.hostname.includes('ais-dev') || window.location.hostname === 'localhost')) {
-      navigator.serviceWorker.getRegistrations().then((registrations) => {
+      void navigator.serviceWorker.getRegistrations().then((registrations) => {
         for (const registration of registrations) {
-          registration.unregister();
+          void registration.unregister();
         }
+      }).catch(() => {
+        // Stale registration cleanup non-critical
       });
     }
 

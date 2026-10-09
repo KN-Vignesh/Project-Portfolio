@@ -111,6 +111,7 @@ const ALLOWED_FREE_CHAT_MODEL = "gemini-3.8-flash";
 
 async function startServer() {
   const app = express();
+  app.disable("x-powered-by");
   app.use(express.json());
 
   // Health check
@@ -392,4 +393,6 @@ async function startServer() {
   });
 }
 
-startServer();
+startServer().catch((err) => {
+  console.error("Failed to start server:", err);
+});

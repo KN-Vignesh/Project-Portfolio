@@ -17,7 +17,7 @@ export function parseGitHubPrUrl(input: string): ParsedPrUrl | null {
   if (standardMatch) {
     const owner = standardMatch[1];
     const repo = standardMatch[2];
-    const pullNumber = parseInt(standardMatch[3], 10);
+    const pullNumber = Number.parseInt(standardMatch[3], 10);
     return {
       owner,
       repo,
@@ -31,7 +31,7 @@ export function parseGitHubPrUrl(input: string): ParsedPrUrl | null {
   if (shorthandMatch) {
     const owner = shorthandMatch[1];
     const repo = shorthandMatch[2];
-    const pullNumber = parseInt(shorthandMatch[3], 10);
+    const pullNumber = Number.parseInt(shorthandMatch[3], 10);
     return {
       owner,
       repo,

@@ -78,10 +78,18 @@ export const PWAInstallButton: React.FC<PWAInstallButtonProps> = ({
       {showModal && (
         <div
           id="pwa-install-guide-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="PWA Installation Guide"
+          tabIndex={-1}
+          onKeyDown={(e) => {
+            if (e.key === 'Escape') setShowModal(false);
+          }}
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/75 p-4 backdrop-blur-sm animate-fade-in"
           onClick={() => setShowModal(false)}
         >
           <div
+            role="document"
             className="w-full max-w-md rounded-2xl border border-[#24272D] bg-[#101216] p-5 shadow-2xl text-[#F2F2F2] font-mono max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >

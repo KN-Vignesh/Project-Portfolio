@@ -278,6 +278,14 @@ export const AILabSection: React.FC<AILabSectionProps> = ({ projects, loading, o
                   {relatedProjects.map((proj) => (
                     <div
                       key={proj.id}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onSelectProject(proj.id);
+                        }
+                      }}
                       className="p-3 rounded bg-[#08090B] border border-[#24272D] hover:border-[#7CFF6B] transition-colors flex items-center justify-between group cursor-pointer"
                       onClick={() => onSelectProject(proj.id)}
                     >

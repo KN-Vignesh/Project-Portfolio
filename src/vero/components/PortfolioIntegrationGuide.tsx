@@ -5,7 +5,9 @@ export const PortfolioIntegrationGuide: React.FC = () => {
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
 
   const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text);
+    void navigator.clipboard.writeText(text).catch(() => {
+      // ignore clipboard error
+    });
     setCopiedSection(id);
     setTimeout(() => setCopiedSection(null), 2500);
   };

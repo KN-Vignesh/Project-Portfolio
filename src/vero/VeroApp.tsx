@@ -59,7 +59,13 @@ export default function VeroApp({ onBackToPortfolio = () => {} }: VeroAppProps) 
   const [clientSessionId] = useState<string>(() => {
     let sid = localStorage.getItem('prs_client_session_id');
     if (!sid) {
-      sid = 'prs_client_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+      if (typeof window !== 'undefined' && window.crypto) {
+        const arr = new Uint32Array(2);
+        window.crypto.getRandomValues(arr);
+        sid = 'prs_client_' + arr[0].toString(36) + arr[1].toString(36) + Date.now().toString(36);
+      } else {
+        sid = 'prs_client_' + Date.now().toString(36);
+      }
       localStorage.setItem('prs_client_session_id', sid);
     }
     return sid;
@@ -203,7 +209,7 @@ export default function VeroApp({ onBackToPortfolio = () => {} }: VeroAppProps) 
 
   // Run initial analysis automatically on mount for immediate interactive experience
   useEffect(() => {
-    handleAnalyze('https://github.com/KN-Vignesh/PR-Sentinel-Demo/pull/1');
+    void handleAnalyze('https://github.com/KN-Vignesh/PR-Sentinel-Demo/pull/1');
   }, []);
 
   // Copy Markdown review report
@@ -241,7 +247,9 @@ ${assessment.activePolicies
 *Generated in ${analysis.telemetry.totalMs}ms by Vero with zero LLM chat hallucination.*
 `;
 
-    navigator.clipboard.writeText(md);
+    void navigator.clipboard.writeText(md).catch(() => {
+      // ignore clipboard error
+    });
     setHasCopiedMarkdown(true);
     setTimeout(() => setHasCopiedMarkdown(false), 2500);
   };

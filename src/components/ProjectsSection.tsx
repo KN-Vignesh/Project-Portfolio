@@ -87,6 +87,14 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ projects, load
             return (
               <div
                 key={project.id}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectProject(project.id);
+                  }
+                }}
                 onClick={() => onSelectProject(project.id)}
                 className="rounded-xl border border-[#24272D] bg-[#101216] p-5 flex flex-col justify-between hover:border-[#7CFF6B]/60 transition-all duration-200 group hover:bg-[#12151B] cursor-pointer"
               >

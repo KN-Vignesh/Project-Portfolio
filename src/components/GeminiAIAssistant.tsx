@@ -221,13 +221,17 @@ export const GeminiAIAssistant: React.FC = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSendMessage();
+                if (e.key === 'Enter') {
+                  void handleSendMessage();
+                }
               }}
               placeholder="Ask about projects, architecture, or skills..."
               className="flex-1 bg-[#08090B] border border-[#24272D] rounded px-3 py-2 text-xs text-[#F2F2F2] placeholder-[#8B8F98]/60 focus:outline-none focus:border-[#7CFF6B]"
             />
             <button
-              onClick={() => handleSendMessage()}
+              onClick={() => {
+                void handleSendMessage();
+              }}
               disabled={isLoading || !input.trim()}
               className="p-2 rounded bg-[#7CFF6B] text-[#08090B] hover:bg-[#7CFF6B]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               aria-label="Send message"

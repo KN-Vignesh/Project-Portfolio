@@ -127,7 +127,7 @@ export const VerdictBanner: React.FC<VerdictBannerProps> = ({
       {assessment.summaryStatements.length > 0 && (
         <div className="mt-4 rounded-lg bg-[#101216] border border-[#24272D] p-4">
           <h4 className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#8B8F98]">
-            // AUDIT & EVIDENCE SUMMARY
+            {"// AUDIT & EVIDENCE SUMMARY"}
           </h4>
           <ul className="mt-2 space-y-1.5 text-xs font-mono leading-relaxed text-[#F2F2F2]">
             {assessment.summaryStatements.map((statement, idx) => (
