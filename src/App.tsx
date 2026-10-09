@@ -13,6 +13,8 @@ import { EducationCertificationsSection } from './components/EducationCertificat
 import { ContactSection } from './components/ContactSection';
 import { GeminiAIAssistant } from './components/GeminiAIAssistant';
 import { ResumeModal } from './components/ResumeModal';
+import { CommandPalette } from './components/CommandPalette';
+import { LiveAITrendsSection } from './components/LiveAITrendsSection';
 import { Footer } from './components/Footer';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { MobileAppDock } from './components/MobileAppDock';
@@ -25,7 +27,20 @@ export default function App() {
   const [activeSection, setActiveSection] = useState<string>('hero');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isResumeOpen, setIsResumeOpen] = useState<boolean>(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
   const { projects, loading: projectsLoading, error: projectsError } = useProjects();
+
+  // Global shortcut for Command Palette (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Check URL hash on initial load and navigation for direct project deep-linking or VERO engine
   useEffect(() => {
@@ -78,6 +93,7 @@ export default function App() {
     const sections = [
       'hero',
       'projects',
+      'ai-trends',
       'engineering-system',
       'about',
       'ai-lab',
@@ -187,6 +203,7 @@ export default function App() {
         onNavigate={handleNavigate}
         onOpenResume={() => setIsResumeOpen(true)}
         onOpenVero={handleOpenVero}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
       {/* Main Multi-Section Portfolio Experience with mobile dock clearance */}
@@ -197,6 +214,7 @@ export default function App() {
           onExploreSystem={() => handleNavigate('engineering-system')}
           onOpenResume={() => setIsResumeOpen(true)}
           onOpenVero={handleOpenVero}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         />
 
         {/* 02 / PROJECTS (EXPERIENCE INITIALLY) */}
@@ -207,6 +225,9 @@ export default function App() {
           onSelectProject={handleOpenProject}
           onOpenVero={handleOpenVero}
         />
+
+        {/* 02.5 / LIVE AUTOMATED AI RESEARCH & REPOSITORY TRENDS */}
+        <LiveAITrendsSection />
 
         {/* 03 / ENGINEERING SYSTEM */}
         <EngineeringSystemSection
@@ -257,6 +278,15 @@ export default function App() {
         onClose={() => setIsResumeOpen(false)}
         projects={projects}
         projectsLoading={projectsLoading}
+      />
+
+      {/* Global Command Palette Dialog */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSelectSection={handleNavigate}
+        onOpenResume={() => setIsResumeOpen(true)}
+        onOpenVero={handleOpenVero}
       />
 
       {/* Gemini AI Assistant Floating Widget */}

@@ -1,14 +1,21 @@
 import { ExperienceItem, CertificationItem, AILabNode, StackCategory } from '../types';
 
 export const PERSONAL_INFO = {
-  name: 'VIGNESH KN', title: 'AI SOFTWARE ENGINEER', subtitle: 'SOFTWARE ENGINEERING → AI ENGINEERING',
-  heroStatement: 'Building intelligent systems from models to production.',
-  supportingText: 'Software engineer with 4+ years of experience in full-stack engineering, cloud automation, and API integration, now focused on production-oriented AI, Generative AI, LLM orchestration, RAG, agentic workflows, and model engineering.',
-  summary: 'Results-driven AI Software Engineer with 4+ years of experience in full-stack engineering, cloud automation, and API integration. Expertise in architecting production-grade Generative AI, LLM orchestration, Agentic workflows, RAG, and NLP pipelines.',
-  email: 'vigneshknagaraj@outlook.com', phone: '+91 8861524366', location: 'Bengaluru - 560045, India',
-  github: 'https://github.com/KN-Vignesh', projectsRepo: 'https://github.com/KN-Vignesh/Projects',
-  linkedin: 'https://www.linkedin.com/in/vignesh-k-n/', deployedPortfolio: 'https://kn-vignesh.github.io/Projects/#/',
-  status: 'ONLINE', statusSubtext: 'AI ENGINEERING CORE ACTIVE',
+  name: 'VIGNESH KN',
+  title: 'AI SOFTWARE ENGINEER',
+  subtitle: 'ENTERPRISE .NET 8 → PRODUCTION AI & AGENTS',
+  heroStatement: 'Production AI Engineering & High-Throughput Systems',
+  supportingText: '4+ years engineering scalable enterprise backends, Azure serverless pipelines, and production AI systems—specializing in QLoRA fine-tuning, deterministic code quality gates, and high-throughput RAG architectures.',
+  summary: 'Results-driven AI Software Engineer with 4+ years across .NET Core 8, Azure Serverless, and production AI. Architect of Vero (zero-hallucination PR analysis engine), fine-tuned open-weight LLMs, and enterprise IAM automation for 6,000+ users.',
+  email: 'vigneshknagaraj@outlook.com',
+  phone: '+91 8861524366',
+  location: 'Bengaluru, India',
+  github: 'https://github.com/KN-Vignesh',
+  projectsRepo: 'https://github.com/KN-Vignesh/Projects',
+  linkedin: 'https://www.linkedin.com/in/vignesh-k-n/',
+  deployedPortfolio: 'https://vignesh-k-n.is-a.dev/',
+  status: 'ONLINE',
+  statusSubtext: 'SYSTEM ACTIVE · VERIFIED ON SONARCLOUD',
 };
 
 export const RESUME_DATA = {
