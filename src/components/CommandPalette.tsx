@@ -61,6 +61,17 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       }
     },
     {
+      id: 'nav-3d-stage',
+      title: '3D Project Architecture Workbench',
+      subtitle: 'WebGL experimentation: LoRA rank slider, Agent DAG, and AST tree',
+      category: 'SYSTEMS',
+      icon: Terminal,
+      handler: () => {
+        onSelectSection('3d-workbench');
+        onClose();
+      }
+    },
+    {
       id: 'open-vero',
       title: 'Launch Vero AI PR Review Workbench',
       subtitle: 'Deterministic AST Quality Gate + TypeSafe Jev System 1 Model',

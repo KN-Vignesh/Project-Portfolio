@@ -24,6 +24,7 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
 
   const navLinks = [
     { label: 'PROJECTS', href: '#projects', id: 'projects' },
+    { label: '3D STAGE', href: '#3d-workbench', id: '3d-workbench' },
     { label: 'AI PULSE', href: '#ai-trends', id: 'ai-trends' },
     { label: 'SYSTEM', href: '#engineering-system', id: 'engineering-system' },
     { label: 'ABOUT', href: '#about', id: 'about' },

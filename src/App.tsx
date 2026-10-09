@@ -15,6 +15,8 @@ import { GeminiAIAssistant } from './components/GeminiAIAssistant';
 import { ResumeModal } from './components/ResumeModal';
 import { CommandPalette } from './components/CommandPalette';
 import { LiveAITrendsSection } from './components/LiveAITrendsSection';
+import { Interactive3DProjectStage, ThreeDSceneType } from './components/Interactive3DProjectStage';
+import { InspectSpecDrawer } from './components/InspectSpecDrawer';
 import { Footer } from './components/Footer';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { MobileAppDock } from './components/MobileAppDock';
@@ -28,6 +30,7 @@ export default function App() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isResumeOpen, setIsResumeOpen] = useState<boolean>(false);
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
+  const [selectedSpecScene, setSelectedSpecScene] = useState<ThreeDSceneType | null>(null);
   const { projects, loading: projectsLoading, error: projectsError } = useProjects();
 
   // Global shortcut for Command Palette (Cmd+K / Ctrl+K)
@@ -93,6 +96,7 @@ export default function App() {
     const sections = [
       'hero',
       'projects',
+      '3d-workbench',
       'ai-trends',
       'engineering-system',
       'about',
@@ -226,6 +230,15 @@ export default function App() {
           onOpenVero={handleOpenVero}
         />
 
+        {/* 02.2 / INTERACTIVE 3D MULTI-SCENE EXPERIMENTATION WORKBENCH */}
+        <section id="3d-workbench" className="py-16 border-t border-[#24272D] bg-[#08090B]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Interactive3DProjectStage
+              onInspectSpec={(scene) => setSelectedSpecScene(scene)}
+            />
+          </div>
+        </section>
+
         {/* 02.5 / LIVE AUTOMATED AI RESEARCH & REPOSITORY TRENDS */}
         <LiveAITrendsSection />
 
@@ -287,6 +300,13 @@ export default function App() {
         onSelectSection={handleNavigate}
         onOpenResume={() => setIsResumeOpen(true)}
         onOpenVero={handleOpenVero}
+      />
+
+      {/* Technical Slide-Over Specification Drawer */}
+      <InspectSpecDrawer
+        isOpen={Boolean(selectedSpecScene)}
+        onClose={() => setSelectedSpecScene(null)}
+        sceneType={selectedSpecScene}
       />
 
       {/* Gemini AI Assistant Floating Widget */}
