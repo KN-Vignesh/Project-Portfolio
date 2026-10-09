@@ -45,9 +45,10 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          <div
+          <button
+            type="button"
             onClick={() => setActiveTab('analyzer')}
-            className="flex cursor-pointer items-center gap-2.5"
+            className="flex items-center gap-2.5 text-left focus:outline-none focus-visible:ring-1 focus-visible:ring-[#7CFF6B]"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#7CFF6B]/15 border border-[#7CFF6B]/30 text-[#7CFF6B]">
               <GitPullRequest className="h-4 w-4" />
@@ -65,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 Deterministic Static Analysis + Probabilistic Jev Signal
               </p>
             </div>
-          </div>
+          </button>
         </div>
 
         {/* Navigation Tabs */}

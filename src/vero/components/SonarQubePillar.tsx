@@ -246,6 +246,14 @@ export const SonarQubePillar: React.FC<SonarQubePillarProps> = ({ sonar, onSelec
             {filteredIssues.map((issue) => (
               <div
                 key={issue.id}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onSelectIssue?.(issue);
+                  }
+                }}
                 onClick={() => onSelectIssue?.(issue)}
                 className="group cursor-pointer rounded-xl border border-zinc-200 bg-zinc-50/50 p-3.5 transition hover:border-zinc-400 hover:bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800/40 dark:hover:border-zinc-700 dark:hover:bg-zinc-800/80"
               >

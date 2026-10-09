@@ -252,9 +252,11 @@ export function buildResumeDoc(options: ResumePdfOptions = { includeProjects: tr
   return doc;
 }
 
+const DEFAULT_RESUME_OPTIONS: ResumePdfOptions = Object.freeze({ includeProjects: true });
+
 export function generateAndDownloadResumePdf(
   filename = 'Vignesh_K_N_Resume.pdf',
-  options: ResumePdfOptions = { includeProjects: true }
+  options: ResumePdfOptions = DEFAULT_RESUME_OPTIONS
 ) {
   const doc = buildResumeDoc(options);
   doc.save(filename);

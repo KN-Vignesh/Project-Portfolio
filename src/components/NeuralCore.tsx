@@ -46,7 +46,8 @@ export const NeuralCore: React.FC<NeuralCoreProps> = ({ reducedMotion = false })
     for (let i = 0; i < nodeCount; i++) {
       const phi = Math.acos(-1 + (2 * i) / nodeCount);
       const theta = Math.sqrt(nodeCount * Math.PI) * phi;
-      const radius = 4.2 + (Math.random() - 0.5) * 1.5;
+      const radiusOffset = ((Math.sin(i * 12.9898) * 43758.5453) % 1);
+      const radius = 4.2 + (radiusOffset - 0.5) * 1.5;
 
       const x = radius * Math.cos(theta) * Math.sin(phi);
       const y = radius * Math.sin(theta) * Math.sin(phi);
@@ -112,9 +113,9 @@ export const NeuralCore: React.FC<NeuralCoreProps> = ({ reducedMotion = false })
     const particleGeo = new THREE.BufferGeometry();
     const particlePositions = new Float32Array(particleCount * 3);
     for (let i = 0; i < particleCount * 3; i += 3) {
-      particlePositions[i] = (Math.random() - 0.5) * 14;
-      particlePositions[i + 1] = (Math.random() - 0.5) * 14;
-      particlePositions[i + 2] = (Math.random() - 0.5) * 14;
+      particlePositions[i] = Math.sin(i * 1.341 + 0.1) * 7;
+      particlePositions[i + 1] = Math.cos(i * 2.113 + 0.3) * 7;
+      particlePositions[i + 2] = Math.sin(i * 3.789 + 0.5) * 7;
     }
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
     const particleMat = new THREE.PointsMaterial({

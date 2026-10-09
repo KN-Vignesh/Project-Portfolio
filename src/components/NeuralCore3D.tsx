@@ -127,9 +127,9 @@ export const NeuralCore3D: React.FC = () => {
     const particleGeo = new THREE.BufferGeometry();
     const particlePos = new Float32Array(particleCount * 3);
     for (let p = 0; p < particleCount * 3; p += 3) {
-      particlePos[p] = (Math.random() - 0.5) * 12;
-      particlePos[p + 1] = (Math.random() - 0.5) * 12;
-      particlePos[p + 2] = (Math.random() - 0.5) * 8;
+      particlePos[p] = Math.sin(p * 1.512 + 0.2) * 6;
+      particlePos[p + 1] = Math.cos(p * 2.314 + 0.4) * 6;
+      particlePos[p + 2] = Math.sin(p * 3.123 + 0.6) * 4;
     }
     particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
     const particleMat = new THREE.PointsMaterial({

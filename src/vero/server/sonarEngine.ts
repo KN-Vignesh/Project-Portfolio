@@ -109,7 +109,7 @@ export function runSonarQubeAnalysis(files: PullRequestFile[]): SonarQubeAnalysi
       // Check for unified diff line header @@ -start,len +start,len @@
       const headerMatch = line.match(/@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
       if (headerMatch) {
-        currentFileLine = parseInt(headerMatch[1], 10);
+        currentFileLine = Number.parseInt(headerMatch[1], 10);
         continue;
       }
 
@@ -159,8 +159,8 @@ export function runSonarQubeAnalysis(files: PullRequestFile[]): SonarQubeAnalysi
 
   // Technical debt minutes
   const technicalDebtMinutes = issues.reduce((acc, issue) => {
-    if (issue.effort.endsWith('h')) return acc + parseInt(issue.effort) * 60;
-    if (issue.effort.endsWith('min')) return acc + parseInt(issue.effort);
+    if (issue.effort.endsWith('h')) return acc + Number.parseInt(issue.effort, 10) * 60;
+    if (issue.effort.endsWith('min')) return acc + Number.parseInt(issue.effort, 10);
     return acc + 15;
   }, 0);
 

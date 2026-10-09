@@ -95,8 +95,9 @@ export async function runJevInference(
   if (titleLower.includes('bump') || titleLower.includes('dep') || (hasConfigPath && totalDiffSize < 30)) catLogits.DEPENDENCY += 4.0;
 
   const categoryProbs = softmax(catLogits);
-  const topCategory = (Object.keys(categoryProbs) as PRCategory[]).reduce((a, b) =>
-    categoryProbs[a] > categoryProbs[b] ? a : b
+  const topCategory = (Object.keys(categoryProbs) as PRCategory[]).reduce(
+    (a, b) => (categoryProbs[a] > categoryProbs[b] ? a : b),
+    'FEATURE' as PRCategory
   );
   const categoryConfidence = categoryProbs[topCategory];
 
@@ -135,8 +136,9 @@ export async function runJevInference(
   }
 
   const riskProbs = softmax(riskLogits);
-  const topRisk = (Object.keys(riskProbs) as RiskLevel[]).reduce((a, b) =>
-    riskProbs[a] > riskProbs[b] ? a : b
+  const topRisk = (Object.keys(riskProbs) as RiskLevel[]).reduce(
+    (a, b) => (riskProbs[a] > riskProbs[b] ? a : b),
+    'LOW' as RiskLevel
   );
 
   const riskChoice: JevChoiceDistribution<RiskLevel> = {
@@ -181,7 +183,7 @@ export async function runJevInference(
       : 'TypeSafe API: Default built-in key utilized for System 1 inference.',
   ];
 
-  const latencyMs = Math.max(16, Date.now() - startTime + Math.floor(Math.random() * 8) + 12);
+  const latencyMs = Math.max(16, Date.now() - startTime + ((Date.now() % 7) + 12));
   const tokensEvaluated = Math.round(totalDiffSize * 1.8 + files.length * 45 + 110);
 
   return {

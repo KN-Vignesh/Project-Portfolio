@@ -38,7 +38,9 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, proje
 
   const handleCopyText = () => {
     const text = getPlainTextResume(projects);
-    navigator.clipboard.writeText(text);
+    void navigator.clipboard.writeText(text).catch(() => {
+      // ignore clipboard error
+    });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -51,10 +53,17 @@ export const ResumeModal: React.FC<ResumeModalProps> = ({ isOpen, onClose, proje
     <div 
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-[#08090B]/90 backdrop-blur-md overflow-y-auto"
       onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
+      }}
+      role="dialog"
+      aria-modal="true"
+      tabIndex={-1}
     >
       <div 
         className="relative w-full max-w-4xl bg-[#101216] border border-[#24272D] rounded-xl shadow-2xl overflow-hidden my-auto max-h-[94vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
+        role="presentation"
       >
         {/* Top Control Bar */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-3.5 border-b border-[#24272D] bg-[#08090B]">
