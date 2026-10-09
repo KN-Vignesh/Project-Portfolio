@@ -75,7 +75,16 @@ export const EngineeringSystemSection: React.FC<EngineeringSystemSectionProps> =
             return (
               <div
                 key={step.step}
+                role="button"
+                tabIndex={0}
                 onMouseEnter={() => setActiveStage(idx)}
+                onClick={() => setActiveStage(idx)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setActiveStage(idx);
+                  }
+                }}
                 className={`p-5 rounded-lg border transition-all duration-200 cursor-pointer flex flex-col justify-between ${
                   isSelected
                     ? 'border-[#7CFF6B] bg-[#15181D] shadow-lg shadow-[#7CFF6B]/5'

@@ -7,9 +7,10 @@ interface NavigationProps {
   onNavigate?: (sectionId: string) => void;
   onOpenResume?: () => void;
   onOpenVero?: () => void;
+  onOpenCommandPalette?: () => void;
 }
 
-export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigate, onOpenResume, onOpenVero }) => {
+export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigate, onOpenResume, onOpenVero, onOpenCommandPalette }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -23,6 +24,8 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
 
   const navLinks = [
     { label: 'PROJECTS', href: '#projects', id: 'projects' },
+    { label: '3D STAGE', href: '#3d-workbench', id: '3d-workbench' },
+    { label: 'AI PULSE', href: '#ai-trends', id: 'ai-trends' },
     { label: 'SYSTEM', href: '#engineering-system', id: 'engineering-system' },
     { label: 'ABOUT', href: '#about', id: 'about' },
     { label: 'AI LAB', href: '#ai-lab', id: 'ai-lab' },
@@ -122,6 +125,18 @@ export const Navigation: React.FC<NavigationProps> = ({ activeSection, onNavigat
               <GitPullRequest className="w-3.5 h-3.5 text-[#7CFF6B]" />
               <span>VERO ENGINE</span>
               <span className="h-1.5 w-1.5 rounded-full bg-[#7CFF6B] animate-pulse"></span>
+            </button>
+          )}
+
+          {/* Command Palette Button */}
+          {onOpenCommandPalette && (
+            <button
+              type="button"
+              onClick={onOpenCommandPalette}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#101216] hover:bg-[#15181D] border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors cursor-pointer"
+              title="Search and Quick Commands (Cmd+K)"
+            >
+              <span className="text-[#7CFF6B] text-[10px]">⌘K</span>
             </button>
           )}
 

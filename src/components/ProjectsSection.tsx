@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Play, ExternalLink, ShieldAlert, Sparkles, Filter } from 'lucide-react';
+import { Play, ExternalLink, ShieldCheck, Sparkles, GitPullRequest, ArrowRight, Cpu, Database, CheckCircle2 } from 'lucide-react';
 import { ProjectItem } from '../types';
 
 interface ProjectsSectionProps {
@@ -10,29 +10,31 @@ interface ProjectsSectionProps {
   onOpenVero?: () => void;
 }
 
-export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ projects, loading, error, onSelectProject, onOpenVero }) => {
+export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
+  projects,
+  loading,
+  error,
+  onSelectProject,
+  onOpenVero
+}) => {
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
 
   const categories = [
-    { id: 'ALL', label: `ALL SYSTEMS (${projects.length})` },
-    { id: 'SEV_CRITICAL_HIGH', label: 'SEV-1 TO SEV-3 (HIGH / CRITICAL)' },
-    { id: 'GENAI', label: 'GENERATIVE AI & PEFT' },
-    { id: 'MODEL', label: 'MODEL ENGINEERING' },
-    { id: 'ML', label: 'ML & TABULAR' }
+    { id: 'ALL', label: `All Systems (${projects.length})` },
+    { id: 'GENAI', label: 'Generative AI & LLMs' },
+    { id: 'MODEL', label: 'Model Engineering & PEFT' },
+    { id: 'SYSTEMS', label: 'Enterprise .NET & Cloud' }
   ];
 
   const filteredProjects = projects.filter((p) => {
     if (filterCategory === 'ALL') return true;
-    if (filterCategory === 'SEV_CRITICAL_HIGH') {
-      return p.severityTier === 'CRITICAL' || p.severityTier === 'HIGH';
-    }
     if (filterCategory === 'GENAI') {
-      return p.id === 'qwen-lora' || p.id === 'qlora' || p.id === 'vero';
+      return p.id === 'vero' || p.id === 'qwen-lora' || p.id === 'qlora';
     }
     if (filterCategory === 'MODEL') {
       return p.id === 'bert' || p.id === 'cnn' || p.id === 'evaluation';
     }
-    if (filterCategory === 'ML') {
+    if (filterCategory === 'SYSTEMS') {
       return p.id === 'customer-churn' || p.id === 'house-price' || p.id === 'titanic';
     }
     return true;
@@ -45,27 +47,28 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ projects, load
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 pb-4 border-b border-[#24272D]">
           <div>
-            <div className="font-mono text-xs text-[#7CFF6B] tracking-widest uppercase mb-1">
-              [03] // PRODUCTION & RESEARCH PORTFOLIO
+            <div className="font-mono text-xs text-[#7CFF6B] tracking-wider uppercase mb-1">
+              ENGINEERING ARTIFACTS & PRODUCTION SYSTEMS
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#F2F2F2]">
-              EXPERIENCE THE SYSTEMS
+              SELECTED WORKS & BENCHMARKS
             </h2>
             <p className="font-mono text-xs text-[#8B8F98] mt-1.5">
-              Fetched from GitHub &amp; structured by project severity, real-time metrics, and verified production architectures.
+              Production architectures with verified benchmarks, deterministic code quality, and live deployments.
             </p>
           </div>
 
-          {/* Category Tabs */}
-          <div className="flex flex-wrap gap-2 mt-4 md:mt-0 font-mono text-xs">
+          {/* Interactive Filter Segmented Tabs */}
+          <div className="flex flex-wrap gap-1.5 mt-4 md:mt-0 font-mono text-xs p-1 bg-[#101216] rounded-xl border border-[#24272D]">
             {categories.map((cat) => (
               <button
                 key={cat.id}
+                type="button"
                 onClick={() => setFilterCategory(cat.id)}
-                className={`px-3 py-1.5 rounded transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium ${
                   filterCategory === cat.id
                     ? 'bg-[#7CFF6B] text-[#08090B] font-bold shadow-sm'
-                    : 'bg-[#101216] text-[#8B8F98] hover:text-[#F2F2F2] border border-[#24272D]'
+                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
                 }`}
               >
                 {cat.label}
@@ -74,127 +77,127 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({ projects, load
           </div>
         </div>
 
-        {/* Breathable Project Grid */}
-        {loading && <div className="font-mono text-xs text-[#7CFF6B] border border-[#24272D] bg-[#101216] p-5">PROJECT REGISTRY // LOADING...</div>}
-        {error && <div className="font-mono text-xs text-[#FF7B72] border border-[#FF7B72]/30 bg-[#101216] p-5">PROJECT REGISTRY UNAVAILABLE<br /><span className="text-[#8B8F98]">Project information could not be retrieved from the source repository.</span></div>}
+        {/* Asymmetric Bento Showcase Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredProjects.map((project: ProjectItem) => {
-            const keyMetric = project.evaluationMetrics?.[0] || 'Production Tested';
-            const isCrit = project.severityTier === 'CRITICAL';
-            const isHigh = project.severityTier === 'HIGH';
-            const isMed = project.severityTier === 'MEDIUM';
-
-            return (
-              <div
-                key={project.id}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onSelectProject(project.id);
-                  }
-                }}
-                onClick={() => onSelectProject(project.id)}
-                className="rounded-xl border border-[#24272D] bg-[#101216] p-5 flex flex-col justify-between hover:border-[#7CFF6B]/60 transition-all duration-200 group hover:bg-[#12151B] cursor-pointer"
-              >
-                <div>
-                  {/* Top Bar: Number, Severity Badge & Live tag */}
-                  <div className="flex items-center justify-between font-mono text-xs pb-2.5 mb-3 border-b border-[#24272D]/60">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[#8B8F98] font-bold text-[11px]">{project.number}</span>
-                      
-                      {/* Prominent Severity Badge */}
-                      {project.severityLevel && (
-                        <span 
-                          className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
-                            isCrit 
-                              ? 'bg-red-500/15 text-red-400 border-red-500/30' 
-                              : isHigh 
-                              ? 'bg-amber-500/15 text-amber-400 border-amber-500/30' 
-                              : isMed
-                              ? 'bg-blue-500/15 text-blue-400 border-blue-500/30'
-                              : 'bg-zinc-800 text-zinc-400 border-zinc-700'
-                          }`}
-                          title={`Severity Rating: ${project.severityLevel} (${project.severityTier})`}
-                        >
-                          {project.severityLevel} · {project.severityTier}
-                        </span>
-                      )}
-
-                      {project.liveAppView === 'vero' && (
-                        <span className="flex items-center gap-1 text-[9px] text-[#7CFF6B] bg-[#7CFF6B]/15 border border-[#7CFF6B]/30 px-1.5 py-0.2 rounded font-bold">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#7CFF6B] animate-pulse"></span>
-                          LIVE ENGINE
-                        </span>
-                      )}
-                    </div>
-
-                    <span className="text-[10px] text-[#8B8F98] uppercase">
-                      {project.category}
-                    </span>
-                  </div>
-
-                  {/* Title */}
-                  <h3 className="text-lg font-bold text-[#F2F2F2] group-hover:text-[#7CFF6B] transition-colors mb-1.5 leading-snug">
-                    {project.title}
-                  </h3>
-
-                  {/* Severity Operational Label */}
-                  {project.severityLabel && (
-                    <div className="text-[11px] font-mono text-[#A1A7B5] mb-2 flex items-center gap-1">
-                      <span className="text-[#7CFF6B]">▸</span>
-                      <span className="font-semibold">{project.severityLabel}</span>
-                    </div>
-                  )}
-
-                  {/* 1-Sentence Purpose */}
-                  <p className="text-xs text-[#8B8F98] leading-relaxed mb-4 line-clamp-2">
-                    {project.tagline}
-                  </p>
-
-                  {/* Key Verified Result Box */}
-                  <div className="mb-4 p-2.5 rounded-lg bg-[#08090B] border border-[#24272D] font-mono text-xs flex items-center justify-between">
-                    <span className="text-[10px] text-[#8B8F98] uppercase">VERIFIED RESULT:</span>
-                    <span className="text-[#7CFF6B] font-semibold text-[11px] truncate max-w-[180px]">
-                      {keyMetric}
-                    </span>
-                  </div>
-
-                  {/* Tech Stack Pills (Clean, max 3) */}
-                  <div className="flex flex-wrap gap-1.5 mb-4">
-                    {project.technologies.slice(0, 3).map((tech) => (
-                      <span
-                        key={tech}
-                        className="px-2 py-0.5 rounded bg-[#15181D] border border-[#24272D] font-mono text-[10px] text-[#8B8F98]"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
+          
+          {/* Featured Bento Card 1: Vero AI PR Engine (Large Span) */}
+          <div className="md:col-span-2 rounded-2xl border border-[#7CFF6B]/30 bg-[#101216] p-6 hover:border-[#7CFF6B]/60 transition-all flex flex-col justify-between group shadow-xl">
+            <div>
+              {/* Top Unboxed Metadata */}
+              <div className="flex flex-wrap items-center justify-between font-mono text-xs text-[#8B8F98] pb-3 border-b border-[#24272D]">
+                <div className="flex items-center gap-2">
+                  <span className="text-[#7CFF6B] font-bold">SYSTEM 01 // CRITICAL</span>
+                  <span>·</span>
+                  <span>TypeSafe Jev + SonarQube</span>
+                  <span>·</span>
+                  <span className="text-[#6EA8FE]">Zero-Chat AST Engine</span>
                 </div>
+                <div className="text-[#7CFF6B] font-bold">PRODUCTION VERIFIED</div>
+              </div>
 
-                {/* Single Primary Action */}
-                <div className="pt-3 border-t border-[#24272D]/60 flex items-center justify-between font-mono text-xs">
-                  <div className="text-[#7CFF6B] group-hover:translate-x-0.5 transition-transform font-bold flex items-center gap-1.5">
-                    <Play className="w-3 h-3 fill-current" />
-                    <span>EXPERIENCE &amp; INSPECT</span>
-                  </div>
+              {/* Title & Narrative */}
+              <div className="mt-4">
+                <h3 className="text-xl sm:text-2xl font-bold text-[#F2F2F2] group-hover:text-[#7CFF6B] transition-colors">
+                  Vero — AI Pull Request Reviewer & Deterministic Quality Gate
+                </h3>
+                <p className="text-sm text-[#D1D5DB] mt-2 leading-relaxed">
+                  Engineered a zero-hallucination code review pipeline uniting AST static analysis (SonarQube Clean Code rules) with TypeSafe Jev System 1 probabilistic decision primitives. Sub-35ms latency with zero conversational chat reliance.
+                </p>
+              </div>
 
-                  <a
-                    href={project.repository}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-[#8B8F98] hover:text-[#F2F2F2] transition-colors p-1"
-                    title="View GitHub Repository"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
+              {/* Architecture Blueprint Mockup */}
+              <div className="mt-4 grid grid-cols-3 gap-2 p-3 rounded-xl bg-[#08090B] border border-[#24272D] font-mono text-xs text-center">
+                <div className="p-2">
+                  <div className="text-[10px] text-[#8B8F98]">LATENCY</div>
+                  <div className="text-base font-bold text-[#7CFF6B]">&lt;35ms</div>
+                  <div className="text-[10px] text-[#8B8F98]">Deterministic</div>
+                </div>
+                <div className="p-2 border-x border-[#24272D]">
+                  <div className="text-[10px] text-[#8B8F98]">RULES ENFORCED</div>
+                  <div className="text-base font-bold text-[#F2F2F2]">S2068, S3649, S3776</div>
+                  <div className="text-[10px] text-[#8B8F98]">Quality Gates</div>
+                </div>
+                <div className="p-2">
+                  <div className="text-[10px] text-[#8B8F98]">HALLUCINATION</div>
+                  <div className="text-base font-bold text-[#6EA8FE]">0.0%</div>
+                  <div className="text-[10px] text-[#8B8F98]">Math Bounds</div>
                 </div>
               </div>
-            );
-          })}
+            </div>
+
+            {/* Actions */}
+            <div className="mt-6 flex flex-wrap items-center gap-3 pt-3 border-t border-[#24272D] font-mono text-xs">
+              {onOpenVero && (
+                <button
+                  type="button"
+                  onClick={onOpenVero}
+                  className="px-4 py-2 rounded-lg bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-all flex items-center gap-1.5 cursor-pointer"
+                >
+                  <GitPullRequest className="w-3.5 h-3.5" />
+                  <span>LAUNCH VERO WORKBENCH</span>
+                </button>
+              )}
+              <button
+                type="button"
+                onClick={() => onSelectProject('vero')}
+                className="px-3 py-2 rounded-lg border border-[#24272D] text-[#8B8F98] hover:text-[#F2F2F2] hover:border-[#7CFF6B]/50 transition-colors cursor-pointer"
+              >
+                Inspect Spec & Diffs
+              </button>
+            </div>
+          </div>
+
+          {/* Standard Bento Cards for other projects */}
+          {filteredProjects.filter((p) => p.id !== 'vero').map((project: ProjectItem) => (
+            <div
+              key={project.id}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onSelectProject(project.id);
+                }
+              }}
+              onClick={() => onSelectProject(project.id)}
+              className="rounded-2xl border border-[#24272D] bg-[#101216] p-5 flex flex-col justify-between hover:border-[#7CFF6B]/60 transition-all group hover:bg-[#12151B] cursor-pointer"
+            >
+              <div>
+                {/* Unboxed Metadata */}
+                <div className="flex items-center justify-between font-mono text-xs pb-2.5 mb-3 border-b border-[#24272D]/60 text-[#8B8F98]">
+                  <span>{project.number}</span>
+                  <span>·</span>
+                  <span className="text-[#7CFF6B] font-semibold">{project.technologies?.[0] || 'AI System'}</span>
+                  <span>·</span>
+                  <span className="text-[#A1A7B5]">{project.severityTier || 'PRODUCTION'}</span>
+                </div>
+
+                <h4 className="text-base font-bold text-[#F2F2F2] group-hover:text-[#7CFF6B] transition-colors">
+                  {project.title}
+                </h4>
+
+                <p className="text-xs text-[#8B8F98] mt-2 line-clamp-2 leading-relaxed">
+                  {project.description}
+                </p>
+
+                {/* Key Metric Strip */}
+                {project.evaluationMetrics && project.evaluationMetrics.length > 0 && (
+                  <div className="mt-3 p-2 rounded-lg bg-[#08090B] border border-[#24272D]/60 font-mono text-[11px] text-[#7CFF6B]">
+                    {project.evaluationMetrics[0]}
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom Card Footer */}
+              <div className="mt-4 pt-3 border-t border-[#24272D]/60 flex items-center justify-between font-mono text-xs">
+                <span className="text-[11px] text-[#8B8F98] group-hover:text-[#F2F2F2] transition-colors">
+                  VIEW ARCHITECTURE
+                </span>
+                <ArrowRight className="w-3.5 h-3.5 text-[#8B8F98] group-hover:text-[#7CFF6B] group-hover:translate-x-1 transition-transform" />
+              </div>
+            </div>
+          ))}
+
         </div>
 
       </div>

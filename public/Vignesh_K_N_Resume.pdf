@@ -10,7 +10,7 @@
 endobj
 4 0 obj
 <<
-/Length 8017
+/Length 8012
 >>
 stream
 0.200025 w
@@ -58,8 +58,8 @@ BT
 9.7749999999999986 TL
 0.059 0.078 0.098 rg
 36. 753.8899999999999864 Td
-(Results-driven AI Software Engineer with 4+ years of experience in full-stack engineering, cloud automation, and API integration. Expertise) Tj
-T* (in architecting production-grade Generative AI, LLM orchestration, Agentic workflows, RAG, and NLP pipelines.) Tj
+(Results-driven AI Software Engineer with 4+ years across .NET Core 8, Azure Serverless, and production AI. Architect of Vero) Tj
+T* (\(zero-hallucination PR analysis engine\), fine-tuned open-weight LLMs, and enterprise IAM automation for 6,000+ users.) Tj
 ET
 BT
 /F2 11 Tf
@@ -641,7 +641,7 @@ endobj
 21 0 obj
 <<
 /Producer (jsPDF 2.5.2)
-/CreationDate (D:20261009024812-00'00')
+/CreationDate (D:20261009041939-00'00')
 >>
 endobj
 22 0 obj
@@ -655,35 +655,35 @@ endobj
 xref
 0 23
 0000000000 65535 f 
-0000009161 00000 n 
-0000010986 00000 n 
+0000009156 00000 n 
+0000010981 00000 n 
 0000000015 00000 n 
 0000000152 00000 n 
-0000008221 00000 n 
-0000008358 00000 n 
-0000009224 00000 n 
-0000009349 00000 n 
-0000009479 00000 n 
-0000009612 00000 n 
-0000009750 00000 n 
-0000009874 00000 n 
-0000010003 00000 n 
-0000010135 00000 n 
-0000010271 00000 n 
-0000010399 00000 n 
-0000010526 00000 n 
-0000010655 00000 n 
-0000010788 00000 n 
-0000010890 00000 n 
-0000011236 00000 n 
-0000011322 00000 n 
+0000008216 00000 n 
+0000008353 00000 n 
+0000009219 00000 n 
+0000009344 00000 n 
+0000009474 00000 n 
+0000009607 00000 n 
+0000009745 00000 n 
+0000009869 00000 n 
+0000009998 00000 n 
+0000010130 00000 n 
+0000010266 00000 n 
+0000010394 00000 n 
+0000010521 00000 n 
+0000010650 00000 n 
+0000010783 00000 n 
+0000010885 00000 n 
+0000011231 00000 n 
+0000011317 00000 n 
 trailer
 <<
 /Size 23
 /Root 22 0 R
 /Info 21 0 R
-/ID [ <DFA7A00E4FE4A2D5D2B0578ED36B8054> <DFA7A00E4FE4A2D5D2B0578ED36B8054> ]
+/ID [ <22C4A2DCE91D1CC141509A9D1BE2B4F8> <22C4A2DCE91D1CC141509A9D1BE2B4F8> ]
 >>
 startxref
-11426
+11421
 %%EOF

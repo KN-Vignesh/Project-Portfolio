@@ -13,6 +13,10 @@ import { EducationCertificationsSection } from './components/EducationCertificat
 import { ContactSection } from './components/ContactSection';
 import { GeminiAIAssistant } from './components/GeminiAIAssistant';
 import { ResumeModal } from './components/ResumeModal';
+import { CommandPalette } from './components/CommandPalette';
+import { LiveAITrendsSection } from './components/LiveAITrendsSection';
+import { Interactive3DProjectStage, ThreeDSceneType } from './components/Interactive3DProjectStage';
+import { InspectSpecDrawer } from './components/InspectSpecDrawer';
 import { Footer } from './components/Footer';
 import { OfflineIndicator } from './components/OfflineIndicator';
 import { MobileAppDock } from './components/MobileAppDock';
@@ -25,7 +29,21 @@ export default function App() {
   const [activeSection, setActiveSection] = useState<string>('hero');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isResumeOpen, setIsResumeOpen] = useState<boolean>(false);
+  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState<boolean>(false);
+  const [selectedSpecScene, setSelectedSpecScene] = useState<ThreeDSceneType | null>(null);
   const { projects, loading: projectsLoading, error: projectsError } = useProjects();
+
+  // Global shortcut for Command Palette (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Check URL hash on initial load and navigation for direct project deep-linking or VERO engine
   useEffect(() => {
@@ -78,6 +96,8 @@ export default function App() {
     const sections = [
       'hero',
       'projects',
+      '3d-workbench',
+      'ai-trends',
       'engineering-system',
       'about',
       'ai-lab',
@@ -187,6 +207,7 @@ export default function App() {
         onNavigate={handleNavigate}
         onOpenResume={() => setIsResumeOpen(true)}
         onOpenVero={handleOpenVero}
+        onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
       />
 
       {/* Main Multi-Section Portfolio Experience with mobile dock clearance */}
@@ -197,6 +218,7 @@ export default function App() {
           onExploreSystem={() => handleNavigate('engineering-system')}
           onOpenResume={() => setIsResumeOpen(true)}
           onOpenVero={handleOpenVero}
+          onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
         />
 
         {/* 02 / PROJECTS (EXPERIENCE INITIALLY) */}
@@ -207,6 +229,18 @@ export default function App() {
           onSelectProject={handleOpenProject}
           onOpenVero={handleOpenVero}
         />
+
+        {/* 02.2 / INTERACTIVE 3D MULTI-SCENE EXPERIMENTATION WORKBENCH */}
+        <section id="3d-workbench" className="py-16 border-t border-[#24272D] bg-[#08090B]">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <Interactive3DProjectStage
+              onInspectSpec={(scene) => setSelectedSpecScene(scene)}
+            />
+          </div>
+        </section>
+
+        {/* 02.5 / LIVE AUTOMATED AI RESEARCH & REPOSITORY TRENDS */}
+        <LiveAITrendsSection />
 
         {/* 03 / ENGINEERING SYSTEM */}
         <EngineeringSystemSection
@@ -257,6 +291,22 @@ export default function App() {
         onClose={() => setIsResumeOpen(false)}
         projects={projects}
         projectsLoading={projectsLoading}
+      />
+
+      {/* Global Command Palette Dialog */}
+      <CommandPalette
+        isOpen={isCommandPaletteOpen}
+        onClose={() => setIsCommandPaletteOpen(false)}
+        onSelectSection={handleNavigate}
+        onOpenResume={() => setIsResumeOpen(true)}
+        onOpenVero={handleOpenVero}
+      />
+
+      {/* Technical Slide-Over Specification Drawer */}
+      <InspectSpecDrawer
+        isOpen={Boolean(selectedSpecScene)}
+        onClose={() => setSelectedSpecScene(null)}
+        sceneType={selectedSpecScene}
       />
 
       {/* Gemini AI Assistant Floating Widget */}
