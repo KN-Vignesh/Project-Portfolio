@@ -45,19 +45,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <span className="text-[#6EA8FE]">SonarCloud Gate: PASSING (A)</span>
             </div>
 
-            {/* Name & Primary Role */}
-            <div className="space-y-2">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-[#F2F2F2]">
-                {PERSONAL_INFO.name}
-              </h1>
-              <div className="text-lg sm:text-xl font-mono text-[#7CFF6B] font-medium tracking-wide">
-                {PERSONAL_INFO.title}
+            {/* Engineering Headline per Design Prompt */}
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-xs font-mono text-[#7CFF6B] tracking-wider uppercase">
+                <span>{PERSONAL_INFO.name}</span>
+                <span>·</span>
+                <span>{PERSONAL_INFO.title}</span>
               </div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-[#F2F2F2] leading-tight">
+                I build AI systems. Explore the problems, experiments, and engineering behind them.
+              </h1>
             </div>
 
-            {/* Focused 2-Sentence Value Proposition */}
-            <p className="text-base text-[#D1D5DB] leading-relaxed max-w-xl">
-              {PERSONAL_INFO.supportingText}
+            {/* Focused 1-Sentence Value Proposition */}
+            <p className="text-sm sm:text-base text-[#D1D5DB] leading-relaxed max-w-xl">
+              Engineering scalable .NET 8 backends, PEFT fine-tuned LLMs, and deterministic AST code security—each documented with interactive experiments and verified evidence.
             </p>
 
             {/* Primary Action Buttons */}
@@ -67,7 +69,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 onClick={onExploreProjects}
                 className="px-5 py-2.5 rounded-lg bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-all shadow-md shadow-[#7CFF6B]/15 flex items-center gap-2 cursor-pointer"
               >
-                <span>EXPLORE BENTO PROJECTS</span>
+                <span>EXPLORE PROJECTS (9 Systems)</span>
                 <ArrowDown className="w-4 h-4" />
               </button>
 

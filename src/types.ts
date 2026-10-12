@@ -12,6 +12,33 @@ export interface ProjectCodeFile {
   };
 }
 
+export interface ProjectArchitectureNode {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  sourceFile: string;
+}
+
+export interface ProjectFailureAnalysis {
+  challenge: string;
+  whatFailed: string;
+  rootCause: string;
+  resolution: string;
+  verification: string;
+  remainingLimitations: string;
+}
+
+export interface ProjectBeforeAfterLab {
+  baselineMetric: string;
+  solutionMetric: string;
+  inputCondition: string;
+  baselineOutcome: string;
+  solutionOutcome: string;
+  whatChanged: string;
+  limitation: string;
+}
+
 export interface ProjectEngineeringStory {
   problem: string;
   baseline: string;
@@ -26,6 +53,11 @@ export interface ProjectEngineeringStory {
   results: string[];
   limitations: string[];
   futureWork: string[];
+  howItWorks?: string;
+  keyTakeaway?: string;
+  failureAnalysis?: ProjectFailureAnalysis;
+  beforeAfterLab?: ProjectBeforeAfterLab;
+  architectureNodes?: ProjectArchitectureNode[];
 }
 
 export interface ProjectItem {

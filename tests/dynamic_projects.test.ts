@@ -66,5 +66,21 @@ test('Project Registry Contract: all 9 projects have verified 13-stage engineeri
     }
 
     assert.ok(Array.isArray(project.codeFiles) && project.codeFiles.length > 0, `Project ${project.id} must provide key code files`);
+
+    // Level 1: Beginner-Friendly Plain Explanation & Key Takeaway
+    assert.ok(project.story.howItWorks && project.story.howItWorks.length > 20, `Project ${project.id} must have plain howItWorks description`);
+    assert.ok(project.story.keyTakeaway && project.story.keyTakeaway.length > 15, `Project ${project.id} must have concise keyTakeaway`);
+
+    // Priority 1: Interactive Architecture Explorer Nodes
+    assert.ok(Array.isArray(project.story.architectureNodes) && project.story.architectureNodes.length >= 4, `Project ${project.id} must have >=4 architecture nodes`);
+
+    // Priority 2: Before-and-After Evidence Lab
+    assert.ok(project.story.beforeAfterLab?.baselineMetric, `Project ${project.id} must have beforeAfterLab.baselineMetric`);
+    assert.ok(project.story.beforeAfterLab?.solutionMetric, `Project ${project.id} must have beforeAfterLab.solutionMetric`);
+
+    // Priority 3: Failure and Debugging Analysis
+    assert.ok(project.story.failureAnalysis?.challenge, `Project ${project.id} must have failureAnalysis.challenge`);
+    assert.ok(project.story.failureAnalysis?.whatFailed, `Project ${project.id} must have failureAnalysis.whatFailed`);
+    assert.ok(project.story.failureAnalysis?.resolution, `Project ${project.id} must have failureAnalysis.resolution`);
   }
 });
