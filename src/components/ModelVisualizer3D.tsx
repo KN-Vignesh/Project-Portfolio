@@ -10,27 +10,37 @@ export const ModelVisualizer3D: React.FC = () => {
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    const currentMount = mountRef.current;
+    if (!currentMount) return;
 
-    const width = mountRef.current.clientWidth || 400;
-    const height = mountRef.current.clientHeight || 360;
+    // Purge any stale canvas instances to prevent duplicate canvases
+    const existingCanvases = currentMount.querySelectorAll('canvas');
+    existingCanvases.forEach((c) => c.remove());
+
+    const width = currentMount.clientWidth || 400;
+    const height = currentMount.clientHeight || 360;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 14);
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
+    // Adjusted camera distance with generous margin to completely eliminate clipping at any rotation
+    camera.position.set(0, 0, 16.5);
 
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      mountRef.current.appendChild(renderer.domElement);
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      renderer.domElement.style.outline = 'none';
+      currentMount.appendChild(renderer.domElement);
     } catch {
       return;
     }
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
     const pointLight = new THREE.PointLight(0x7cff6b, 3, 50);
@@ -41,8 +51,9 @@ export const ModelVisualizer3D: React.FC = () => {
     secondaryLight.position.set(-6, -4, 6);
     scene.add(secondaryLight);
 
-    // Root Group
+    // Root Group with optimal scale
     const rootGroup = new THREE.Group();
+    rootGroup.scale.set(0.92, 0.92, 0.92);
     scene.add(rootGroup);
 
     // Geometries & Materials
@@ -74,28 +85,34 @@ export const ModelVisualizer3D: React.FC = () => {
     const wireMat = new THREE.LineBasicMaterial({
       color: 0x24272d,
       transparent: true,
-      opacity: 0.4
+      opacity: 0.5
     });
 
-    // Populate Tensor Blocks
+    // Populate Tensor Blocks with precise symmetrical centering around (0,0,0)
     const gridSize = 4;
+    const spacing = 1.1;
+    const halfSpan = ((gridSize - 1) / 2) * spacing;
     const blocks: THREE.Mesh[] = [];
 
-    for (let x = -gridSize / 2; x < gridSize / 2; x++) {
-      for (let y = -gridSize / 2; y < gridSize / 2; y++) {
-        for (let z = -gridSize / 2; z < gridSize / 2; z++) {
-          const isAdapterBlock = (x === -gridSize / 2 || x === gridSize / 2 - 1) && Math.abs(y) <= 1;
+    for (let x = 0; x < gridSize; x++) {
+      for (let y = 0; y < gridSize; y++) {
+        for (let z = 0; z < gridSize; z++) {
+          const posX = x * spacing - halfSpan;
+          const posY = y * spacing - halfSpan;
+          const posZ = z * spacing - halfSpan;
+          const isAdapterBlock = (x === 0 || x === gridSize - 1) && Math.abs(y - 1.5) <= 1;
           const material = mode === 'FP16' ? fp16Mat : mode === 'QLORA_NF4' ? nf4Mat : (isAdapterBlock ? loraMat : fp16Mat);
           const mesh = new THREE.Mesh(baseBoxGeo, material);
-          mesh.position.set(x * 1.1, y * 1.1, z * 1.1);
+          mesh.position.set(posX, posY, posZ);
           rootGroup.add(mesh);
           blocks.push(mesh);
         }
       }
     }
 
-    // Outer bounding cage
-    const cageGeo = new THREE.BoxGeometry(4.8, 4.8, 4.8);
+    // Outer bounding cage: sized symmetrically to enclose the tensor
+    const cageSize = gridSize * spacing + 0.3;
+    const cageGeo = new THREE.BoxGeometry(cageSize, cageSize, cageSize);
     const cageEdges = new THREE.EdgesGeometry(cageGeo);
     const cage = new THREE.LineSegments(cageEdges, wireMat);
     rootGroup.add(cage);
@@ -137,16 +154,18 @@ export const ModelVisualizer3D: React.FC = () => {
     window.addEventListener('touchmove', onPointerMove, { passive: true });
     window.addEventListener('touchend', onPointerUp);
 
-    // Resize handler
-    const onResize = () => {
-      if (!mountRef.current) return;
-      const newW = mountRef.current.clientWidth;
-      const newH = mountRef.current.clientHeight;
-      camera.aspect = newW / newH;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newW, newH);
-    };
-    window.addEventListener('resize', onResize);
+    // ResizeObserver for reliable dimension synchronisation
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width: newW, height: newH } = entry.contentRect;
+        if (newW > 0 && newH > 0) {
+          camera.aspect = newW / newH;
+          camera.updateProjectionMatrix();
+          renderer.setSize(newW, newH, false);
+        }
+      }
+    });
+    resizeObserver.observe(currentMount);
 
     // Animation Loop
     let animationFrameId: number;
@@ -168,11 +187,18 @@ export const ModelVisualizer3D: React.FC = () => {
       domElement.removeEventListener('touchstart', onPointerDown);
       window.removeEventListener('touchmove', onPointerMove);
       window.removeEventListener('touchend', onPointerUp);
-      window.removeEventListener('resize', onResize);
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
+      resizeObserver.disconnect();
+      if (currentMount && renderer.domElement && currentMount.contains(renderer.domElement)) {
+        currentMount.removeChild(renderer.domElement);
       }
       renderer.dispose();
+      baseBoxGeo.dispose();
+      cageGeo.dispose();
+      cageEdges.dispose();
+      fp16Mat.dispose();
+      nf4Mat.dispose();
+      loraMat.dispose();
+      wireMat.dispose();
     };
   }, [mode]);
 
@@ -203,7 +229,7 @@ export const ModelVisualizer3D: React.FC = () => {
       {/* 3D Canvas Area */}
       <div
         ref={mountRef}
-        className="w-full h-64 sm:h-72 my-2 cursor-grab active:cursor-grabbing relative flex items-center justify-center"
+        className="w-full h-72 sm:h-80 my-2 cursor-grab active:cursor-grabbing relative flex items-center justify-center overflow-hidden"
       >
         <div className="absolute bottom-2 left-2 z-10 pointer-events-none text-[10px] font-mono text-[#8B8F98]/70">
           * Drag to rotate tensor volume

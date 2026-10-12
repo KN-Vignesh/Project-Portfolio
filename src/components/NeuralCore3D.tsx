@@ -19,9 +19,16 @@ export const NeuralCore3D: React.FC = () => {
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
     camera.position.z = 9;
 
+    // Purge any stale canvas instances to prevent duplicate canvases
+    const existingCanvases = currentMount.querySelectorAll('canvas');
+    existingCanvases.forEach((c) => c.remove());
+
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.domElement.style.display = 'block';
+    renderer.domElement.style.width = '100%';
+    renderer.domElement.style.height = '100%';
     currentMount.appendChild(renderer.domElement);
 
     // Neural Core Node Graph

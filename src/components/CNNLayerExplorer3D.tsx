@@ -79,11 +79,19 @@ export const CNNLayerExplorer3D: React.FC<CNNLayerExplorer3DProps> = ({
     const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
     camera.position.set(0, 2, 14);
 
+    // Purge any stale canvas instances to prevent duplicate canvases
+    const existingCanvases = currentMount.querySelectorAll('canvas');
+    existingCanvases.forEach((c) => c.remove());
+
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      renderer.domElement.style.outline = 'none';
       currentMount.appendChild(renderer.domElement);
     } catch {
       return;
