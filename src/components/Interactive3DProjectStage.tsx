@@ -23,21 +23,31 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
   const [selectedAgentNode, setSelectedAgentNode] = useState<string>('Planner Agent');
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    const currentMount = mountRef.current;
+    if (!currentMount) return;
 
-    const width = mountRef.current.clientWidth || 600;
-    const height = mountRef.current.clientHeight || 420;
+    // Purge any stale canvas instances to prevent duplicate canvases
+    const existingCanvases = currentMount.querySelectorAll('canvas');
+    existingCanvases.forEach((c) => c.remove());
+
+    const width = currentMount.clientWidth || 600;
+    const height = currentMount.clientHeight || 420;
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-    camera.position.set(0, 0, 16);
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
+    // Camera distance with ample margin to prevent geometry clipping across all aspect ratios
+    camera.position.set(0, 0, 19);
 
     let renderer: THREE.WebGLRenderer;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      mountRef.current.appendChild(renderer.domElement);
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      renderer.domElement.style.outline = 'none';
+      currentMount.appendChild(renderer.domElement);
     } catch {
       return;
     }
@@ -55,6 +65,7 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
     scene.add(accentLight);
 
     const rootGroup = new THREE.Group();
+    rootGroup.scale.set(0.88, 0.88, 0.88);
     scene.add(rootGroup);
 
     // BUILD ACTIVE 3D SCENE
@@ -250,16 +261,18 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
     window.addEventListener('touchmove', onPointerMove, { passive: true });
     window.addEventListener('touchend', onPointerUp);
 
-    // Resize
-    const onResize = () => {
-      if (!mountRef.current) return;
-      const newW = mountRef.current.clientWidth;
-      const newH = mountRef.current.clientHeight;
-      camera.aspect = newW / newH;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newW, newH);
-    };
-    window.addEventListener('resize', onResize);
+    // ResizeObserver for responsive dimension sync
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const { width: newW, height: newH } = entry.contentRect;
+        if (newW > 0 && newH > 0) {
+          camera.aspect = newW / newH;
+          camera.updateProjectionMatrix();
+          renderer.setSize(newW, newH, false);
+        }
+      }
+    });
+    resizeObserver.observe(currentMount);
 
     // Animate
     let animId: number;
@@ -281,9 +294,9 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
       domElement.removeEventListener('touchstart', onPointerDown);
       window.removeEventListener('touchmove', onPointerMove);
       window.removeEventListener('touchend', onPointerUp);
-      window.removeEventListener('resize', onResize);
-      if (mountRef.current && renderer.domElement) {
-        mountRef.current.removeChild(renderer.domElement);
+      resizeObserver.disconnect();
+      if (currentMount && renderer.domElement && currentMount.contains(renderer.domElement)) {
+        currentMount.removeChild(renderer.domElement);
       }
       renderer.dispose();
     };
