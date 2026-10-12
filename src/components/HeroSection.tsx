@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { ArrowDown, ExternalLink, GitPullRequest, Layers, Cpu, ShieldCheck, Terminal, Search } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/portfolioData';
 import { ModelVisualizer3D } from './ModelVisualizer3D';
+import { NeuralCore3D } from './NeuralCore3D';
 import { HeroPRPlayground } from './HeroPRPlayground';
 
 interface HeroSectionProps {
@@ -19,7 +20,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenVero,
   onOpenCommandPalette
 }) => {
-  const [heroTab, setHeroTab] = useState<'3d-model' | 'pr-playground'>('3d-model');
+  const [heroTab, setHeroTab] = useState<'3d-tensor' | '3d-core' | 'pr-playground'>('3d-tensor');
 
   return (
     <section id="hero" className="relative min-h-[90vh] pt-28 pb-16 flex flex-col justify-between overflow-hidden tech-grid">
@@ -130,40 +131,51 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Right Column: Interactive 3D Model Visualizer & PR Sandbox */}
           <div className="lg:col-span-6 space-y-3">
             {/* Segmented Switcher */}
-            <div className="flex items-center p-1 rounded-xl bg-[#08090B] border border-[#24272D] font-mono text-xs">
+            <div className="flex items-center p-1 rounded-xl bg-[#08090B] border border-[#24272D] font-mono text-xs overflow-x-auto">
               <button
                 type="button"
-                onClick={() => setHeroTab('3d-model')}
-                className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-semibold ${
-                  heroTab === '3d-model'
+                onClick={() => setHeroTab('3d-tensor')}
+                className={`flex-1 py-1.5 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-semibold whitespace-nowrap text-[11px] sm:text-xs ${
+                  heroTab === '3d-tensor'
                     ? 'bg-[#101216] text-[#7CFF6B] border border-[#7CFF6B]/30 shadow-sm'
                     : 'text-[#8B8F98] hover:text-[#F2F2F2]'
                 }`}
               >
                 <Cpu className="w-3.5 h-3.5" />
-                <span>3D TENSOR & QLORA</span>
+                <span>3D TENSORS</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setHeroTab('3d-core')}
+                className={`flex-1 py-1.5 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-semibold whitespace-nowrap text-[11px] sm:text-xs ${
+                  heroTab === '3d-core'
+                    ? 'bg-[#101216] text-[#7CFF6B] border border-[#7CFF6B]/30 shadow-sm'
+                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                }`}
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>3D NEURAL GRAPH</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setHeroTab('pr-playground')}
-                className={`flex-1 py-1.5 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-semibold ${
+                className={`flex-1 py-1.5 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer font-semibold whitespace-nowrap text-[11px] sm:text-xs ${
                   heroTab === 'pr-playground'
                     ? 'bg-[#101216] text-[#7CFF6B] border border-[#7CFF6B]/30 shadow-sm'
                     : 'text-[#8B8F98] hover:text-[#F2F2F2]'
                 }`}
               >
                 <GitPullRequest className="w-3.5 h-3.5" />
-                <span>LIVE PR REVIEW PLAYGROUND</span>
+                <span>PR SANDBOX</span>
               </button>
             </div>
 
             {/* Active Interactive Widget */}
-            {heroTab === '3d-model' ? (
-              <ModelVisualizer3D />
-            ) : (
-              <HeroPRPlayground onOpenFullVero={onOpenVero} />
-            )}
+            {heroTab === '3d-tensor' && <ModelVisualizer3D />}
+            {heroTab === '3d-core' && <NeuralCore3D />}
+            {heroTab === 'pr-playground' && <HeroPRPlayground onOpenFullVero={onOpenVero} />}
           </div>
 
         </div>

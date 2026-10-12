@@ -24,3 +24,47 @@ test('Dynamic Projects Data Contract: validates schema and 3D scene bindings', (
   assert.match(sampleProject.threeDScene, /^(PEFT_LORA|MULTI_AGENT|VERO_AST|VECTOR_RAG)$/);
   assert.ok(sampleProject.specDetails.length > 20);
 });
+
+test('Project Registry Contract: all 9 projects have verified 13-stage engineering stories and source code', async () => {
+  const fs = await import('node:fs/promises');
+  const path = await import('node:path');
+  const raw = await fs.readFile(path.resolve(process.cwd(), 'public/projects.json'), 'utf-8');
+  const data = JSON.parse(raw);
+
+  assert.ok(Array.isArray(data.projects));
+  assert.equal(data.projects.length, 9, 'Must contain all 9 verified portfolio projects');
+
+  const requiredStoryKeys = [
+    'problem',
+    'baseline',
+    'constraints',
+    'investigation',
+    'solution',
+    'architecture',
+    'personalContribution',
+    'decisionRationale',
+    'experiment',
+    'validation',
+    'results',
+    'limitations',
+    'futureWork'
+  ];
+
+  for (const project of data.projects) {
+    assert.ok(project.id, `Project must have an id`);
+    assert.ok(project.title, `Project ${project.id} must have a title`);
+    assert.ok(project.technologies?.length > 0, `Project ${project.id} must have technologies`);
+    assert.ok(project.story, `Project ${project.id} must have an engineering story`);
+
+    for (const key of requiredStoryKeys) {
+      assert.ok(project.story[key], `Project ${project.id} story is missing field: ${key}`);
+      if (Array.isArray(project.story[key])) {
+        assert.ok(project.story[key].length > 0, `Project ${project.id} story field ${key} must not be empty`);
+      } else {
+        assert.ok(typeof project.story[key] === 'string' && project.story[key].length > 10, `Project ${project.id} story field ${key} must have content`);
+      }
+    }
+
+    assert.ok(Array.isArray(project.codeFiles) && project.codeFiles.length > 0, `Project ${project.id} must provide key code files`);
+  }
+});

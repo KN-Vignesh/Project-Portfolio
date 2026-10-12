@@ -12,6 +12,22 @@ export interface ProjectCodeFile {
   };
 }
 
+export interface ProjectEngineeringStory {
+  problem: string;
+  baseline: string;
+  constraints: string[];
+  investigation: string;
+  solution: string;
+  architecture: string;
+  personalContribution: string;
+  decisionRationale: string[];
+  experiment: string;
+  validation: string;
+  results: string[];
+  limitations: string[];
+  futureWork: string[];
+}
+
 export interface ProjectItem {
   id: string;
   number: string;
@@ -46,6 +62,7 @@ export interface ProjectItem {
     limitations: string[];
     futureImprovements: string[];
   };
+  story?: ProjectEngineeringStory;
   codeFiles?: ProjectCodeFile[];
   standaloneRepoInfo?: {
     repoName: string;

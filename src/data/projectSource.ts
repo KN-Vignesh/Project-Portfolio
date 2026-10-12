@@ -51,13 +51,19 @@ export async function fetchProjects(): Promise<ProjectItem[]> {
       return loadFallbackProjects();
     }
 
+    const localFallback = await loadFallbackProjects();
+    const localMap = new Map(localFallback.map((p) => [p.id, p]));
+
     return remoteProjects.map((project) => {
-      if (project.repository) return project;
-      const projectPath = project.projectPath as string;
-      return {
+      const local = localMap.get(project.id);
+      const enriched: ProjectItem = {
         ...project,
-        repository: `https://github.com/KN-Vignesh/Projects/tree/main/${projectPath.replace(/^\/+/, '')}`,
+        story: project.story || local?.story,
+        codeFiles: project.codeFiles || local?.codeFiles,
+        sections: project.sections || local?.sections,
+        repository: project.repository || (project.projectPath ? `https://github.com/KN-Vignesh/Projects/tree/main/${(project.projectPath as string).replace(/^\/+/, '')}` : (local?.repository || 'https://github.com/KN-Vignesh/Projects'))
       };
+      return enriched;
     });
   } catch (err) {
     console.info('[Project Registry] Remote fetch failed. Serving verified local project registry.', err);

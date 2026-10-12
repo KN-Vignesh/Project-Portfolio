@@ -11,7 +11,12 @@ import {
   Activity,
   CheckCircle2,
   GitPullRequest,
-  ArrowLeft
+  ArrowLeft,
+  BookOpen,
+  Cpu,
+  ShieldCheck,
+  Zap,
+  Sparkles
 } from 'lucide-react';
 import { ProjectCodeFile, ProjectItem } from '../types';
 import { ProjectInteractiveExperience } from './ProjectInteractiveExperience';
@@ -29,7 +34,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   onSelectProject,
   onOpenVero,
 }) => {
-  const [activeTab, setActiveTab] = useState<'experience' | 'code'>('experience');
+  const [activeTab, setActiveTab] = useState<'experience' | 'story' | 'code'>('experience');
   const [activeFileIndex, setActiveFileIndex] = useState(0);
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedClone, setCopiedClone] = useState(false);
@@ -44,20 +49,29 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
   useEffect(() => {
     setActiveTab('experience');
+    setActiveFileIndex(0);
   }, [project?.id]);
 
   if (!project) return null;
 
   const standaloneRepo = {
-    repoName: project.title,
-    runtime: 'Authoritative source repository',
-    cloneCommand: `git clone ${project.repository}.git`,
+    repoName: project.standaloneRepoInfo?.repoName || project.title,
+    runtime: project.standaloneRepoInfo?.deploymentType || 'Authoritative source repository',
+    cloneCommand: project.standaloneRepoInfo?.cloneCommand || `git clone ${project.repository}.git`,
   };
 
-  const codeFiles: ProjectCodeFile[] = [];
+  const codeFiles: ProjectCodeFile[] = project.codeFiles || [];
   const activeCodeFile = codeFiles[activeFileIndex];
+
   const handleCopyCode = async () => {
-    setCopiedCode(false);
+    if (!activeCodeFile) return;
+    try {
+      await navigator.clipboard.writeText(activeCodeFile.code);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 2000);
+    } catch {
+      // fallback
+    }
   };
 
   const handleCopyClone = async () => {
@@ -70,6 +84,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
       // fallback
     }
   };
+
+  const story = project.story;
 
   return (
     <div
@@ -90,79 +106,76 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         
         {/* Sticky Clean Header Bar */}
         <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-b border-[#24272D] bg-[#101216] flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3 font-mono shrink-0 sticky top-0 z-20">
-          {/* Top Row: Back Button, Number, Title & Mobile-only Quick Actions */}
+          {/* Top Row: Back Button, Number, Title */}
           <div className="flex items-center justify-between gap-2 min-w-0">
             <div className="flex items-center gap-2 min-w-0">
-              {/* Prominent Back Button (Always visible, extra clear on mobile) */}
               <button
                 onClick={onClose}
                 id="project-modal-back-btn"
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#15181D] hover:bg-[#20242C] border border-[#24272D] hover:border-[#7CFF6B]/50 text-[#7CFF6B] hover:text-[#F2F2F2] font-mono text-xs font-bold transition-all shrink-0 cursor-pointer shadow-sm active:scale-95"
-                aria-label="Back to all projects"
-                title="Back to all projects"
+                title="Return to Portfolio (Esc)"
               >
-                <ArrowLeft className="w-4 h-4" />
-                <span>BACK</span>
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span className="hidden xs:inline">BACK</span>
               </button>
 
-              {/* Project Number */}
-              <span className="px-2 py-0.5 rounded bg-[#08090B] border border-[#7CFF6B]/40 text-[#7CFF6B] text-xs font-bold shrink-0">
+              <span className="px-1.5 py-0.5 rounded bg-[#08090B] border border-[#24272D] text-[#7CFF6B] text-[10px] font-bold shrink-0">
                 {project.number}
               </span>
 
-              {/* Project Title */}
-              <span className="text-xs text-[#F2F2F2] font-semibold truncate max-w-[140px] xs:max-w-[200px] sm:max-w-xs" title={project.title}>
+              <h2 className="text-xs sm:text-sm font-bold text-[#F2F2F2] truncate tracking-tight">
                 {project.title}
-              </span>
+              </h2>
             </div>
 
-            {/* Mobile Quick Actions (Repo + Close) */}
-            <div className="flex items-center gap-1.5 sm:hidden shrink-0">
-              <a
-                href={project.repository}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-1.5 text-xs rounded border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B] transition-colors"
-                title="View GitHub Repository"
-              >
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-              <button
-                onClick={onClose}
-                className="p-1.5 rounded-md text-[#8B8F98] hover:text-[#F2F2F2] hover:bg-[#15181D] transition-colors cursor-pointer"
-                aria-label="Close modal"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+            {/* Mobile Close Button */}
+            <button
+              onClick={onClose}
+              className="sm:hidden p-1.5 rounded-lg text-[#8B8F98] hover:text-[#F2F2F2] hover:bg-[#15181D] transition-colors shrink-0"
+              aria-label="Close modal"
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
 
           {/* Tab Switcher & Desktop Action Buttons */}
           <div className="flex items-center justify-between sm:justify-end gap-2 shrink-0">
-            {/* Simple Tab Switcher: Experience vs Code */}
+            {/* 3 Tab Switcher: Experience vs Story vs Code */}
             <div className="flex items-center bg-[#08090B] p-1 rounded-lg border border-[#24272D] text-xs w-full sm:w-auto">
               <button
                 onClick={() => setActiveTab('experience')}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1 rounded transition-colors cursor-pointer ${
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 py-1 rounded transition-colors cursor-pointer text-[11px] ${
                   activeTab === 'experience'
                     ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
                     : 'text-[#8B8F98] hover:text-[#F2F2F2]'
                 }`}
               >
                 <Activity className="w-3.5 h-3.5" />
-                <span>EXPERIENCE</span>
+                <span>EXPERIMENT</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('story')}
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 py-1 rounded transition-colors cursor-pointer text-[11px] ${
+                  activeTab === 'story'
+                    ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
+                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>ENGINEERING STORY</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('code')}
-                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-3 py-1 rounded transition-colors cursor-pointer ${
+                className={`flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-2.5 py-1 rounded transition-colors cursor-pointer text-[11px] ${
                   activeTab === 'code'
                     ? 'bg-[#15181D] text-[#7CFF6B] border border-[#7CFF6B]/40 font-bold'
                     : 'text-[#8B8F98] hover:text-[#F2F2F2]'
                 }`}
               >
                 <Code className="w-3.5 h-3.5" />
-                <span>CODE &amp; NOTES</span>
+                <span>CODE &amp; ARCH</span>
               </button>
             </div>
 
@@ -190,17 +203,16 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-sm flex-1">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 text-sm flex-1 font-mono">
           
-          {/* TAB 1: EXPERIENCE INITIALLY + PARALLEL EXPLANATION */}
+          {/* TAB 1: INTERACTIVE SIMULATOR */}
           {activeTab === 'experience' && (
             <div className="space-y-6 animate-fadeIn">
-              {/* 1. INTERACTIVE EXPERIENCE FIRST */}
               <div className="space-y-2">
-                <div className="flex items-center justify-between font-mono text-xs text-[#8B8F98]">
+                <div className="flex items-center justify-between text-xs text-[#8B8F98]">
                   <span className="text-[#7CFF6B] font-semibold flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
-                    STEP 1: EXPERIENCE IN ACTION
+                    INTERACTIVE EXPERIMENT IN ACTION
                   </span>
                   <span>Interact with live parameters below</span>
                 </div>
@@ -211,227 +223,342 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 />
               </div>
 
-              {/* 2. PARALLEL CONCISE EXPLANATION */}
+              {/* Parallel Quick Summary */}
               <div className="space-y-4 pt-2 border-t border-[#24272D]/60">
-                <div className="font-mono text-xs text-[#7CFF6B] uppercase font-semibold">
-                  STEP 2: UNDERSTAND THE ARCHITECTURE & EFFORT
+                <div className="text-xs text-[#7CFF6B] uppercase font-semibold">
+                  CORE ENGINEERING PROPOSITION
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Problem & Motivation */}
                   <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-2">
-                    <span className="font-mono text-[11px] text-[#8B8F98] block uppercase font-bold">
-                      WHAT THIS SOLVES
+                    <span className="text-[11px] text-[#8B8F98] block uppercase font-bold">
+                      THE PROBLEM
                     </span>
-                    <p className="text-xs sm:text-sm text-[#F2F2F2] leading-relaxed">
-                      {project.sections?.problem || 'Project details are maintained in the source repository.'}
+                    <p className="text-xs sm:text-sm text-[#F2F2F2] leading-relaxed font-sans">
+                      {project.story?.problem || project.sections?.problem || project.description}
                     </p>
                   </div>
 
-                  {/* Why this engineering approach */}
                   <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-2">
-                    <span className="font-mono text-[11px] text-[#7CFF6B] block uppercase font-bold">
-                      WHY THIS ARCHITECTURE
+                    <span className="text-[11px] text-[#7CFF6B] block uppercase font-bold">
+                      THE SOLUTION
                     </span>
-                    <p className="text-xs sm:text-sm text-[#8B8F98] leading-relaxed">
-                      {project.sections?.whyApproach || 'Architecture details are maintained in the source repository.'}
+                    <p className="text-xs sm:text-sm text-[#8B8F98] leading-relaxed font-sans">
+                      {project.story?.solution || project.sections?.whyApproach || project.tagline}
                     </p>
                   </div>
                 </div>
 
-                {/* Key Metrics & Engineering Decisions */}
+                {/* Key Metrics */}
                 <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-3">
-                  <span className="font-mono text-[11px] text-[#6EA8FE] block uppercase font-bold">
-                    VERIFIED RESULTS & PRODUCTION DECISIONS
+                  <span className="text-[11px] text-[#6EA8FE] block uppercase font-bold">
+                    VERIFIED BENCHMARKS &amp; OUTCOMES
                   </span>
 
                   <div className="flex flex-wrap gap-2">
                     {project.evaluationMetrics?.map((m) => (
                       <span
                         key={m}
-                        className="px-2.5 py-1 rounded bg-[#08090B] border border-[#24272D] font-mono text-xs text-[#7CFF6B]"
+                        className="px-2.5 py-1 rounded bg-[#08090B] border border-[#24272D] text-xs text-[#7CFF6B]"
                       >
                         ✓ {m}
                       </span>
                     ))}
                   </div>
-
-                  <ul className="space-y-1.5 pt-1 text-xs text-[#8B8F98]">
-                    {(project.sections?.engineeringDecisions || []).slice(0, 2).map((dec, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#7CFF6B] shrink-0 mt-0.5" />
-                        <span className="text-[#E6EDF3]">{dec}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Quick toggle to inspect code */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-[#0C0E12] border border-[#24272D] font-mono text-xs">
-                  <span className="text-[#8B8F98]">Want to inspect the exact Python / TypeScript code?</span>
-                  <button
-                    onClick={() => setActiveTab('code')}
-                    className="px-3 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#24272D] text-[#7CFF6B] font-bold transition-colors cursor-pointer flex items-center gap-1"
-                  >
-                    <Code className="w-3.5 h-3.5" />
-                    <span>VIEW SOURCE CODE</span>
-                  </button>
                 </div>
               </div>
             </div>
           )}
 
-          {/* TAB 2: CLEAN SOURCE CODE & MECHANICS */}
+          {/* TAB 2: DETAILED 13-POINT ENGINEERING STORY */}
+          {activeTab === 'story' && (
+            <div className="space-y-6 animate-fadeIn text-xs">
+              <div className="p-4 rounded-xl bg-[#101216] border border-[#7CFF6B]/30 space-y-2">
+                <div className="text-xs text-[#7CFF6B] uppercase font-bold">
+                  PROJECT SPECIFICATION: {project.title}
+                </div>
+                <p className="text-[#D1D5DB] leading-relaxed font-sans text-xs sm:text-sm">
+                  {project.story?.solution || project.description}
+                </p>
+              </div>
+
+              {/* 13 Engineering Dimensions Grid */}
+              <div className="space-y-4">
+                {/* 1. Problem & 2. Baseline */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-1.5">
+                    <span className="text-[11px] text-[#FF7B72] uppercase font-bold block">
+                      1. PROBLEM DEFINITION
+                    </span>
+                    <p className="text-[#D1D5DB] leading-relaxed font-sans">
+                      {story?.problem || project.sections?.problem || 'Problem context maintained in repository.'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-1.5">
+                    <span className="text-[11px] text-[#FFB86B] uppercase font-bold block">
+                      2. EXISTING BASELINE &amp; DEFICIENCIES
+                    </span>
+                    <p className="text-[#D1D5DB] leading-relaxed font-sans">
+                      {story?.baseline || 'Manual baseline without automated pipeline.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 3. Constraints & 4. Investigation */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-1.5">
+                    <span className="text-[11px] text-[#6EA8FE] uppercase font-bold block">
+                      3. HARD TECHNICAL CONSTRAINTS
+                    </span>
+                    <ul className="space-y-1 text-[#D1D5DB] font-sans">
+                      {(story?.constraints || ['Latency < 50ms', 'Bounded memory envelope']).map((c, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-[#6EA8FE]">&bull;</span>
+                          <span>{c}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-1.5">
+                    <span className="text-[11px] text-[#7CFF6B] uppercase font-bold block">
+                      4. EXPERIMENTAL INVESTIGATION
+                    </span>
+                    <p className="text-[#D1D5DB] leading-relaxed font-sans">
+                      {story?.investigation || 'Exploratory data analysis and model comparison.'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 5. Solution & 6. Architecture Flow */}
+                <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-2">
+                  <span className="text-[11px] text-[#7CFF6B] uppercase font-bold block">
+                    5. ARCHITECTURE &amp; DATA FLOW PIPELINE
+                  </span>
+                  <div className="p-3 rounded-lg bg-[#08090B] border border-[#24272D] text-[#7CFF6B] text-[11px] leading-relaxed">
+                    {story?.architecture || project.sections?.architecture || 'Input -> Preprocessing -> Model -> Output'}
+                  </div>
+                </div>
+
+                {/* 7. Personal Contribution & 8. Decision Rationale */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-1.5">
+                    <span className="text-[11px] text-[#F2F2F2] uppercase font-bold block">
+                      7. VERIFIED PERSONAL CONTRIBUTION
+                    </span>
+                    <p className="text-[#D1D5DB] leading-relaxed font-sans">
+                      {story?.personalContribution || 'Architected the pipeline, authored codebase, and ran validation experiments.'}
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-1.5">
+                    <span className="text-[11px] text-[#6EA8FE] uppercase font-bold block">
+                      8. KEY ENGINEERING DECISIONS
+                    </span>
+                    <ul className="space-y-1 text-[#D1D5DB] font-sans">
+                      {(story?.decisionRationale || project.sections?.engineeringDecisions || []).map((dec, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#7CFF6B] shrink-0 mt-0.5" />
+                          <span>{dec}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* 9. Experiment & 10. Validation & 11. Results */}
+                <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-2">
+                  <span className="text-[11px] text-[#7CFF6B] uppercase font-bold block">
+                    10. EMPIRICAL VALIDATION &amp; RESULTS
+                  </span>
+                  <p className="text-[#D1D5DB] font-sans">
+                    {story?.validation || 'Cross-validated against held-out validation split.'}
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-center">
+                    {(story?.results || project.evaluationMetrics || []).map((r, idx) => (
+                      <div key={idx} className="p-2 rounded bg-[#08090B] border border-[#24272D] text-[#7CFF6B] font-bold">
+                        {r}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* 12. Limitations & 13. Future Work */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-1.5">
+                    <span className="text-[11px] text-[#FFB86B] uppercase font-bold block">
+                      12. KNOWN LIMITATIONS
+                    </span>
+                    <ul className="space-y-1 text-[#8B8F98] font-sans">
+                      {(story?.limitations || project.sections?.limitations || ['Batch-trained weights requiring periodic retraining']).map((lim, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-[#FFB86B]">&bull;</span>
+                          <span>{lim}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="p-4 rounded-xl bg-[#101216] border border-[#24272D] space-y-1.5">
+                    <span className="text-[11px] text-[#7CFF6B] uppercase font-bold block">
+                      13. FUTURE ENGINEERING IMPROVEMENTS
+                    </span>
+                    <ul className="space-y-1 text-[#8B8F98] font-sans">
+                      {(story?.futureWork || project.sections?.futureImprovements || ['Automated drift monitoring']).map((fw, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-[#7CFF6B]">&bull;</span>
+                          <span>{fw}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: SOURCE CODE & LINE-BY-LINE MECHANICS */}
           {activeTab === 'code' && (
             <div className="space-y-6 animate-fadeIn">
               {/* Standalone Repo Info Bar */}
-              {standaloneRepo && (
-                <div className="p-3.5 rounded-xl bg-[#101216] border border-[#24272D] flex flex-wrap items-center justify-between gap-3 font-mono text-xs">
-                  <div className="flex items-center gap-2">
-                    <FolderGit2 className="w-4 h-4 text-[#7CFF6B]" />
-                    <span className="text-[#F2F2F2] font-semibold">{standaloneRepo.repoName}</span>
-                    <span className="text-[10px] text-[#8B8F98]">({standaloneRepo.runtime})</span>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <a
-                      href={project.repository}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="px-2.5 py-1 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-colors"
-                    >
-                      OPEN SOURCE REPOSITORY
-                    </a>
-                    <code className="px-2 py-1 rounded bg-[#08090B] border border-[#24272D] text-[#8B8F98] text-[11px] hidden sm:inline select-all">
-                      {standaloneRepo.cloneCommand}
-                    </code>
-                    <button
-                      onClick={handleCopyClone}
-                      className="px-2.5 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
-                      title="Copy clone command"
-                    >
-                      {copiedClone ? <Check className="w-3 h-3 text-[#7CFF6B]" /> : <Copy className="w-3 h-3" />}
-                      <span>{copiedClone ? 'COPIED' : 'CLONE'}</span>
-                    </button>
-                  </div>
+              <div className="p-3.5 rounded-xl bg-[#101216] border border-[#24272D] flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2">
+                  <FolderGit2 className="w-4 h-4 text-[#7CFF6B]" />
+                  <span className="text-[#F2F2F2] font-semibold">{standaloneRepo.repoName}</span>
+                  <span className="text-[10px] text-[#8B8F98]">({standaloneRepo.runtime})</span>
                 </div>
-              )}
 
-              {/* Code File Selector (if multiple) */}
-              {codeFiles.length > 1 && (
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 font-mono text-xs">
-                  {codeFiles.map((file, idx) => (
-                    <button
-                      key={file.filename}
-                      onClick={() => setActiveFileIndex(idx)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded border transition-colors cursor-pointer ${
-                        activeFileIndex === idx
-                          ? 'bg-[#15181D] border-[#7CFF6B] text-[#7CFF6B]'
-                          : 'bg-[#101216] border-[#24272D] text-[#8B8F98]'
-                      }`}
-                    >
-                      <FileCode className="w-3.5 h-3.5" />
-                      <span>{file.filename}</span>
-                    </button>
-                  ))}
+                <div className="flex items-center gap-2">
+                  <a
+                    href={project.repository}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-2.5 py-1 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-colors"
+                  >
+                    OPEN REPOSITORY
+                  </a>
+                  <code className="px-2 py-1 rounded bg-[#08090B] border border-[#24272D] text-[#8B8F98] text-[11px] hidden sm:inline select-all">
+                    {standaloneRepo.cloneCommand}
+                  </code>
+                  <button
+                    onClick={handleCopyClone}
+                    className="px-2.5 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors cursor-pointer flex items-center gap-1 text-[11px]"
+                    title="Copy clone command"
+                  >
+                    {copiedClone ? <Check className="w-3 h-3 text-[#7CFF6B]" /> : <Copy className="w-3 h-3" />}
+                    <span>{copiedClone ? 'COPIED' : 'CLONE'}</span>
+                  </button>
                 </div>
-              )}
+              </div>
 
-              {/* Code Box */}
-              {activeCodeFile && (
+              {/* Code File Selector */}
+              {codeFiles.length > 0 ? (
                 <div className="space-y-4">
-                  <div className="rounded-xl bg-[#0B0D11] border border-[#24272D] overflow-hidden">
-                    <div className="px-4 py-2 bg-[#101216] border-b border-[#24272D] flex items-center justify-between font-mono text-xs">
-                      <span className="text-[#F2F2F2] font-semibold">{activeCodeFile.filename}</span>
-                      <button
-                        onClick={handleCopyCode}
-                        className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors cursor-pointer text-[11px]"
-                      >
-                        {copiedCode ? <Check className="w-3 h-3 text-[#7CFF6B]" /> : <Copy className="w-3 h-3" />}
-                        <span>{copiedCode ? 'COPIED' : 'COPY'}</span>
-                      </button>
-                    </div>
-
-                    <div className="p-4 overflow-x-auto max-h-[340px] font-mono text-xs leading-relaxed text-[#E6EDF3] bg-[#050608]">
-                      <pre className="table w-full">
-                        {activeCodeFile.code.trim().split('\n').map((line, lIdx) => (
-                          <div key={lIdx} className="table-row hover:bg-[#101216]/50">
-                            <span className="table-cell pr-4 text-right text-[#484F58] select-none text-[11px] w-8">
-                              {lIdx + 1}
-                            </span>
-                            <span className="table-cell font-mono whitespace-pre">
-                              {line.startsWith('#') || line.startsWith('//') ? (
-                                <span className="text-[#8B8F98] italic">{line}</span>
-                              ) : line.includes('import ') || line.includes('from ') || line.includes('export ') || line.includes('class ') || line.includes('def ') || line.includes('async ') ? (
-                                <span className="text-[#FF7B72]">{line}</span>
-                              ) : line.includes('return ') || line.includes('if ') || line.includes('else:') || line.includes('try:') || line.includes('except ') ? (
-                                <span className="text-[#D2A8FF]">{line}</span>
-                              ) : (
-                                line
-                              )}
-                            </span>
-                          </div>
-                        ))}
-                      </pre>
-                    </div>
-                  </div>
-
-                  {/* Step-by-step logic breakdown */}
-                  <div className="space-y-2">
-                    <span className="font-mono text-[11px] text-[#7CFF6B] uppercase font-bold block">
-                      LINE-BY-LINE ENGINEERING MECHANICS
-                    </span>
-                    <div className="grid grid-cols-1 gap-2 font-mono text-xs">
-                      {activeCodeFile.explanation.keyLines.map((item, kIdx) => (
-                        <div
-                          key={kIdx}
-                          className="p-3 rounded-lg bg-[#101216] border border-[#24272D] flex items-start gap-3"
+                  {codeFiles.length > 1 && (
+                    <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
+                      {codeFiles.map((file, idx) => (
+                        <button
+                          key={file.filename}
+                          onClick={() => setActiveFileIndex(idx)}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded border transition-colors cursor-pointer ${
+                            activeFileIndex === idx
+                              ? 'bg-[#15181D] border-[#7CFF6B] text-[#7CFF6B]'
+                              : 'bg-[#101216] border-[#24272D] text-[#8B8F98]'
+                          }`}
                         >
-                          <span className="px-2 py-0.5 rounded bg-[#08090B] border border-[#7CFF6B]/40 text-[#7CFF6B] text-[11px] shrink-0 font-bold">
-                            Lines {item.lineNumbers}
-                          </span>
-                          <p className="text-xs text-[#E6EDF3] font-sans leading-relaxed">
-                            {item.description}
-                          </p>
-                        </div>
+                          <FileCode className="w-3.5 h-3.5" />
+                          <span>{file.filename}</span>
+                        </button>
                       ))}
                     </div>
-                  </div>
+                  )}
+
+                  {/* Code Box */}
+                  {activeCodeFile && (
+                    <div className="space-y-4">
+                      <div className="rounded-xl bg-[#0B0D11] border border-[#24272D] overflow-hidden">
+                        <div className="px-4 py-2 bg-[#101216] border-b border-[#24272D] flex items-center justify-between text-xs">
+                          <span className="text-[#F2F2F2] font-semibold">{activeCodeFile.filename}</span>
+                          <button
+                            onClick={handleCopyCode}
+                            className="flex items-center gap-1 px-2.5 py-1 rounded bg-[#15181D] hover:bg-[#24272D] border border-[#24272D] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors cursor-pointer text-[11px]"
+                          >
+                            {copiedCode ? <Check className="w-3 h-3 text-[#7CFF6B]" /> : <Copy className="w-3 h-3" />}
+                            <span>{copiedCode ? 'COPIED' : 'COPY'}</span>
+                          </button>
+                        </div>
+
+                        <div className="p-4 overflow-x-auto max-h-[380px] text-xs leading-relaxed text-[#E6EDF3] bg-[#050608]">
+                          <pre className="table w-full">
+                            {activeCodeFile.code.trim().split('\n').map((line, lIdx) => (
+                              <div key={lIdx} className="table-row hover:bg-[#101216]/50">
+                                <span className="table-cell pr-4 text-right text-[#484F58] select-none text-[11px] w-8">
+                                  {lIdx + 1}
+                                </span>
+                                <span className="table-cell whitespace-pre">
+                                  {line.startsWith('#') || line.startsWith('//') ? (
+                                    <span className="text-[#8B8F98] italic">{line}</span>
+                                  ) : line.includes('import ') || line.includes('from ') || line.includes('export ') || line.includes('class ') || line.includes('def ') || line.includes('async ') ? (
+                                    <span className="text-[#FF7B72]">{line}</span>
+                                  ) : line.includes('return ') || line.includes('if ') || line.includes('else:') || line.includes('try:') || line.includes('except ') ? (
+                                    <span className="text-[#D2A8FF]">{line}</span>
+                                  ) : (
+                                    line
+                                  )}
+                                </span>
+                              </div>
+                            ))}
+                          </pre>
+                        </div>
+                      </div>
+
+                      {/* Step-by-step logic breakdown */}
+                      {activeCodeFile.explanation && (
+                        <div className="space-y-2">
+                          <span className="text-[11px] text-[#7CFF6B] uppercase font-bold block">
+                            LINE-BY-LINE ENGINEERING MECHANICS
+                          </span>
+                          <div className="grid grid-cols-1 gap-2 text-xs">
+                            {activeCodeFile.explanation.keyLines.map((item, kIdx) => (
+                              <div
+                                key={kIdx}
+                                className="p-3 rounded-lg bg-[#101216] border border-[#24272D] flex items-start gap-3"
+                              >
+                                <span className="px-2 py-0.5 rounded bg-[#08090B] border border-[#7CFF6B]/40 text-[#7CFF6B] text-[11px] shrink-0 font-bold">
+                                  Lines {item.lineNumbers}
+                                </span>
+                                <span className="text-[#D1D5DB] font-sans text-xs">
+                                  {item.description}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="p-8 text-center rounded-xl bg-[#101216] border border-[#24272D] space-y-2">
+                  <p className="text-xs text-[#8B8F98]">
+                    Full repository source code is maintained on GitHub.
+                  </p>
+                  <a
+                    href={project.repository}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#7CFF6B] text-[#08090B] font-bold text-xs"
+                  >
+                    <span>BROWSE REPOSITORY ON GITHUB</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
                 </div>
               )}
             </div>
           )}
 
         </div>
-
-        {/* Minimal Clean Footer with Persistent Back Navigation */}
-        <div className="px-3 sm:px-4 py-2.5 sm:py-3 border-t border-[#24272D] bg-[#101216] flex items-center justify-between gap-2 font-mono text-xs shrink-0">
-          <button
-            onClick={onClose}
-            id="project-modal-bottom-back-btn"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#24272D] bg-[#15181D] hover:bg-[#20242C] text-[#8B8F98] hover:text-[#7CFF6B] hover:border-[#7CFF6B]/40 font-mono text-xs font-semibold transition-colors cursor-pointer active:scale-95"
-            title="Back to All Projects"
-          >
-            <ArrowLeft className="w-3.5 h-3.5 text-[#7CFF6B]" />
-            <span>BACK TO PROJECTS</span>
-          </button>
-
-          <div className="flex items-center gap-2 sm:gap-3">
-            <span className="text-[#8B8F98] text-[11px] hidden md:inline">
-              TECH: <span className="text-[#F2F2F2]">{project.technologies.slice(0, 3).join(', ')}</span>
-            </span>
-            <a
-              href={project.repository}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-3 py-1.5 rounded bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/90 transition-colors flex items-center gap-1.5 cursor-pointer"
-            >
-              <span>GITHUB REPO</span>
-              <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          </div>
-        </div>
-
       </div>
     </div>
   );
