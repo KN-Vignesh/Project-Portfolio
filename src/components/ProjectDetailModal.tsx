@@ -422,8 +422,10 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                             : 'bg-[#08090B] border-[#24272D] text-[#8B8F98] hover:border-[#7CFF6B]/40 hover:text-[#F2F2F2]'
                         }`}
                       >
-                        <div className="text-[10px] font-bold uppercase opacity-80 mb-1">
-                          STEP {nIdx + 1} // {node.type}
+                        <div className="text-[10px] font-bold uppercase opacity-80 mb-1 flex items-center gap-1.5">
+                          <span>STEP {nIdx + 1}</span>
+                          <span className="text-[#8B8F98] opacity-60">/</span>
+                          <span>{node.type}</span>
                         </div>
                         <div className="text-xs font-bold text-[#F2F2F2] leading-tight">
                           {node.name}
