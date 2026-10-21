@@ -21,6 +21,41 @@ interface SpecContent {
 }
 
 const SPEC_DATA: Record<ThreeDSceneType, SpecContent> = {
+  HOUSE_PRICE_3D: {
+    title: 'Interactive 3D House Price Prediction & SHAP Explainability Surface',
+    category: 'MODEL_ENGINEERING · TABULAR_ML',
+    repoFolder: 'Data-recipe/House_Price_Prediction',
+    repoUrl: 'https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/House_Price_Prediction',
+    summary: 'A 7-model stacking ensemble (Ridge, Lasso, ElasticNet, GradientBoosting, RandomForest, XGBoost, LightGBM) trained on 1,458 cleaned Ames housing records with log1p target transformation and exact Stacking SHAP attributions.',
+    architectureBlueprint: [
+      'Filter extreme outliers (GrLivArea > 4000 sq ft & SalePrice < $300k) and engineer 9 domain interaction features',
+      'Train 7 base estimators with 5-fold out-of-fold cross-validation combined via a Ridge meta-regressor',
+      'Export 50x10 conditional prediction surface (GrLivArea × OverallQual) and 1,458 OOF records to house_price_3d.json',
+      'Render interactive Three.js terrain with bilinear interpolation, 3D house massing marker, and exact SHAP waterfalls'
+    ],
+    benchmarks: [
+      { label: 'OOF R² SCORE', value: '0.9178', desc: '91.8% variance explained across 1,458 homes' },
+      { label: 'MEAN ABS ERROR', value: '$13,441', desc: '5-fold out-of-fold MAE (Median AE: $9,081)' },
+      { label: '5-FOLD RMSLE', value: '0.1149', desc: 'Log-scale root mean squared error across folds' }
+    ],
+    failureModes: [
+      'Right-skewed SalePrice distribution: mitigated via log1p(SalePrice) training and expm1 inverse transform',
+      'Non-linear feature interactions: captured via TotalSF,TotalQualIndex, and exact Stacking SHAP decomposition'
+    ],
+    sampleCode: `stacking_regressor = StackingRegressor(
+    estimators=[
+        ("ridge", ridge_pipe),
+        ("lasso", lasso_pipe),
+        ("elasticnet", elastic_pipe),
+        ("gbr", gbr_model),
+        ("rf", rf_model),
+        ("xgb", xgb_model),
+        ("lgbm", lgbm_model),
+    ],
+    final_estimator=Ridge(alpha=1.0),
+    cv=5,
+)`
+  },
   PEFT_LORA: {
     title: 'QLoRA 4-bit NormalFloat4 & Parameter-Efficient LoRA Fine-Tuning',
     category: 'GENERATIVE_AI · PEFT',

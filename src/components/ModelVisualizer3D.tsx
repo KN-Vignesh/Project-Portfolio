@@ -1,28 +1,47 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Cpu, Zap, Database, Layers, Sparkles } from 'lucide-react';
+import { Cpu, Sliders, Home, ArrowRight } from 'lucide-react';
 
 type QuantMode = 'FP16' | 'QLORA_NF4' | 'LORA_DECOMP';
 
 export const ModelVisualizer3D: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [mode, setMode] = useState<QuantMode>('QLORA_NF4');
-  const [hoveredNode, setHoveredNode] = useState<string | null>(null);
+  const [loraRank, setLoraRank] = useState<number>(16);
+  const [seqLength, setSeqLength] = useState<number>(2048);
+
+  // Live Llama-3 8B / 7B empirical math based on user controls
+  const hiddenDim = 4096;
+  const numLayers = 32;
+  const baseParamsB = 7.24;
+  const bytesPerParam = mode === 'FP16' ? 2.0 : mode === 'LORA_DECOMP' ? 1.0 : 0.52;
+  const baseWeightsGb = baseParamsB * bytesPerParam;
+
+  const trainableParamsM =
+    mode === 'FP16'
+      ? 7241.0
+      : Number(((4 * hiddenDim * loraRank * numLayers) / 1_000_000).toFixed(1));
+  const trainablePct = ((trainableParamsM / 7241.0) * 100).toFixed(2);
+
+  const adapterAndOptimizerGb =
+    mode === 'FP16'
+      ? 14.4
+      : (trainableParamsM * 8.5) / 1000 + (seqLength / 2048) * 0.85;
+  const totalVramGb = (baseWeightsGb + adapterAndOptimizerGb).toFixed(1);
+  const vramSavedPct = Math.round((1 - Number(totalVramGb) / 28.9) * 100);
 
   useEffect(() => {
     const currentMount = mountRef.current;
     if (!currentMount) return;
 
-    // Purge any stale canvas instances to prevent duplicate canvases
     const existingCanvases = currentMount.querySelectorAll('canvas');
     existingCanvases.forEach((c) => c.remove());
 
     const width = currentMount.clientWidth || 400;
-    const height = currentMount.clientHeight || 360;
+    const height = currentMount.clientHeight || 300;
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
-    // Adjusted camera distance with generous margin to completely eliminate clipping at any rotation
     camera.position.set(0, 0, 16.5);
 
     let renderer: THREE.WebGLRenderer;
@@ -39,7 +58,6 @@ export const ModelVisualizer3D: React.FC = () => {
       return;
     }
 
-    // Lights
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
     scene.add(ambientLight);
 
@@ -51,19 +69,23 @@ export const ModelVisualizer3D: React.FC = () => {
     secondaryLight.position.set(-6, -4, 6);
     scene.add(secondaryLight);
 
-    // Root Group with optimal scale
     const rootGroup = new THREE.Group();
     rootGroup.scale.set(0.92, 0.92, 0.92);
     scene.add(rootGroup);
 
-    // Geometries & Materials
-    const baseBoxGeo = new THREE.BoxGeometry(0.35, 0.35, 0.35);
+    // Scale tensor blocks dynamically based on quantization mode & rank slider
+    const blockScale = mode === 'QLORA_NF4' ? 0.3 : mode === 'LORA_DECOMP' ? 0.36 : 0.44;
+    const adapterScale = 0.28 + (loraRank / 64) * 0.34;
+
+    const baseBoxGeo = new THREE.BoxGeometry(blockScale, blockScale, blockScale);
+    const adapterBoxGeo = new THREE.BoxGeometry(adapterScale, adapterScale, adapterScale);
+
     const fp16Mat = new THREE.MeshStandardMaterial({
       color: 0x6ea8fe,
       roughness: 0.3,
       metalness: 0.7,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.85,
     });
 
     const nf4Mat = new THREE.MeshStandardMaterial({
@@ -71,28 +93,26 @@ export const ModelVisualizer3D: React.FC = () => {
       roughness: 0.2,
       metalness: 0.8,
       emissive: 0x7cff6b,
-      emissiveIntensity: 0.25
+      emissiveIntensity: 0.25,
     });
 
     const loraMat = new THREE.MeshStandardMaterial({
       color: 0xffb703,
-      roughness: 0.3,
+      roughness: 0.25,
       metalness: 0.9,
       emissive: 0xffb703,
-      emissiveIntensity: 0.4
+      emissiveIntensity: 0.45,
     });
 
     const wireMat = new THREE.LineBasicMaterial({
       color: 0x24272d,
       transparent: true,
-      opacity: 0.5
+      opacity: 0.5,
     });
 
-    // Populate Tensor Blocks with precise symmetrical centering around (0,0,0)
     const gridSize = 4;
     const spacing = 1.1;
     const halfSpan = ((gridSize - 1) / 2) * spacing;
-    const blocks: THREE.Mesh[] = [];
 
     for (let x = 0; x < gridSize; x++) {
       for (let y = 0; y < gridSize; y++) {
@@ -100,24 +120,31 @@ export const ModelVisualizer3D: React.FC = () => {
           const posX = x * spacing - halfSpan;
           const posY = y * spacing - halfSpan;
           const posZ = z * spacing - halfSpan;
-          const isAdapterBlock = (x === 0 || x === gridSize - 1) && Math.abs(y - 1.5) <= 1;
-          const material = mode === 'FP16' ? fp16Mat : mode === 'QLORA_NF4' ? nf4Mat : (isAdapterBlock ? loraMat : fp16Mat);
-          const mesh = new THREE.Mesh(baseBoxGeo, material);
+          const isAdapterBlock =
+            mode !== 'FP16' && (x === 0 || x === gridSize - 1) && Math.abs(y - 1.5) <= 1;
+
+          const geo = isAdapterBlock ? adapterBoxGeo : baseBoxGeo;
+          const material = isAdapterBlock
+            ? loraMat
+            : mode === 'FP16'
+            ? fp16Mat
+            : mode === 'QLORA_NF4'
+            ? nf4Mat
+            : fp16Mat;
+
+          const mesh = new THREE.Mesh(geo, material);
           mesh.position.set(posX, posY, posZ);
           rootGroup.add(mesh);
-          blocks.push(mesh);
         }
       }
     }
 
-    // Outer bounding cage: sized symmetrically to enclose the tensor
-    const cageSize = gridSize * spacing + 0.3;
+    const cageSize = gridSize * spacing + 0.35;
     const cageGeo = new THREE.BoxGeometry(cageSize, cageSize, cageSize);
     const cageEdges = new THREE.EdgesGeometry(cageGeo);
     const cage = new THREE.LineSegments(cageEdges, wireMat);
     rootGroup.add(cage);
 
-    // Rotation & Interaction
     let isDragging = false;
     let prevMouseX = 0;
     let prevMouseY = 0;
@@ -154,7 +181,6 @@ export const ModelVisualizer3D: React.FC = () => {
     window.addEventListener('touchmove', onPointerMove, { passive: true });
     window.addEventListener('touchend', onPointerUp);
 
-    // ResizeObserver for reliable dimension synchronisation
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width: newW, height: newH } = entry.contentRect;
@@ -167,7 +193,6 @@ export const ModelVisualizer3D: React.FC = () => {
     });
     resizeObserver.observe(currentMount);
 
-    // Animation Loop
     let animationFrameId: number;
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
@@ -193,6 +218,7 @@ export const ModelVisualizer3D: React.FC = () => {
       }
       renderer.dispose();
       baseBoxGeo.dispose();
+      adapterBoxGeo.dispose();
       cageGeo.dispose();
       cageEdges.dispose();
       fp16Mat.dispose();
@@ -200,98 +226,165 @@ export const ModelVisualizer3D: React.FC = () => {
       loraMat.dispose();
       wireMat.dispose();
     };
-  }, [mode]);
+  }, [mode, loraRank]);
 
   return (
-    <div className="rounded-2xl border border-[#24272D] bg-[#101216] p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+    <div className="rounded-2xl border border-[#24272D] bg-[#101216] p-4 sm:p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between font-mono text-xs">
       {/* Header Bar */}
-      <div className="flex items-center justify-between pb-3 border-b border-[#24272D] z-10">
+      <div className="flex items-center justify-between pb-2.5 border-b border-[#24272D] z-10">
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-lg bg-[#7CFF6B]/10 border border-[#7CFF6B]/30 flex items-center justify-center text-[#7CFF6B]">
             <Cpu className="w-4 h-4" />
           </div>
           <div>
-            <h3 className="text-xs font-mono font-bold text-[#F2F2F2] uppercase tracking-wider">
-              3D Tensor & Quantization Architecture
+            <h3 className="text-xs font-bold text-[#F2F2F2] uppercase tracking-wider">
+              3D Tensor &amp; Quantization Explorer
             </h3>
-            <p className="text-[11px] font-mono text-[#8B8F98]">
-              Interactive WebGL parameter matrix visualizer
+            <p className="text-[11px] text-[#8B8F98] font-sans">
+              Adjust rank &amp; precision below to see how QLoRA shrinks GPU memory
             </p>
           </div>
         </div>
 
-        {/* Live Mode Indicator */}
-        <span className="font-mono text-[10px] text-[#7CFF6B] border border-[#7CFF6B]/30 bg-[#7CFF6B]/10 px-2 py-0.5 rounded">
-          {mode === 'QLORA_NF4' ? '4-BIT NF4' : mode === 'LORA_DECOMP' ? 'RANK DECOMP (r=16)' : 'FP16 BASE'}
+        <span className="text-[10px] text-[#7CFF6B] border border-[#7CFF6B]/30 bg-[#7CFF6B]/10 px-2 py-0.5 rounded font-bold">
+          {mode === 'QLORA_NF4'
+            ? `4-BIT NF4 (r=${loraRank})`
+            : mode === 'LORA_DECOMP'
+            ? `8-BIT LORA (r=${loraRank})`
+            : '16-BIT FULL'}
         </span>
       </div>
 
       {/* 3D Canvas Area */}
       <div
         ref={mountRef}
-        className="w-full h-72 sm:h-80 my-2 cursor-grab active:cursor-grabbing relative flex items-center justify-center overflow-hidden"
+        className="w-full h-56 sm:h-64 my-2 cursor-grab active:cursor-grabbing relative flex items-center justify-center overflow-hidden rounded-xl bg-[#08090B]/60 border border-[#24272D]/60"
       >
-        <div className="absolute bottom-2 left-2 z-10 pointer-events-none text-[10px] font-mono text-[#8B8F98]/70">
-          * Drag to rotate tensor volume
+        <div className="absolute bottom-2 left-2.5 z-10 pointer-events-none text-[10px] text-[#8B8F98]">
+          Drag to rotate 3D weights · Amber cubes = Trainable LoRA Adapters (r={loraRank})
         </div>
       </div>
 
-      {/* Telemetry Metrics Bar */}
-      <div className="grid grid-cols-3 gap-2 py-3 border-t border-b border-[#24272D] text-center font-mono my-1">
-        <div className="bg-[#08090B] p-2 rounded border border-[#24272D]/60">
-          <div className="text-[10px] text-[#8B8F98]">VRAM FOOTPRINT</div>
+      {/* Interactive Controls: Mode Buttons + Live Rank & Context Sliders */}
+      <div className="space-y-2.5 py-2.5 border-t border-b border-[#24272D]">
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setMode('QLORA_NF4')}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+              mode === 'QLORA_NF4'
+                ? 'bg-[#7CFF6B] text-[#08090B]'
+                : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-[#24272D]'
+            }`}
+          >
+            1. QLoRA (4-Bit NF4)
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('LORA_DECOMP')}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+              mode === 'LORA_DECOMP'
+                ? 'bg-[#7CFF6B] text-[#08090B]'
+                : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-[#24272D]'
+            }`}
+          >
+            2. LoRA (8-Bit)
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode('FP16')}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+              mode === 'FP16'
+                ? 'bg-[#7CFF6B] text-[#08090B]'
+                : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-[#24272D]'
+            }`}
+          >
+            3. Full FP16
+          </button>
+        </div>
+
+        {/* Interactive Rank Slider */}
+        {mode !== 'FP16' && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+            <div className="p-2.5 rounded-lg bg-[#08090B] border border-[#24272D] space-y-1">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-[#D1D5DB] flex items-center gap-1 font-bold">
+                  <Sliders className="w-3 h-3 text-[#FFB86B]" />
+                  <span>Adapter Rank (r):</span>
+                </span>
+                <span className="text-[#FFB86B] font-bold">r = {loraRank}</span>
+              </div>
+              <input
+                type="range"
+                min={4}
+                max={64}
+                step={4}
+                value={loraRank}
+                onChange={(e) => setLoraRank(Number(e.target.value))}
+                className="w-full accent-[#FFB86B] cursor-pointer"
+              />
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-[#08090B] border border-[#24272D] space-y-1">
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-[#D1D5DB] font-bold">Sequence Context:</span>
+                <span className="text-[#6EA8FE] font-bold">{seqLength} tokens</span>
+              </div>
+              <input
+                type="range"
+                min={512}
+                max={4096}
+                step={512}
+                value={seqLength}
+                onChange={(e) => setSeqLength(Number(e.target.value))}
+                className="w-full accent-[#6EA8FE] cursor-pointer"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Live Calculated Telemetry Bar */}
+      <div className="grid grid-cols-3 gap-2 pt-2.5 text-center tabular-nums">
+        <div className="bg-[#08090B] p-2 rounded-lg border border-[#24272D]">
+          <div className="text-[10px] text-[#8B8F98]">GPU VRAM NEEDED</div>
           <div className="text-sm font-bold text-[#7CFF6B]">
-            {mode === 'FP16' ? '14.2 GB' : mode === 'QLORA_NF4' ? '3.8 GB (-73%)' : '4.1 GB (-71%)'}
+            {totalVramGb} GB {vramSavedPct > 0 ? `(-${vramSavedPct}%)` : ''}
           </div>
         </div>
-        <div className="bg-[#08090B] p-2 rounded border border-[#24272D]/60">
-          <div className="text-[10px] text-[#8B8F98]">TRAINABLE WEIGHTS</div>
+        <div className="bg-[#08090B] p-2 rounded-lg border border-[#24272D]">
+          <div className="text-[10px] text-[#8B8F98]">TRAINABLE PARAMS</div>
           <div className="text-sm font-bold text-[#F2F2F2]">
-            {mode === 'FP16' ? '7,241M (100%)' : mode === 'QLORA_NF4' ? '18.4M (0.25%)' : '36.8M (0.50%)'}
+            {trainableParamsM}M ({trainablePct}%)
           </div>
         </div>
-        <div className="bg-[#08090B] p-2 rounded border border-[#24272D]/60">
-          <div className="text-[10px] text-[#8B8F98]">BATCH CAPACITY</div>
-          <div className="text-sm font-bold text-[#6EA8FE]">
-            {mode === 'FP16' ? '1x Base' : mode === 'QLORA_NF4' ? '3.8x Speed' : '3.2x Speed'}
+        <div className="bg-[#08090B] p-2 rounded-lg border border-[#24272D]">
+          <div className="text-[10px] text-[#8B8F98]">24GB GPU STATUS</div>
+          <div
+            className={`text-xs font-bold ${
+              Number(totalVramGb) <= 24 ? 'text-[#7CFF6B]' : 'text-[#FF7B72]'
+            }`}
+          >
+            {Number(totalVramGb) <= 24 ? '✓ Fits Single GPU' : '✗ OOM (>24GB)'}
           </div>
         </div>
       </div>
 
-      {/* Mode Selector Controls */}
-      <div className="flex items-center gap-1.5 pt-3">
+      {/* Direct Quick-Link to the Interactive 3D House Price Predictor */}
+      <div className="mt-2.5 pt-2.5 border-t border-[#24272D] flex items-center justify-between">
+        <span className="text-[10px] text-[#8B8F98] font-sans">
+          Looking for the 3D House Price Prediction terrain?
+        </span>
         <button
           type="button"
-          onClick={() => setMode('QLORA_NF4')}
-          className={`flex-1 py-1.5 px-2 rounded text-[11px] font-mono font-semibold transition-colors ${
-            mode === 'QLORA_NF4'
-              ? 'bg-[#7CFF6B] text-[#08090B]'
-              : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-[#24272D]'
-          }`}
+          onClick={() => {
+            window.location.hash = '#project-house-price';
+          }}
+          className="px-2.5 py-1 rounded-lg bg-[#7CFF6B]/15 border border-[#7CFF6B]/50 hover:bg-[#7CFF6B] text-[#7CFF6B] hover:text-[#08090B] font-bold text-[10px] flex items-center gap-1 transition-colors cursor-pointer"
         >
-          QLoRA (NF4)
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('LORA_DECOMP')}
-          className={`flex-1 py-1.5 px-2 rounded text-[11px] font-mono font-semibold transition-colors ${
-            mode === 'LORA_DECOMP'
-              ? 'bg-[#7CFF6B] text-[#08090B]'
-              : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-[#24272D]'
-          }`}
-        >
-          LoRA Matrix (B×A)
-        </button>
-        <button
-          type="button"
-          onClick={() => setMode('FP16')}
-          className={`flex-1 py-1.5 px-2 rounded text-[11px] font-mono font-semibold transition-colors ${
-            mode === 'FP16'
-              ? 'bg-[#7CFF6B] text-[#08090B]'
-              : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-[#24272D]'
-          }`}
-        >
-          Full FP16
+          <Home className="w-3 h-3" />
+          <span>OPEN 3D HOUSE PRICE PREDICTOR</span>
+          <ArrowRight className="w-3 h-3" />
         </button>
       </div>
     </div>

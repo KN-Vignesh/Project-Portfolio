@@ -32,7 +32,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
       return p.id === 'vero' || p.id === 'qwen-lora' || p.id === 'qlora';
     }
     if (filterCategory === 'MODEL') {
-      return p.id === 'bert' || p.id === 'cnn' || p.id === 'evaluation';
+      return p.id === 'bert' || p.id === 'cnn' || p.id === 'evaluation' || p.id === 'house-price';
     }
     if (filterCategory === 'SYSTEMS') {
       return p.id === 'customer-churn' || p.id === 'house-price' || p.id === 'titanic';
@@ -58,22 +58,32 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             </p>
           </div>
 
-          {/* Interactive Filter Segmented Tabs */}
-          <div className="flex flex-wrap gap-1.5 mt-4 md:mt-0 font-mono text-xs p-1 bg-[#101216] rounded-xl border border-[#24272D]">
-            {categories.map((cat) => (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => setFilterCategory(cat.id)}
-                className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium ${
-                  filterCategory === cat.id
-                    ? 'bg-[#7CFF6B] text-[#08090B] font-bold shadow-sm'
-                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+          {/* Interactive Filter Segmented Tabs + Quick 3D House Price Workbench Launcher */}
+          <div className="flex flex-wrap items-center gap-2 mt-4 md:mt-0">
+            <button
+              type="button"
+              onClick={() => onSelectProject('house-price')}
+              className="px-3 py-1.5 rounded-xl bg-[#7CFF6B]/15 hover:bg-[#7CFF6B]/25 border border-[#7CFF6B]/50 text-[#7CFF6B] font-mono text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>3D HOUSE PRICE SURFACE + SHAP</span>
+            </button>
+            <div className="flex flex-wrap gap-1.5 font-mono text-xs p-1 bg-[#101216] rounded-xl border border-[#24272D]">
+              {categories.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setFilterCategory(cat.id)}
+                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium ${
+                    filterCategory === cat.id
+                      ? 'bg-[#7CFF6B] text-[#08090B] font-bold shadow-sm'
+                      : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 

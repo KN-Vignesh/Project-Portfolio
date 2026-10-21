@@ -1298,6 +1298,12 @@
         "deploymentType": "TensorFlow Decision Forests Notebook / Script",
         "entryPoint": "python train_tfdf.py"
       },
+      "experiment": {
+        "type": "regression-surface",
+        "dataUrl": "https://raw.githubusercontent.com/KN-Vignesh/Projects/main/portfolio/assets/house_price_3d.json",
+        "fallbackFixtureUrl": "/data/house_price_3d.fixture.json",
+        "schemaVersion": "1.0.0"
+      },
       "sections": {
         "problem": "Continuous property valuation involves high-cardinality categorical variables, extreme skewness in square footage features, and non-linear interactions.",
         "whyApproach": "Applies TensorFlow Decision Forests (TF-DF), which handle mixed tabular data types natively without extensive manual one-hot encoding.",

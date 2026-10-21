@@ -73,6 +73,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <ArrowDown className="w-4 h-4" />
               </button>
 
+              <button
+                type="button"
+                onClick={() => {
+                  window.location.hash = '#project-house-price';
+                }}
+                className="px-4 py-2.5 rounded-lg border border-[#6EA8FE]/50 bg-[#6EA8FE]/15 text-[#6EA8FE] hover:bg-[#6EA8FE] hover:text-[#08090B] transition-colors flex items-center gap-1.5 font-bold cursor-pointer"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>3D HOUSE PRICE LAB</span>
+              </button>
+
               {onOpenVero && (
                 <button
                   type="button"

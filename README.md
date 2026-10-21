@@ -19,9 +19,18 @@
 
 ## Project Registry
 
-Project metadata is loaded at runtime from the authoritative [Projects repository](https://github.com/KN-Vignesh/Projects/blob/main/portfolio/projects.json). The portfolio intentionally does not keep a local project catalog or source-code snapshot.
+Project metadata is loaded at runtime from the authoritative [Projects repository](https://github.com/KN-Vignesh/Projects/blob/main/portfolio/projects.json), with a verified local registry fallback (`/projects.json`) if the remote raw endpoint is unreachable.
 
 Set `VITE_PROJECT_DATA_URL` to override the public registry URL during development or deployment. It defaults to `https://raw.githubusercontent.com/KN-Vignesh/Projects/main/portfolio/projects.json`.
+
+### Interactive 3D House Price Prediction (`house_price_3d.json`)
+
+The **House Price Tabular Regression** project (`id: "house-price"`) includes a 4-stage interactive 3D scientific workbench powered by static JSON exported from [`Projects/Data-recipe/House_Price_Prediction`](https://github.com/KN-Vignesh/Projects/tree/main/Data-recipe/House_Price_Prediction):
+
+- **Configurable Asset URL**: Controlled via `VITE_HOUSE_PRICE_3D_DATA_URL` (defaults to `https://raw.githubusercontent.com/KN-Vignesh/Projects/main/Data-recipe/House_Price_Prediction/house_price_3d.json`).
+- **Schema Validation & Labeled Dev Fixture**: Validated at runtime against `schemaVersion: "1.0.0"` (`src/services/housePriceSurfaceLoader.ts`). If the remote asset returns a 404 prior to exporter publication, the loader falls back to `/data/house_price_3d.fixture.json` and badges the UI as a **Labeled Dev Fixture** (never passing off fixture data as live model output).
+- **3D Surface & Bilinear Interpolation**: Constructs an indexed Three.js `BufferGeometry` over `GrLivArea` × `OverallQual` with conditioning slices for `GarageArea`, `YearBuilt`, and `LotArea`. Strictly distinguishes **Exact Reference Predictions**, **Precomputed Grid Nodes**, and **Bilinearly Interpolated Surface Estimates**.
+- **Precomputed SHAP Explanations**: Displays additive TreeSHAP attributions (`baseValue` + $\sum \phi_i$ = `outputValue`) for verified reference homes without interpolating SHAP across non-linear tree splits.
 
 ---
 
