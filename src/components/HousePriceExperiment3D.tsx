@@ -460,6 +460,8 @@ export const HousePriceExperiment3D: React.FC<HousePriceExperiment3DProps> = ({
               features={features}
               onSelectCoordinates={handleSelectCoordinates}
               onSelectPreset={handleSelectPreset}
+              onChangeFeature={handleFeatureChange}
+              onReset={handleReset}
             />
           </div>
 

@@ -250,6 +250,25 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
   };
   const titanicStats = getTitanicOdds();
 
+  // Render the self-contained 3D House Price Workbench directly without extra nested card wrappers
+  if (projectId === 'house-price' || experiment?.type === 'regression-surface') {
+    return (
+      <Suspense
+        fallback={
+          <div className="p-6 rounded-xl bg-[#08090B] border border-[#24272D] font-mono text-xs text-[#8B8F98] flex items-center justify-center gap-2">
+            <Activity className="w-4 h-4 text-[#7CFF6B] animate-pulse" />
+            <span>Loading 3D House Price Prediction Surface &amp; SHAP Workbench...</span>
+          </div>
+        }
+      >
+        <HousePriceExperiment3D
+          dataUrl={experiment?.dataUrl}
+          fallbackFixtureUrl={experiment?.fallbackFixtureUrl}
+        />
+      </Suspense>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-[#24272D] bg-[#0C0E12] overflow-hidden">
       {/* Header bar of interactive sandbox */}
@@ -778,25 +797,6 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
               <strong>Trade-off Insight:</strong> Increasing threshold to 0.70+ maximizes Precision (eliminates false alarms), but drops Recall below 60%. Lowering threshold to 0.30 catches 95%+ of positive events at the expense of false alarms.
             </div>
           </div>
-        )}
-
-        {/* ====================================================================
-            PROJECT 08: HOUSE PRICE TABULAR REGRESSION (3D PREDICTION SURFACE & SHAP)
-        ==================================================================== */}
-        {(projectId === 'house-price' || experiment?.type === 'regression-surface') && (
-          <Suspense
-            fallback={
-              <div className="p-6 rounded-xl bg-[#08090B] border border-[#24272D] font-mono text-xs text-[#8B8F98] flex items-center justify-center gap-2">
-                <Activity className="w-4 h-4 text-[#7CFF6B] animate-pulse" />
-                <span>Loading 3D House Price Prediction Surface &amp; SHAP Workbench...</span>
-              </div>
-            }
-          >
-            <HousePriceExperiment3D
-              dataUrl={experiment?.dataUrl}
-              fallbackFixtureUrl={experiment?.fallbackFixtureUrl}
-            />
-          </Suspense>
         )}
 
         {/* ====================================================================

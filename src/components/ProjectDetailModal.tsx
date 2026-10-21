@@ -51,7 +51,10 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        if (document.body.dataset.surfaceMaximized === 'true') return;
+        onClose();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
@@ -69,6 +72,10 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
   }, [project?.id]);
 
   if (!project) return null;
+
+  const isHousePrice3D =
+    project.id === 'house-price' ||
+    project.experiment?.componentType === 'house-price-3d';
 
   const standaloneRepo = {
     repoName: project.standaloneRepoInfo?.repoName || project.title,
@@ -113,15 +120,17 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
       aria-label="Project Details Modal"
       tabIndex={-1}
       onKeyDown={(e) => {
-        if (e.key === 'Escape') onClose();
+        if (e.key === 'Escape' && document.body.dataset.surfaceMaximized !== 'true') {
+          onClose();
+        }
       }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
-      className="fixed inset-0 z-50 overflow-y-auto bg-black/90 backdrop-blur-md flex items-center justify-center p-0 sm:p-4 md:p-6 animate-fadeIn"
+      className="fixed inset-0 z-50 overflow-y-auto bg-black/90 backdrop-blur-md flex items-center justify-center p-0 sm:p-3 md:p-5 animate-fadeIn"
     >
-      {/* Container Dialog: Full-screen on mobile, wide 6xl floating dialog on tablet/desktop */}
-      <div className="relative w-full max-w-6xl h-full sm:h-auto sm:max-h-[94vh] bg-[#08090B] border-0 sm:border sm:border-[#24272D] sm:rounded-2xl shadow-2xl shadow-black overflow-hidden flex flex-col my-auto">
+      {/* Container Dialog: Full-screen on mobile, wide 7xl floating dialog on tablet/desktop */}
+      <div className="relative w-full max-w-7xl h-full sm:h-auto sm:max-h-[95vh] bg-[#08090B] border-0 sm:border sm:border-[#24272D] sm:rounded-2xl shadow-2xl shadow-black overflow-hidden flex flex-col my-auto">
         
         {/* Sticky Clean Header Bar */}
         <div className="px-4 py-3 border-b border-[#24272D] bg-[#101216] flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono shrink-0 sticky top-0 z-20">
@@ -161,6 +170,16 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
 
           {/* Top Action Links */}
           <div className="hidden sm:flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleResetExperiment}
+              className="px-2.5 py-1.5 rounded-lg bg-[#08090B] border border-[#24272D] hover:border-[#7CFF6B]/40 text-[#8B8F98] hover:text-[#7CFF6B] transition-colors flex items-center gap-1 text-xs cursor-pointer"
+              title="Reset experiment parameters"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>RESET</span>
+            </button>
+
             <a
               href={project.repository}
               target="_blank"
@@ -183,79 +202,35 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
         </div>
 
         {/* Scrollable Content Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-6 flex-1 font-mono text-xs">
+        <div className="p-4 sm:p-5 overflow-y-auto space-y-5 flex-1 font-mono text-xs">
 
           {/* ====================================================================
-              CANONICAL SECTION 1: BALANCED TWO-COLUMN OPENING VIEW
-              Left: Interactive 3D Workbench / Simulator
-              Right: Beginner-Friendly 4-Block Plain Explanation + Key Takeaway
+              SECTION 1: DIRECT INTERACTIVE WORKBENCH (NO CASCADING BOXES)
           ==================================================================== */}
-          <div className="rounded-2xl border border-[#24272D] bg-[#0D0F12] p-4 sm:p-5 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 pb-3 border-b border-[#24272D]">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse"></span>
-                <span className="font-bold text-xs text-[#7CFF6B] uppercase tracking-wider">
-                  CANONICAL PROJECT WORKBENCH &amp; SIMULATOR
-                </span>
-                <span className="text-[#8B8F98] hidden md:inline">·</span>
-                <span className="text-[#8B8F98] hidden md:inline text-[11px]">
-                  Adjust parameters on the left to see cause and effect
-                </span>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleResetExperiment}
-                  className="px-2.5 py-1 rounded bg-[#101216] border border-[#24272D] hover:border-[#7CFF6B]/40 text-[#8B8F98] hover:text-[#7CFF6B] transition-colors flex items-center gap-1 text-[11px] cursor-pointer"
-                  title="Reset experiment parameters"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>RESET</span>
-                </button>
-                <span className="text-[10px] text-[#6EA8FE] px-2 py-0.5 rounded bg-[#6EA8FE]/10 border border-[#6EA8FE]/30">
-                  {project.category}
-                </span>
-              </div>
-            </div>
-
-            {/* Full-width layout for 3D House Price Workbench, or Balanced Two-Column Split for standard simulators */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
               
-              {/* Interactive Workbench / 3D Scene */}
+              {/* Interactive Workbench / 3D Scene (Flat, Direct Mounting for House Price 3D) */}
               <div
                 className={
-                  project.id === 'house-price' ||
-                  project.experiment?.componentType === 'house-price-3d'
-                    ? 'lg:col-span-12 space-y-3'
-                    : 'lg:col-span-7 space-y-3'
+                  isHousePrice3D
+                    ? 'lg:col-span-12'
+                    : 'lg:col-span-7'
                 }
               >
-                <div className="rounded-xl border border-[#24272D] bg-[#101216] p-3.5 space-y-3">
-                  <div className="flex items-center justify-between text-[11px] text-[#8B8F98] border-b border-[#24272D] pb-2">
-                    <span className="text-[#F2F2F2] font-semibold flex items-center gap-1.5">
-                      <Activity className="w-3.5 h-3.5 text-[#7CFF6B]" />
-                      <span>LIVE INTERACTIVE 3D MODEL &amp; FEATURE CONTROLS</span>
-                    </span>
-                    <span className="text-[#7CFF6B]">REAL-TIME INFERENCE &amp; SHAP</span>
-                  </div>
-
-                  {/* Keyed Simulator for seamless reset */}
-                  <div key={experimentKey}>
-                    <ProjectInteractiveExperience
-                      projectId={project.id}
-                      experiment={project.experiment}
-                      onOpenVero={project.liveAppView === 'vero' ? () => { onClose(); onOpenVero?.(); } : undefined}
-                    />
-                  </div>
+                <div key={experimentKey}>
+                  <ProjectInteractiveExperience
+                    projectId={project.id}
+                    experiment={project.experiment}
+                    onOpenVero={project.liveAppView === 'vero' ? () => { onClose(); onOpenVero?.(); } : undefined}
+                  />
                 </div>
               </div>
 
               {/* Beginner-Friendly 4-Block Explanation */}
               <div
                 className={
-                  project.id === 'house-price' ||
-                  project.experiment?.componentType === 'house-price-3d'
+                  isHousePrice3D
                     ? 'lg:col-span-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-sans'
                     : 'lg:col-span-5 space-y-3 font-sans'
                 }

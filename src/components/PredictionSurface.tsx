@@ -12,6 +12,9 @@ import {
   Pause,
   Eye,
   Home,
+  Maximize2,
+  Minimize2,
+  Sliders,
 } from 'lucide-react';
 import {
   HousePrice3DDataContract,
@@ -27,6 +30,8 @@ interface PredictionSurfaceProps {
   features?: Record<string, number>;
   onSelectCoordinates?: (xVal: number, zVal: number) => void;
   onSelectPreset?: (preset: HousePriceReferencePreset) => void;
+  onChangeFeature?: (featureId: string, value: number) => void;
+  onReset?: () => void;
 }
 
 /**
@@ -66,6 +71,8 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
   features,
   onSelectCoordinates,
   onSelectPreset,
+  onChangeFeature,
+  onReset,
 }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [webglSupported, setWebglSupported] = useState<boolean>(true);
@@ -73,11 +80,34 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
   const [autoRotate, setAutoRotate] = useState<boolean>(false);
   const [showDataCloud, setShowDataCloud] = useState<boolean>(true);
   const [showCrosshairs, setShowCrosshairs] = useState<boolean>(true);
+  const [isMaximized, setIsMaximized] = useState<boolean>(false);
+  const [showFloatingControls, setShowFloatingControls] = useState<boolean>(true);
   const [cameraAngles, setCameraAngles] = useState<{ theta: number; phi: number; radius: number }>({
     theta: 0.65,
     phi: 0.96,
     radius: 13.0,
   });
+
+  // Sync body dataset flag and handle Escape key to exit maximized 3D view cleanly
+  useEffect(() => {
+    if (isMaximized) {
+      document.body.dataset.surfaceMaximized = 'true';
+    } else {
+      delete document.body.dataset.surfaceMaximized;
+    }
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isMaximized) {
+        e.stopPropagation();
+        setIsMaximized(false);
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown, true);
+    return () => {
+      window.removeEventListener('keydown', handleGlobalKeyDown, true);
+      delete document.body.dataset.surfaceMaximized;
+    };
+  }, [isMaximized]);
 
   // Mutable ref so the Three.js animation loop reads fresh target coordinates, house dimensions,
   // and camera orbit without tearing down and rebuilding the WebGL scene.
@@ -987,14 +1017,25 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
   const deltaFromAverage = estimate.predictedPrice - estimate.baselinePrice;
 
   return (
-    <div className="rounded-xl border border-[#24272D] bg-[#08090B] overflow-hidden flex flex-col justify-between h-full">
+    <div
+      className={
+        isMaximized
+          ? 'fixed inset-0 z-[100] w-screen h-screen bg-[#08090B] flex flex-col justify-between overflow-hidden shadow-2xl'
+          : 'rounded-xl border border-[#24272D] bg-[#08090B] overflow-hidden flex flex-col justify-between h-full'
+      }
+    >
       {/* Top Easy-to-Use Camera & View Controls Bar */}
-      <div className="px-3.5 py-2.5 bg-[#101216] border-b border-[#24272D] flex flex-wrap items-center justify-between gap-2 font-mono text-[11px]">
+      <div className="px-3.5 py-2.5 bg-[#101216] border-b border-[#24272D] flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <Compass className="w-4 h-4 text-[#7CFF6B] shrink-0" />
           <span className="font-bold text-[#F2F2F2] truncate">
             3D PRICE TERRAIN &amp; HOUSE MODEL
           </span>
+          {isMaximized && (
+            <span className="px-2 py-0.5 rounded bg-[#7CFF6B]/15 border border-[#7CFF6B]/40 text-[#7CFF6B] text-[10px] font-bold">
+              FULLSCREEN 3D STUDIO
+            </span>
+          )}
         </div>
 
         <div className="flex flex-wrap items-center gap-1.5">
@@ -1107,6 +1148,55 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
               </button>
             </>
           )}
+
+          {isMaximized && onChangeFeature && (
+            <button
+              type="button"
+              onClick={() => setShowFloatingControls((p) => !p)}
+              className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 text-[10px] font-bold cursor-pointer transition-colors ${
+                showFloatingControls
+                  ? 'bg-[#6EA8FE]/15 border-[#6EA8FE] text-[#6EA8FE]'
+                  : 'bg-[#08090B] border-[#24272D] text-[#D1D5DB] hover:text-[#F2F2F2]'
+              }`}
+              title="Toggle Floating Property Sliders in Fullscreen"
+            >
+              <Sliders className="w-3 h-3" />
+              <span>{showFloatingControls ? 'Hide Sliders' : 'Show Sliders'}</span>
+            </button>
+          )}
+
+          {/* Maximize / Exit Fullscreen Button */}
+          <button
+            type="button"
+            onClick={() => setIsMaximized((prev) => !prev)}
+            className={`px-2.5 py-1 rounded-lg border flex items-center gap-1.5 text-[10px] font-bold cursor-pointer transition-all ${
+              isMaximized
+                ? 'bg-[#FF7B72]/20 border-[#FF7B72] text-[#FF7B72] hover:bg-[#FF7B72] hover:text-[#08090B]'
+                : 'bg-[#7CFF6B]/15 border-[#7CFF6B]/60 text-[#7CFF6B] hover:bg-[#7CFF6B] hover:text-[#08090B]'
+            }`}
+            title={
+              isMaximized
+                ? 'Exit Fullscreen 3D View (Esc)'
+                : 'Maximize 3D Price Terrain & House Model'
+            }
+            aria-label={
+              isMaximized
+                ? 'Exit fullscreen 3D Price Terrain and House Model'
+                : 'Maximize 3D Price Terrain and House Model'
+            }
+          >
+            {isMaximized ? (
+              <>
+                <Minimize2 className="w-3.5 h-3.5" />
+                <span>Exit Fullscreen</span>
+              </>
+            ) : (
+              <>
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>Maximize 3D</span>
+              </>
+            )}
+          </button>
         </div>
       </div>
 
@@ -1118,10 +1208,12 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
           role="region"
           aria-label={`Interactive 3D House Price Prediction Surface. Selected Living Area is ${estimate.xValue} sq ft, Quality is ${estimate.zValue}/10, predicted price is ${formatTargetValue(estimate.predictedPrice, data.modelMetadata)}.`}
           onKeyDown={handleCanvasKeyDown}
-          className="relative w-full h-[360px] sm:h-[430px] bg-[#08090B] cursor-grab active:cursor-grabbing focus:outline-none focus:ring-1 focus:ring-[#7CFF6B]/50 select-none"
+          className={`relative w-full bg-[#08090B] cursor-grab active:cursor-grabbing focus:outline-none focus:ring-1 focus:ring-[#7CFF6B]/50 select-none ${
+            isMaximized ? 'flex-1 min-h-0' : 'h-[380px] sm:h-[440px]'
+          }`}
         >
           {/* Top-Left Clear & Friendly Live Property Card */}
-          <div className="pointer-events-none absolute top-3 left-3 z-10 max-w-[260px] sm:max-w-[290px] rounded-xl bg-[#08090B]/90 backdrop-blur-md border border-[#24272D] p-3 font-mono space-y-2 shadow-xl">
+          <div className="pointer-events-none absolute top-3 left-3 z-10 max-w-[260px] sm:max-w-[300px] rounded-xl bg-[#08090B]/90 backdrop-blur-md border border-[#24272D] p-3 font-mono space-y-2 shadow-xl">
             <div className="flex items-center justify-between gap-2">
               <span className="flex items-center gap-1.5 text-[10px] font-bold text-[#7CFF6B]">
                 <Home className="w-3.5 h-3.5" />
@@ -1188,6 +1280,111 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Top-Right Quick Maximize Button when in Standard View, or Floating Sliders Dock when Maximized */}
+          {!isMaximized ? (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMaximized(true);
+              }}
+              onMouseDown={(e) => e.stopPropagation()}
+              className="absolute top-3 right-3 z-10 px-2.5 py-1.5 rounded-lg bg-[#08090B]/90 backdrop-blur-md border border-[#24272D] hover:border-[#7CFF6B] text-[#D1D5DB] hover:text-[#7CFF6B] font-mono text-[10px] font-bold flex items-center gap-1.5 shadow-lg cursor-pointer transition-colors"
+              title="Maximize 3D Price Terrain & House Model"
+            >
+              <Maximize2 className="w-3.5 h-3.5 text-[#7CFF6B]" />
+              <span>Fullscreen 3D</span>
+            </button>
+          ) : (
+            showFloatingControls &&
+            onChangeFeature &&
+            features && (
+              <div
+                onMouseDown={(e) => e.stopPropagation()}
+                onTouchStart={(e) => e.stopPropagation()}
+                onWheel={(e) => e.stopPropagation()}
+                className="absolute top-3 right-3 z-20 w-72 sm:w-80 max-h-[calc(100vh-145px)] overflow-y-auto rounded-xl bg-[#08090B]/95 backdrop-blur-md border border-[#24272D] p-3.5 font-mono text-xs space-y-3 shadow-2xl"
+              >
+                <div className="flex items-center justify-between border-b border-[#24272D] pb-2">
+                  <div className="flex items-center gap-1.5 text-[#7CFF6B] font-bold text-[11px]">
+                    <Sliders className="w-3.5 h-3.5" />
+                    <span>LIVE 3D HOUSE CONTROLS</span>
+                  </div>
+                  {onReset && (
+                    <button
+                      type="button"
+                      onClick={onReset}
+                      className="px-2 py-0.5 rounded bg-[#101216] border border-[#24272D] hover:border-[#7CFF6B] text-[10px] text-[#D1D5DB] flex items-center gap-1 cursor-pointer"
+                    >
+                      <RotateCcw className="w-2.5 h-2.5 text-[#7CFF6B]" />
+                      <span>Reset</span>
+                    </button>
+                  )}
+                </div>
+
+                <div className="space-y-2.5">
+                  {data.features.map((feat) => {
+                    const val = features[feat.id] ?? feat.defaultValue;
+                    const delta = estimate.featureImpacts?.[feat.id] ?? 0;
+                    const friendlyName =
+                      feat.id === 'GrLivArea'
+                        ? 'Living Area (sq ft)'
+                        : feat.id === 'OverallQual'
+                        ? 'Overall Quality (1-10)'
+                        : feat.id === 'GarageArea'
+                        ? 'Garage Size (sq ft)'
+                        : feat.id === 'YearBuilt'
+                        ? 'Year Built'
+                        : feat.id === 'LotArea'
+                        ? 'Lot Size (sq ft)'
+                        : feat.label;
+
+                    return (
+                      <div
+                        key={feat.id}
+                        className="p-2 rounded-lg bg-[#101216] border border-[#24272D] space-y-1"
+                      >
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="text-[#F2F2F2] font-bold">{friendlyName}</span>
+                          <div className="flex items-center gap-1.5 tabular-nums">
+                            <span className="text-[#7CFF6B] font-bold">
+                              {val.toLocaleString()}
+                            </span>
+                            <span
+                              className={`text-[9px] px-1 py-0.2 rounded ${
+                                delta > 500
+                                  ? 'text-[#7CFF6B] bg-[#7CFF6B]/10'
+                                  : delta < -500
+                                  ? 'text-[#FF7B72] bg-[#FF7B72]/10'
+                                  : 'text-[#8B8F98]'
+                              }`}
+                            >
+                              {formatTargetValue(delta, data.modelMetadata, {
+                                showPositiveSign: true,
+                                compact: true,
+                              })}
+                            </span>
+                          </div>
+                        </div>
+                        <input
+                          type="range"
+                          min={feat.min}
+                          max={feat.max}
+                          step={feat.step}
+                          value={val}
+                          onChange={(e) =>
+                            onChangeFeature(feat.id, Number(e.target.value))
+                          }
+                          className="w-full h-1.5 accent-[#7CFF6B] cursor-pointer"
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )
+          )}
 
           {/* Bottom-Left Simple How-to-Interact Guide */}
           <div className="pointer-events-none absolute bottom-3 left-3 z-10 rounded-lg bg-[#08090B]/90 backdrop-blur-sm border border-[#24272D] px-3 py-2 font-sans text-[11px] text-[#D1D5DB] space-y-0.5 max-w-xs">
