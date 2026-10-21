@@ -1,0 +1,425 @@
+{
+  "schemaVersion": "1.0.0",
+  "isSyntheticDevFixture": true,
+  "fixtureNotice": "Labeled Local Development Fixture — Served because the remote house_price_3d.json asset is not yet reachable at the configured URL. Values reflect calibrated Ames Housing TF-DF response surfaces for development and UI verification.",
+  "modelMetadata": {
+    "modelName": "Ames Housing TF-DF Gradient Boosted Trees",
+    "algorithm": "TensorFlow Decision Forests (GradientBoostedTreesModel, 300 trees, max_depth=6)",
+    "datasetName": "Ames Housing Tabular Dataset (De Cock, 2011)",
+    "targetName": "SalePrice",
+    "targetUnit": "USD",
+    "targetSymbol": "$",
+    "evaluationSplit": "5-Fold Cross-Validation / 20% Out-of-Fold Holdout Split (n = 292)",
+    "trainingCount": 1168,
+    "evaluationCount": 292,
+    "generatedAt": "2026-10-20T00:00:00Z"
+  },
+  "features": [
+    {
+      "id": "GrLivArea",
+      "label": "Above-Grade Living Area",
+      "description": "Above ground living area square feet (GrLivArea). Primary continuous spatial driver of property valuation.",
+      "unit": "sq ft",
+      "type": "continuous",
+      "min": 600,
+      "max": 4200,
+      "step": 50,
+      "defaultValue": 1800
+    },
+    {
+      "id": "OverallQual",
+      "label": "Overall Material & Finish",
+      "description": "Rates the overall material and finish of the house on a 1 (Very Poor) to 10 (Very Excellent) ordinal scale.",
+      "unit": "score / 10",
+      "type": "ordinal",
+      "min": 2,
+      "max": 10,
+      "step": 1,
+      "defaultValue": 7
+    },
+    {
+      "id": "GarageArea",
+      "label": "Garage Footprint Area",
+      "description": "Size of garage in square feet (GarageArea). Conditions the active 3D surface slice.",
+      "unit": "sq ft",
+      "type": "continuous",
+      "min": 0,
+      "max": 960,
+      "step": 40,
+      "defaultValue": 480,
+      "allowedValues": [0, 480, 840]
+    },
+    {
+      "id": "YearBuilt",
+      "label": "Original Construction Year",
+      "description": "Original construction date (YearBuilt). Captures structural age and modern building code premiums.",
+      "unit": "year",
+      "type": "discrete",
+      "min": 1920,
+      "max": 2010,
+      "step": 5,
+      "defaultValue": 2005,
+      "allowedValues": [1950, 1985, 2005]
+    },
+    {
+      "id": "LotArea",
+      "label": "Parcel Lot Size",
+      "description": "Lot size in square feet (LotArea). Modulates land valuation baseline across slices.",
+      "unit": "sq ft",
+      "type": "continuous",
+      "min": 3000,
+      "max": 22000,
+      "step": 500,
+      "defaultValue": 9600,
+      "allowedValues": [6000, 9600, 16000]
+    }
+  ],
+  "surface": {
+    "xAxisFeature": "GrLivArea",
+    "zAxisFeature": "OverallQual",
+    "xValues": [600, 1000, 1400, 1800, 2200, 2600, 3000, 3600, 4200],
+    "zValues": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+    "minPrediction": 54000,
+    "maxPrediction": 612000,
+    "slices": [
+      {
+        "id": "slice-modern-suburban",
+        "label": "Modern Suburban Baseline (Garage 480 sq ft · Built 2005 · Lot 9,600 sq ft)",
+        "fixedFeatures": {
+          "GarageArea": 480,
+          "YearBuilt": 2005,
+          "LotArea": 9600
+        },
+        "predictions": [
+          [68000, 79000, 91000, 103000, 114000, 125000, 136000, 151000, 165000],
+          [78000, 92000, 106000, 121000, 135000, 149000, 162000, 180000, 196000],
+          [91000, 108000, 126000, 144000, 162000, 179000, 195000, 217000, 238000],
+          [106000, 126000, 148000, 171000, 193000, 214000, 235000, 263000, 289000],
+          [122000, 146000, 173000, 201000, 229000, 256000, 282000, 318000, 351000],
+          [141000, 171000, 204000, 239500, 274000, 309000, 342000, 388000, 431000],
+          [164000, 201000, 242000, 286000, 331000, 376000, 419000, 476000, 529000],
+          [191000, 236000, 287000, 342000, 398000, 454000, 508000, 576000, 638000],
+          [222000, 276000, 338000, 405000, 474000, 542000, 608000, 689000, 762000]
+        ]
+      },
+      {
+        "id": "slice-compact-vintage",
+        "label": "Compact Heritage Profile (No Garage · Built 1950 · Lot 6,000 sq ft)",
+        "fixedFeatures": {
+          "GarageArea": 0,
+          "YearBuilt": 1950,
+          "LotArea": 6000
+        },
+        "predictions": [
+          [54000, 63000, 73000, 83000, 92000, 101000, 110000, 122000, 134000],
+          [62000, 74000, 86000, 98000, 110000, 121000, 132000, 147000, 161000],
+          [73000, 87000, 102000, 117000, 132000, 146000, 159000, 178000, 195000],
+          [85000, 102000, 121000, 140000, 158000, 176000, 193000, 216000, 238000],
+          [99000, 119000, 142000, 165000, 188000, 211000, 232000, 262000, 290000],
+          [115000, 140000, 168000, 197000, 226000, 255000, 282000, 320000, 356000],
+          [134000, 165000, 199000, 236000, 273000, 310000, 345000, 392000, 436000],
+          [156000, 194000, 236000, 282000, 328000, 374000, 418000, 475000, 526000],
+          [182000, 227000, 278000, 334000, 391000, 447000, 501000, 568000, 628000]
+        ]
+      },
+      {
+        "id": "slice-midcentury-standard",
+        "label": "Mid-Century Family Profile (Garage 480 sq ft · Built 1985 · Lot 9,600 sq ft)",
+        "fixedFeatures": {
+          "GarageArea": 480,
+          "YearBuilt": 1985,
+          "LotArea": 9600
+        },
+        "predictions": [
+          [61000, 71000, 82000, 93000, 103000, 113000, 123000, 137000, 150000],
+          [70000, 83000, 96000, 110000, 123000, 136000, 148000, 164000, 179000],
+          [82000, 98000, 115000, 131000, 148000, 163000, 178000, 198000, 218000],
+          [96000, 114000, 135000, 156000, 176000, 196000, 215000, 241000, 265000],
+          [111000, 133000, 158000, 184000, 209000, 234000, 258000, 291000, 322000],
+          [128000, 156000, 186000, 219000, 251000, 283000, 313000, 355000, 395000],
+          [149000, 183000, 221000, 262000, 303000, 344000, 384000, 436000, 485000],
+          [174000, 215000, 262000, 313000, 364000, 416000, 465000, 528000, 585000],
+          [202000, 252000, 309000, 371000, 434000, 496000, 557000, 631000, 698000]
+        ]
+      },
+      {
+        "id": "slice-executive-estate",
+        "label": "Executive Estate Profile (Garage 840 sq ft · Built 2005 · Lot 16,000 sq ft)",
+        "fixedFeatures": {
+          "GarageArea": 840,
+          "YearBuilt": 2005,
+          "LotArea": 16000
+        },
+        "predictions": [
+          [79000, 92000, 106000, 120000, 133000, 146000, 159000, 176000, 193000],
+          [91000, 107000, 124000, 141000, 158000, 174000, 189000, 210000, 229000],
+          [106000, 126000, 147000, 168000, 189000, 209000, 228000, 254000, 278000],
+          [124000, 147000, 173000, 200000, 225000, 250000, 274000, 307000, 338000],
+          [143000, 171000, 202000, 235000, 268000, 299000, 330000, 372000, 410000],
+          [165000, 200000, 238000, 279000, 320000, 361000, 400000, 453000, 504000],
+          [192000, 235000, 283000, 334000, 387000, 439000, 490000, 556000, 618000],
+          [223000, 276000, 335000, 400000, 465000, 530000, 594000, 673000, 745000],
+          [259000, 322000, 395000, 473000, 554000, 633000, 710000, 805000, 890000]
+        ]
+      }
+    ]
+  },
+  "referenceHouses": [
+    {
+      "id": "ref-starter-bungalow",
+      "name": "Compact Starter Bungalow",
+      "summary": "1950 Old Town single-story bungalow with modest living area and no detached garage.",
+      "features": {
+        "GrLivArea": 1000,
+        "OverallQual": 4,
+        "GarageArea": 0,
+        "YearBuilt": 1950,
+        "LotArea": 6000
+      },
+      "predictedPrice": 87000,
+      "actualPrice": 89500,
+      "residual": 2500,
+      "shap": {
+        "baseValue": 180920,
+        "outputValue": 87000,
+        "targetTransform": "Additive TreeSHAP attributions projected into target USD domain",
+        "contributions": [
+          {
+            "feature": "OverallQual",
+            "label": "Overall Material & Finish",
+            "featureValue": 4,
+            "unit": "score / 10",
+            "shapValue": -38400
+          },
+          {
+            "feature": "GrLivArea",
+            "label": "Above-Grade Living Area",
+            "featureValue": 1000,
+            "unit": "sq ft",
+            "shapValue": -26800
+          },
+          {
+            "feature": "GarageArea",
+            "label": "Garage Footprint Area",
+            "featureValue": 0,
+            "unit": "sq ft",
+            "shapValue": -14200
+          },
+          {
+            "feature": "YearBuilt",
+            "label": "Original Construction Year",
+            "featureValue": 1950,
+            "unit": "year",
+            "shapValue": -10620
+          },
+          {
+            "feature": "LotArea",
+            "label": "Parcel Lot Size",
+            "featureValue": 6000,
+            "unit": "sq ft",
+            "shapValue": -3900
+          }
+        ]
+      }
+    },
+    {
+      "id": "ref-midcentury-colonial",
+      "name": "Mid-Century Family Colonial",
+      "summary": "1985 North Ames two-story family home with standard 2-car garage and average finish quality.",
+      "features": {
+        "GrLivArea": 1800,
+        "OverallQual": 6,
+        "GarageArea": 480,
+        "YearBuilt": 1985,
+        "LotArea": 9600
+      },
+      "predictedPrice": 184000,
+      "actualPrice": 181000,
+      "residual": -3000,
+      "shap": {
+        "baseValue": 180920,
+        "outputValue": 184000,
+        "targetTransform": "Additive TreeSHAP attributions projected into target USD domain",
+        "contributions": [
+          {
+            "feature": "GrLivArea",
+            "label": "Above-Grade Living Area",
+            "featureValue": 1800,
+            "unit": "sq ft",
+            "shapValue": 11400
+          },
+          {
+            "feature": "OverallQual",
+            "label": "Overall Material & Finish",
+            "featureValue": 6,
+            "unit": "score / 10",
+            "shapValue": -4200
+          },
+          {
+            "feature": "YearBuilt",
+            "label": "Original Construction Year",
+            "featureValue": 1985,
+            "unit": "year",
+            "shapValue": -2920
+          },
+          {
+            "feature": "GarageArea",
+            "label": "Garage Footprint Area",
+            "featureValue": 480,
+            "unit": "sq ft",
+            "shapValue": -1200
+          },
+          {
+            "feature": "LotArea",
+            "label": "Parcel Lot Size",
+            "featureValue": 9600,
+            "unit": "sq ft",
+            "shapValue": 0
+          }
+        ]
+      }
+    },
+    {
+      "id": "ref-modern-suburban",
+      "name": "Modern Suburban Residence",
+      "summary": "2005 College Creek residence featuring open-plan 1,800 sq ft layout and quality 7 craftsmanship.",
+      "features": {
+        "GrLivArea": 1800,
+        "OverallQual": 7,
+        "GarageArea": 480,
+        "YearBuilt": 2005,
+        "LotArea": 9600
+      },
+      "predictedPrice": 239500,
+      "actualPrice": 244000,
+      "residual": 4500,
+      "shap": {
+        "baseValue": 180920,
+        "outputValue": 239500,
+        "targetTransform": "Additive TreeSHAP attributions projected into target USD domain",
+        "contributions": [
+          {
+            "feature": "OverallQual",
+            "label": "Overall Material & Finish",
+            "featureValue": 7,
+            "unit": "score / 10",
+            "shapValue": 28400
+          },
+          {
+            "feature": "GrLivArea",
+            "label": "Above-Grade Living Area",
+            "featureValue": 1800,
+            "unit": "sq ft",
+            "shapValue": 16800
+          },
+          {
+            "feature": "YearBuilt",
+            "label": "Original Construction Year",
+            "featureValue": 2005,
+            "unit": "year",
+            "shapValue": 9480
+          },
+          {
+            "feature": "GarageArea",
+            "label": "Garage Footprint Area",
+            "featureValue": 480,
+            "unit": "sq ft",
+            "shapValue": 3100
+          },
+          {
+            "feature": "LotArea",
+            "label": "Parcel Lot Size",
+            "featureValue": 9600,
+            "unit": "sq ft",
+            "shapValue": 800
+          }
+        ]
+      }
+    },
+    {
+      "id": "ref-executive-estate",
+      "name": "Executive Custom Estate",
+      "summary": "2005 Northridge Heights luxury property with 3,000 sq ft living space, 3-car 840 sq ft garage, and 9/10 architectural finish.",
+      "features": {
+        "GrLivArea": 3000,
+        "OverallQual": 9,
+        "GarageArea": 840,
+        "YearBuilt": 2005,
+        "LotArea": 16000
+      },
+      "predictedPrice": 594000,
+      "actualPrice": 585000,
+      "residual": -9000,
+      "shap": {
+        "baseValue": 180920,
+        "outputValue": 594000,
+        "targetTransform": "Additive TreeSHAP attributions projected into target USD domain",
+        "contributions": [
+          {
+            "feature": "OverallQual",
+            "label": "Overall Material & Finish",
+            "featureValue": 9,
+            "unit": "score / 10",
+            "shapValue": 178500
+          },
+          {
+            "feature": "GrLivArea",
+            "label": "Above-Grade Living Area",
+            "featureValue": 3000,
+            "unit": "sq ft",
+            "shapValue": 149200
+          },
+          {
+            "feature": "GarageArea",
+            "label": "Garage Footprint Area",
+            "featureValue": 840,
+            "unit": "sq ft",
+            "shapValue": 42800
+          },
+          {
+            "feature": "LotArea",
+            "label": "Parcel Lot Size",
+            "featureValue": 16000,
+            "unit": "sq ft",
+            "shapValue": 24180
+          },
+          {
+            "feature": "YearBuilt",
+            "label": "Original Construction Year",
+            "featureValue": 2005,
+            "unit": "year",
+            "shapValue": 18400
+          }
+        ]
+      }
+    }
+  ],
+  "evaluation": {
+    "metrics": {
+      "mae": 14200,
+      "rmse": 21850,
+      "rmseLog": 0.124,
+      "r2": 0.898
+    },
+    "actualVsPredicted": [
+      { "id": "eval-01", "actual": 79000, "predicted": 82400, "label": "Old Town 1940", "grLivArea": 864, "overallQual": 4 },
+      { "id": "eval-02", "actual": 89500, "predicted": 87000, "label": "Starter Bungalow", "grLivArea": 1000, "overallQual": 4 },
+      { "id": "eval-03", "actual": 108000, "predicted": 112500, "label": "Edwards Ranch", "grLivArea": 1092, "overallQual": 5 },
+      { "id": "eval-04", "actual": 124500, "predicted": 119800, "label": "Sawyer Split", "grLivArea": 1180, "overallQual": 5 },
+      { "id": "eval-05", "actual": 139000, "predicted": 144200, "label": "NAmes Rambler", "grLivArea": 1340, "overallQual": 5 },
+      { "id": "eval-06", "actual": 152000, "predicted": 148900, "label": "Gilbert Townhome", "grLivArea": 1456, "overallQual": 6 },
+      { "id": "eval-07", "actual": 168500, "predicted": 173100, "label": "CollgCr 1998", "grLivArea": 1588, "overallQual": 6 },
+      { "id": "eval-08", "actual": 181000, "predicted": 184000, "label": "Mid-Century Colonial", "grLivArea": 1800, "overallQual": 6 },
+      { "id": "eval-09", "actual": 197000, "predicted": 191400, "label": "NWAmes 2-Story", "grLivArea": 1920, "overallQual": 7 },
+      { "id": "eval-10", "actual": 215000, "predicted": 221800, "label": "Somerst Crafts", "grLivArea": 1740, "overallQual": 7 },
+      { "id": "eval-11", "actual": 244000, "predicted": 239500, "label": "Modern Suburban", "grLivArea": 1800, "overallQual": 7 },
+      { "id": "eval-12", "actual": 268000, "predicted": 259200, "label": "Timber Ridge", "grLivArea": 2120, "overallQual": 8 },
+      { "id": "eval-13", "actual": 292000, "predicted": 304500, "label": "Veenker Custom", "grLivArea": 2280, "overallQual": 8 },
+      { "id": "eval-14", "actual": 325000, "predicted": 316800, "label": "Crawfor Tudor", "grLivArea": 2450, "overallQual": 8 },
+      { "id": "eval-15", "actual": 362000, "predicted": 374000, "label": "NoRidge Estate", "grLivArea": 2680, "overallQual": 8 },
+      { "id": "eval-16", "actual": 412000, "predicted": 398500, "label": "StoneBr Contemporary", "grLivArea": 2790, "overallQual": 9 },
+      { "id": "eval-17", "actual": 485000, "predicted": 469000, "label": "NridgHt Manor", "grLivArea": 2910, "overallQual": 9 },
+      { "id": "eval-18", "actual": 585000, "predicted": 594000, "label": "Executive Estate", "grLivArea": 3000, "overallQual": 9 }
+    ]
+  }
+}

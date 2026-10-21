@@ -219,32 +219,47 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
               </div>
             </div>
 
-            {/* The Balanced Two-Column Split */}
+            {/* Full-width layout for 3D House Price Workbench, or Balanced Two-Column Split for standard simulators */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
-              {/* LEFT COLUMN: Existing Interactive Workbench / 3D Scene */}
-              <div className="lg:col-span-7 space-y-3">
+              {/* Interactive Workbench / 3D Scene */}
+              <div
+                className={
+                  project.id === 'house-price' ||
+                  project.experiment?.componentType === 'house-price-3d'
+                    ? 'lg:col-span-12 space-y-3'
+                    : 'lg:col-span-7 space-y-3'
+                }
+              >
                 <div className="rounded-xl border border-[#24272D] bg-[#101216] p-3.5 space-y-3">
                   <div className="flex items-center justify-between text-[11px] text-[#8B8F98] border-b border-[#24272D] pb-2">
                     <span className="text-[#F2F2F2] font-semibold flex items-center gap-1.5">
                       <Activity className="w-3.5 h-3.5 text-[#7CFF6B]" />
-                      <span>LIVE EXPERIMENTAL CONTROLS</span>
+                      <span>LIVE INTERACTIVE 3D MODEL &amp; FEATURE CONTROLS</span>
                     </span>
-                    <span className="text-[#7CFF6B]">DETERMINISTIC SIMULATION</span>
+                    <span className="text-[#7CFF6B]">REAL-TIME INFERENCE &amp; SHAP</span>
                   </div>
 
                   {/* Keyed Simulator for seamless reset */}
                   <div key={experimentKey}>
                     <ProjectInteractiveExperience
                       projectId={project.id}
+                      experiment={project.experiment}
                       onOpenVero={project.liveAppView === 'vero' ? () => { onClose(); onOpenVero?.(); } : undefined}
                     />
                   </div>
                 </div>
               </div>
 
-              {/* RIGHT COLUMN: Beginner-Friendly 4-Block Explanation */}
-              <div className="lg:col-span-5 space-y-3 font-sans">
+              {/* Beginner-Friendly 4-Block Explanation */}
+              <div
+                className={
+                  project.id === 'house-price' ||
+                  project.experiment?.componentType === 'house-price-3d'
+                    ? 'lg:col-span-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 font-sans'
+                    : 'lg:col-span-5 space-y-3 font-sans'
+                }
+              >
                 
                 {/* 1. THE PROBLEM */}
                 <div className="p-3.5 rounded-xl bg-[#101216] border border-[#FF7B72]/30 space-y-1">
@@ -293,7 +308,14 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                 </div>
 
                 {/* 💡 KEY TAKEAWAY STATEMENT BANNER */}
-                <div className="p-3 rounded-xl bg-[#7CFF6B]/10 border border-[#7CFF6B]/40 space-y-1 font-mono">
+                <div
+                  className={`p-3 rounded-xl bg-[#7CFF6B]/10 border border-[#7CFF6B]/40 space-y-1 font-mono ${
+                    project.id === 'house-price' ||
+                    project.experiment?.componentType === 'house-price-3d'
+                      ? 'sm:col-span-2 lg:col-span-4'
+                      : ''
+                  }`}
+                >
                   <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#7CFF6B] uppercase">
                     <Lightbulb className="w-3.5 h-3.5 shrink-0" />
                     <span>KEY TAKEAWAY</span>

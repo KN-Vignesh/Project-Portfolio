@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import {
   Play,
   RotateCcw,
@@ -20,14 +20,19 @@ import {
   Network
 } from 'lucide-react';
 import { CNNLayerExplorer3D } from './CNNLayerExplorer3D';
+import { ExperimentConfig } from '../types';
+
+const HousePriceExperiment3D = lazy(() => import('./HousePriceExperiment3D'));
 
 interface ProjectInteractiveExperienceProps {
   projectId: string;
+  experiment?: ExperimentConfig;
   onOpenVero?: () => void;
 }
 
 export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperienceProps> = ({
   projectId,
+  experiment,
   onOpenVero,
 }) => {
   // 01: Customer Churn Simulator State
@@ -776,97 +781,22 @@ export const ProjectInteractiveExperience: React.FC<ProjectInteractiveExperience
         )}
 
         {/* ====================================================================
-            PROJECT 08: HOUSE PRICE TABULAR REGRESSION
+            PROJECT 08: HOUSE PRICE TABULAR REGRESSION (3D PREDICTION SURFACE & SHAP)
         ==================================================================== */}
-        {projectId === 'house-price' && (
-          <div className="space-y-4 font-mono text-xs">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              <div className="p-2.5 rounded bg-[#101216] border border-[#24272D] space-y-1">
-                <span className="text-[#8B8F98] text-[10px] block">LIVING AREA:</span>
-                <input
-                  type="number"
-                  min="600"
-                  max="6000"
-                  step="100"
-                  value={houseSqFt}
-                  onChange={(e) => setHouseSqFt(Number(e.target.value))}
-                  className="w-full bg-[#08090B] px-2 py-1 rounded text-[#7CFF6B] font-bold border border-[#24272D]"
-                />
-                <span className="text-[9px] text-[#8B8F98]">sq. feet</span>
+        {(projectId === 'house-price' || experiment?.type === 'regression-surface') && (
+          <Suspense
+            fallback={
+              <div className="p-6 rounded-xl bg-[#08090B] border border-[#24272D] font-mono text-xs text-[#8B8F98] flex items-center justify-center gap-2">
+                <Activity className="w-4 h-4 text-[#7CFF6B] animate-pulse" />
+                <span>Loading 3D House Price Prediction Surface &amp; SHAP Workbench...</span>
               </div>
-              <div className="p-2.5 rounded bg-[#101216] border border-[#24272D] space-y-1">
-                <span className="text-[#8B8F98] text-[10px] block">OVERALL QUALITY:</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={houseQuality}
-                  onChange={(e) => setHouseQuality(Number(e.target.value))}
-                  className="w-full bg-[#08090B] px-2 py-1 rounded text-[#6EA8FE] font-bold border border-[#24272D]"
-                />
-                <span className="text-[9px] text-[#8B8F98]">scale 1 - 10</span>
-              </div>
-              <div className="p-2.5 rounded bg-[#101216] border border-[#24272D] space-y-1">
-                <span className="text-[#8B8F98] text-[10px] block">GARAGE CAPACITY:</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="4"
-                  value={houseGarage}
-                  onChange={(e) => setHouseGarage(Number(e.target.value))}
-                  className="w-full bg-[#08090B] px-2 py-1 rounded text-[#FFB86B] font-bold border border-[#24272D]"
-                />
-                <span className="text-[9px] text-[#8B8F98]">cars</span>
-              </div>
-              <div className="p-2.5 rounded bg-[#101216] border border-[#24272D] space-y-1">
-                <span className="text-[#8B8F98] text-[10px] block">YEAR BUILT:</span>
-                <input
-                  type="number"
-                  min="1900"
-                  max="2025"
-                  value={houseYear}
-                  onChange={(e) => setHouseYear(Number(e.target.value))}
-                  className="w-full bg-[#08090B] px-2 py-1 rounded text-[#F2F2F2] font-bold border border-[#24272D]"
-                />
-                <span className="text-[9px] text-[#8B8F98]">year</span>
-              </div>
-            </div>
-
-            {/* Estimated Price Output */}
-            <div className="p-4 rounded-xl bg-[#101216] border border-[#7CFF6B]/40 flex items-center justify-between">
-              <div>
-                <span className="text-[#8B8F98] text-[10px] block">ESTIMATED VALUATION (REGULARIZED RIDGE):</span>
-                <span className="text-2xl font-bold text-[#7CFF6B]">${priceBreakdown.total.toLocaleString()}</span>
-              </div>
-              <div className="text-right text-[11px] text-[#8B8F98]">
-                <span>MODEL R²: 0.892</span>
-                <span className="block text-[10px] text-[#7CFF6B]">MAE: ±$14,800</span>
-              </div>
-            </div>
-
-            {/* SHAP-style Feature Attribution Waterfall */}
-            <div className="p-3 rounded-lg bg-[#101216] border border-[#24272D] space-y-1.5 text-[11px]">
-              <span className="text-[#8B8F98] block text-[10px] uppercase font-bold">LINEAR FEATURE ATTRIBUTIONS:</span>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
-                <div className="p-1.5 rounded bg-[#08090B] border border-[#24272D]">
-                  <span className="text-[#8B8F98] text-[9px] block">BASE INTERCEPT:</span>
-                  <span className="text-[#F2F2F2] font-bold">+${priceBreakdown.base.toLocaleString()}</span>
-                </div>
-                <div className="p-1.5 rounded bg-[#08090B] border border-[#24272D]">
-                  <span className="text-[#8B8F98] text-[9px] block">AREA IMPACT:</span>
-                  <span className="text-[#7CFF6B] font-bold">+${priceBreakdown.sqftContrib.toLocaleString()}</span>
-                </div>
-                <div className="p-1.5 rounded bg-[#08090B] border border-[#24272D]">
-                  <span className="text-[#8B8F98] text-[9px] block">QUALITY IMPACT:</span>
-                  <span className="text-[#6EA8FE] font-bold">+${priceBreakdown.qualContrib.toLocaleString()}</span>
-                </div>
-                <div className="p-1.5 rounded bg-[#08090B] border border-[#24272D]">
-                  <span className="text-[#8B8F98] text-[9px] block">GARAGE/AGE:</span>
-                  <span className="text-[#FFB86B] font-bold">+${(priceBreakdown.garageContrib + priceBreakdown.yearContrib).toLocaleString()}</span>
-                </div>
-              </div>
-            </div>
-          </div>
+            }
+          >
+            <HousePriceExperiment3D
+              dataUrl={experiment?.dataUrl}
+              fallbackFixtureUrl={experiment?.fallbackFixtureUrl}
+            />
+          </Suspense>
         )}
 
         {/* ====================================================================

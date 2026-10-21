@@ -22,6 +22,7 @@ import { OfflineIndicator } from './components/OfflineIndicator';
 import { MobileAppDock } from './components/MobileAppDock';
 import { ProjectItem } from './types';
 import { useProjects } from './hooks/useProjects';
+import { resolveCanonicalProjectId } from './data/projectSource';
 import VeroApp from './vero/VeroApp';
 
 export default function App() {
@@ -59,11 +60,17 @@ export default function App() {
       
       setCurrentView('portfolio');
       
-      if (hash.startsWith('project-')) {
-        const projId = hash.replace('project-', '');
-        const exists = projects.find((p) => p.id === projId);
+      const params = new URLSearchParams(window.location.search);
+      const queryProject = params.get('project');
+
+      if (hash.startsWith('project-') || queryProject) {
+        const rawProjId = queryProject || hash.replace('project-', '');
+        const canonicalId = resolveCanonicalProjectId(rawProjId);
+        const exists = projects.find((p) => p.id === canonicalId || p.id === rawProjId);
         if (exists) {
-          setSelectedProjectId(projId);
+          setSelectedProjectId(exists.id);
+        } else if (projectsLoading) {
+          setSelectedProjectId(canonicalId);
         } else {
           setSelectedProjectId(null);
         }
@@ -87,7 +94,7 @@ export default function App() {
       window.removeEventListener('hashchange', handleUrlChange);
       window.removeEventListener('popstate', handleUrlChange);
     };
-  }, [projects]);
+  }, [projects, projectsLoading]);
 
   // Update active section based on scroll position (when in portfolio view)
   useEffect(() => {
