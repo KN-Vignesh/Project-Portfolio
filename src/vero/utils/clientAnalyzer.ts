@@ -1,60 +1,51 @@
-import { parseGitHubPrUrl, fetchPullRequestData } from './server/github.js';
-import { runSonarQubeAnalysis } from './server/sonarEngine.js';
-import { runJevInference } from './server/jevEngine.js';
-import { runDeterministicDecisionEngine } from './server/decisionEngine.js';
-import { AnalysisResult, TrialStatus } from './types.js';
+import { parseGitHubPrUrl, fetchPullRequestData } from '../server/github.js';
+import { runSonarQubeAnalysis } from '../server/sonarEngine.js';
+import { runJevInference } from '../server/jevEngine.js';
+import { runDeterministicDecisionEngine } from '../server/decisionEngine.js';
+import { AnalysisResult, TrialStatus } from '../types.js';
 
+const STORAGE_KEY = 'prs_client_trial_session_v1';
 const COOLING_PERIOD_MS = 24 * 60 * 60 * 1000; // 24-hour cooling window
 const MAX_FREE_DISTINCT_PRS = 3;
-const STORAGE_KEY = 'prs_static_trial_session_v1';
 
-interface StoredClientSession {
+interface ClientSessionData {
   coolingStart: number;
   distinctPrs: string[];
 }
 
-function getOrUpdateClientSession(): StoredClientSession {
+function loadOrResetClientSession(): ClientSessionData {
   const now = Date.now();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
     if (raw) {
-      const parsed: StoredClientSession = JSON.parse(raw);
+      const parsed = JSON.parse(raw) as ClientSessionData;
       if (
         typeof parsed.coolingStart === 'number' &&
-        Array.isArray(parsed.distinctPrs)
+        Array.isArray(parsed.distinctPrs) &&
+        now - parsed.coolingStart < COOLING_PERIOD_MS
       ) {
-        if (now - parsed.coolingStart >= COOLING_PERIOD_MS) {
-          const resetSession: StoredClientSession = {
-            coolingStart: now,
-            distinctPrs: [],
-          };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(resetSession));
-          return resetSession;
-        }
         return parsed;
       }
     }
   } catch {
-    // Ignore localStorage parse errors
+    // Ignore storage parse errors
   }
 
-  const fresh: StoredClientSession = {
+  const fresh: ClientSessionData = {
     coolingStart: now,
     distinctPrs: [],
   };
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
-  } catch {
-    // Ignore storage quota errors
-  }
+  saveClientSession(fresh);
   return fresh;
 }
 
-function saveClientSession(session: StoredClientSession): void {
+function saveClientSession(session: ClientSessionData): void {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    }
   } catch {
-    // Ignore storage errors
+    // Ignore storage write errors
   }
 }
 
@@ -64,7 +55,7 @@ export function getClientTrialStatus(
 ): TrialStatus {
   const hasUserToken = Boolean(userGithubToken && userGithubToken.trim().length > 0);
   const hasUserTypesafeKey = Boolean(userTypesafeKey && userTypesafeKey.trim().length > 0);
-  const session = getOrUpdateClientSession();
+  const session = loadOrResetClientSession();
   const coolingResetMs = Math.max(0, session.coolingStart + COOLING_PERIOD_MS - Date.now());
 
   return {
@@ -82,7 +73,19 @@ export function getClientTrialStatus(
   };
 }
 
-export async function runClientFallbackAnalysis(
+export class TrialQuotaExceededError extends Error {
+  trialsUsed: number;
+  coolingResetMs: number;
+
+  constructor(message: string, trialsUsed: number, coolingResetMs: number) {
+    super(message);
+    this.name = 'TrialQuotaExceededError';
+    this.trialsUsed = trialsUsed;
+    this.coolingResetMs = coolingResetMs;
+  }
+}
+
+export async function runClientPrAnalysis(
   prUrl: string,
   userGithubToken?: string,
   userTypesafeKey?: string
@@ -102,26 +105,23 @@ export async function runClientFallbackAnalysis(
     );
   }
 
-  const session = getOrUpdateClientSession();
+  const session = loadOrResetClientSession();
   const canonicalKey = parsed.canonicalUrl.toLowerCase();
   const alreadyAnalyzedThisPr = session.distinctPrs.includes(canonicalKey);
 
   if (!hasUserGithubToken) {
     if (!alreadyAnalyzedThisPr && session.distinctPrs.length >= MAX_FREE_DISTINCT_PRS) {
-      const remainingHours = Math.ceil(
-        Math.max(0, session.coolingStart + COOLING_PERIOD_MS - Date.now()) / (1000 * 60 * 60)
+      const coolingResetMs = Math.max(0, session.coolingStart + COOLING_PERIOD_MS - Date.now());
+      const remainingHours = Math.ceil(coolingResetMs / (1000 * 60 * 60));
+      throw new TrialQuotaExceededError(
+        `24-Hour Free Trial Limit Reached: You have analyzed ${MAX_FREE_DISTINCT_PRS} distinct Pull Requests using the shared demo quota. Please provide your own GitHub Personal Access Token in Settings for unlimited analyses, or wait ${remainingHours} hours for the 24-hour cooling window to reset.`,
+        session.distinctPrs.length,
+        coolingResetMs
       );
-      const err: any = new Error(
-        `24-Hour Free Trial Limit Reached: You have analyzed ${MAX_FREE_DISTINCT_PRS} distinct Pull Requests in this 24-hour window. Please provide your own GitHub Personal Access Token in Settings for unlimited analyses, or wait ${remainingHours} hours for the 24-hour cooling window to reset.`
-      );
-      err.status = 429;
-      err.trialsUsed = session.distinctPrs.length;
-      err.coolingResetMs = Math.max(0, session.coolingStart + COOLING_PERIOD_MS - Date.now());
-      throw err;
     }
   }
 
-  // Step 1: GitHub PR Ingestion
+  // Step 1: GitHub PR Ingestion (Live GitHub REST API with fixture fallback)
   const ghStart = Date.now();
   const { metadata, files, source } = await fetchPullRequestData(
     parsed,

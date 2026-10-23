@@ -238,8 +238,8 @@ export default function App() {
         />
 
         {/* 02.2 / INTERACTIVE 3D MULTI-SCENE EXPERIMENTATION WORKBENCH */}
-        <section id="3d-workbench" className="py-16 border-t border-[#24272D] bg-[#08090B]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section id="3d-workbench" className="py-24 lg:py-28 border-t border-white/[0.08] bg-[#08090B]">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
             <Interactive3DProjectStage
               onInspectSpec={(scene) => setSelectedSpecScene(scene)}
             />
@@ -287,6 +287,7 @@ export default function App() {
       {/* Standalone Project Detail View Modal */}
       <ProjectDetailModal
         project={currentProject}
+        allProjects={projects}
         onClose={handleCloseProject}
         onSelectProject={handleOpenProject}
         onOpenVero={handleOpenVero}

@@ -15,21 +15,17 @@ import { TokenSettingsModal } from './components/TokenSettingsModal.js';
 import { TrialHistoryBanner } from './components/TrialHistoryBanner.js';
 import { downloadMarkdownDossier, downloadPdfDossier } from './utils/exportDossier.js';
 import {
+  getClientTrialStatus,
+  runClientPrAnalysis,
+  TrialQuotaExceededError,
+} from './utils/clientAnalyzer.js';
+import {
   AnalysisResult,
   SonarIssue,
   DeterministicPolicyRule,
   TrialStatus,
   TrialHistoryItem,
 } from './types.js';
-import {
-  getClientTrialStatus,
-  runClientFallbackAnalysis,
-} from './clientAnalysisFallback.js';
-
-const API_BASE_URL = (
-  (typeof import.meta !== 'undefined' && (import.meta as any).env?.VITE_API_BASE_URL) ||
-  ''
-).replace(/\/$/, '');
 
 export interface VeroAppProps {
   onBackToPortfolio?: () => void;
@@ -101,7 +97,7 @@ export default function VeroApp({ onBackToPortfolio = () => {} }: VeroAppProps) 
     fetchTrialStatus(userGithubToken, key);
   };
 
-  // Fetch current trial quota and 24h cooling status (with static-host fallback)
+  // Fetch current trial quota and 24h cooling status (with automatic client-side fallback for static deployments)
   const fetchTrialStatus = useCallback(
     async (ghToken?: string, tsKey?: string) => {
       const activeGh = ghToken !== undefined ? ghToken : userGithubToken;
@@ -113,7 +109,7 @@ export default function VeroApp({ onBackToPortfolio = () => {} }: VeroAppProps) 
         if (activeGh) headers['x-user-github-token'] = activeGh;
         if (activeTs) headers['x-user-typesafe-key'] = activeTs;
 
-        const res = await fetch(`${API_BASE_URL}/api/trial-status`, { headers });
+        const res = await fetch('/api/trial-status', { headers });
         const contentType = res.headers.get('content-type') || '';
         if (res.ok && contentType.includes('application/json')) {
           const data: TrialStatus = await res.json();
@@ -121,7 +117,7 @@ export default function VeroApp({ onBackToPortfolio = () => {} }: VeroAppProps) 
           return;
         }
       } catch {
-        // Static hosting or offline backend — fall through to client-side trial status
+        // Fallback to client-side trial status tracking below
       }
       setTrialStatus(getClientTrialStatus(activeGh, activeTs));
     },
@@ -138,44 +134,45 @@ export default function VeroApp({ onBackToPortfolio = () => {} }: VeroAppProps) 
     localStorage.removeItem('prs_trial_history');
   };
 
-  // Trigger analysis (uses Express API when available, automatically falls back to browser pipeline on static hosts)
+  // Trigger analysis (uses backend /api/analyze-pr when available, with automatic isomorphic client fallback on HTTP 405 / static hosting)
   const handleAnalyze = async (url: string) => {
     setIsLoading(true);
     setError(null);
     setCurrentUrl(url);
 
     try {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'x-client-session-id': clientSessionId,
+      };
+      if (userGithubToken) headers['x-user-github-token'] = userGithubToken;
+      if (userTypesafeKey) headers['x-user-typesafe-key'] = userTypesafeKey;
+
       let data: AnalysisResult | null = null;
 
       try {
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-          'x-client-session-id': clientSessionId,
-        };
-        if (userGithubToken) headers['x-user-github-token'] = userGithubToken;
-        if (userTypesafeKey) headers['x-user-typesafe-key'] = userTypesafeKey;
-
-        const response = await fetch(`${API_BASE_URL}/api/analyze-pr`, {
+        const response = await fetch('/api/analyze-pr', {
           method: 'POST',
           headers,
           body: JSON.stringify({ prUrl: url }),
         });
 
         const contentType = response.headers.get('content-type') || '';
-        const isStaticHostFallbackStatus =
-          response.status === 404 ||
+        const isJsonResponse = contentType.includes('application/json');
+
+        // If static host/CDN (e.g. Vercel SPA rewrite to index.html) returns 405 Method Not Allowed,
+        // 404 Not Found, or non-JSON HTML content, fall back to direct client-side pipeline execution.
+        if (
           response.status === 405 ||
-          response.status === 501 ||
+          response.status === 404 ||
           response.status === 502 ||
           response.status === 503 ||
-          response.status === 504;
-
-        if (response.ok && contentType.includes('application/json')) {
-          data = await response.json();
-        } else if (isStaticHostFallbackStatus || !contentType.includes('application/json')) {
-          data = await runClientFallbackAnalysis(url, userGithubToken, userTypesafeKey);
-        } else {
-          const errData = await response.json().catch(() => ({}));
+          response.status === 504 ||
+          (response.ok && !isJsonResponse)
+        ) {
+          data = await runClientPrAnalysis(url, userGithubToken, userTypesafeKey);
+        } else if (!response.ok) {
+          const errData = isJsonResponse ? await response.json().catch(() => ({})) : {};
           if (response.status === 429) {
             if (errData.trialsUsed !== undefined) {
               setTrialStatus((prev) =>
@@ -194,21 +191,25 @@ export default function VeroApp({ onBackToPortfolio = () => {} }: VeroAppProps) 
             );
           }
           throw new Error(errData.error || `HTTP error ${response.status}: Failed to analyze PR`);
+        } else {
+          data = await response.json();
         }
       } catch (networkOrApiErr: any) {
+        // If fetch itself threw a network error (not a 400/429/500 application error), run client pipeline
         if (
-          networkOrApiErr?.message?.includes('Trial limit reached') ||
-          networkOrApiErr?.message?.includes('24-Hour Free Trial Limit Reached') ||
-          networkOrApiErr?.message?.includes('Invalid GitHub Pull Request URL')
+          networkOrApiErr instanceof TypeError &&
+          /fetch|network/i.test(networkOrApiErr.message || '')
         ) {
+          data = await runClientPrAnalysis(url, userGithubToken, userTypesafeKey);
+        } else {
           throw networkOrApiErr;
         }
-        data = await runClientFallbackAnalysis(url, userGithubToken, userTypesafeKey);
       }
 
       if (!data) {
-        throw new Error('Failed to generate PR analysis result.');
+        throw new Error('Failed to obtain PR analysis result.');
       }
+
       setAnalysis(data);
       if (data.trialStatus) {
         setTrialStatus(data.trialStatus);
@@ -240,6 +241,18 @@ export default function VeroApp({ onBackToPortfolio = () => {} }: VeroAppProps) 
       }
     } catch (err: any) {
       console.error('Analysis error:', err);
+      if (err instanceof TrialQuotaExceededError) {
+        setTrialStatus((prev) =>
+          prev
+            ? {
+                ...prev,
+                trialsUsed: err.trialsUsed,
+                trialsRemaining: 0,
+                coolingResetMs: err.coolingResetMs || prev.coolingResetMs,
+              }
+            : getClientTrialStatus(userGithubToken, userTypesafeKey)
+        );
+      }
       setError(err.message || 'An error occurred during PR analysis');
     } finally {
       setIsLoading(false);

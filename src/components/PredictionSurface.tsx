@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import {
   RotateCcw,
   ZoomIn,
@@ -129,6 +130,10 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
     houseScaleY: 1,
     houseScaleZ: 1,
     garageScale: 1,
+    currentHouseScaleX: 1,
+    currentHouseScaleY: 1,
+    currentHouseScaleZ: 1,
+    currentGarageScale: 1,
     autoRotate: false,
     showDataCloud: true,
     showCrosshairs: true,
@@ -371,12 +376,19 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
     container.querySelectorAll('canvas').forEach((c) => c.remove());
 
     let renderer: THREE.WebGLRenderer;
+    let envTexture: THREE.Texture | null = null;
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x08090b, 0.024);
+
     try {
       renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: false,
         powerPreference: 'high-performance',
       });
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.12;
       renderer.setSize(width, height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
       renderer.setClearColor(0x08090b, 1);
@@ -385,14 +397,19 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
       renderer.domElement.style.height = '100%';
       renderer.domElement.style.outline = 'none';
       container.appendChild(renderer.domElement);
+
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      envTexture = pmremGenerator.fromScene(
+        new RoomEnvironment(),
+        0.04
+      ).texture;
+      scene.environment = envTexture;
+      pmremGenerator.dispose();
     } catch {
       setWebglSupported(false);
       setViewMode('2d');
       return;
     }
-
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x08090b, 0.024);
 
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 100);
 
@@ -655,45 +672,78 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
     const beaconRing = new THREE.Mesh(beaconRingGeo, beaconRingMat);
     activeBeaconGroup.add(beaconRing);
 
-    // Composite 3D Miniature House Group sitting at the selected point
+    // Composite 3D Miniature House Group sitting at the selected point (Argon4 6-Part Hierarchy)
     const miniHouseGroup = new THREE.Group();
     activeBeaconGroup.add(miniHouseGroup);
 
-    // Main house body
+    // 1. Foundation Plinth
+    const housePlinthGeo = new THREE.BoxGeometry(0.54, 0.05, 0.46);
+    housePlinthGeo.translate(0, 0.025, 0);
+    const housePlinthMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.7,
+      metalness: 0.2,
+    });
+    miniHouseGroup.add(new THREE.Mesh(housePlinthGeo, housePlinthMat));
+
+    // 2. Main house body
     const houseBodyGeo = new THREE.BoxGeometry(0.42, 0.32, 0.36);
-    houseBodyGeo.translate(0, 0.16, 0);
+    houseBodyGeo.translate(0, 0.21, 0);
     const houseBodyMat = new THREE.MeshStandardMaterial({
       color: 0xf8fafc,
       emissive: 0x7cff6b,
-      emissiveIntensity: 0.22,
-      roughness: 0.3,
-      metalness: 0.1,
+      emissiveIntensity: 0.18,
+      roughness: 0.26,
+      metalness: 0.14,
     });
     const houseBodyMesh = new THREE.Mesh(houseBodyGeo, houseBodyMat);
     miniHouseGroup.add(houseBodyMesh);
 
-    // Pitched Roof (4-sided pyramid cone)
-    const roofGeo = new THREE.ConeGeometry(0.36, 0.24, 4);
+    // 3. Illuminated Clerestory Window Band
+    const houseWinGeo = new THREE.BoxGeometry(0.28, 0.08, 0.38);
+    houseWinGeo.translate(0, 0.24, 0);
+    const houseWinMat = new THREE.MeshStandardMaterial({
+      color: 0xffb86b,
+      emissive: 0xffb86b,
+      emissiveIntensity: 0.85,
+      roughness: 0.1,
+      metalness: 0.9,
+    });
+    miniHouseGroup.add(new THREE.Mesh(houseWinGeo, houseWinMat));
+
+    // 4. Pitched Roof (4-sided pyramid cone)
+    const roofGeo = new THREE.ConeGeometry(0.38, 0.25, 4);
     roofGeo.rotateY(Math.PI / 4);
-    roofGeo.translate(0, 0.44, 0);
+    roofGeo.translate(0, 0.49, 0);
     const roofMat = new THREE.MeshStandardMaterial({
       color: 0x7cff6b,
       emissive: 0x7cff6b,
-      emissiveIntensity: 0.45,
-      roughness: 0.25,
-      metalness: 0.3,
+      emissiveIntensity: 0.42,
+      roughness: 0.22,
+      metalness: 0.4,
     });
     const roofMesh = new THREE.Mesh(roofGeo, roofMat);
     miniHouseGroup.add(roofMesh);
 
-    // Attached Garage Wing
+    // 5. Chimney Stack Accent
+    const chimneyGeo = new THREE.BoxGeometry(0.07, 0.18, 0.07);
+    chimneyGeo.translate(-0.11, 0.52, -0.08);
+    const chimneyMat = new THREE.MeshStandardMaterial({
+      color: 0x334155,
+      roughness: 0.65,
+      metalness: 0.2,
+    });
+    miniHouseGroup.add(new THREE.Mesh(chimneyGeo, chimneyMat));
+
+    // 6. Attached Garage Wing
     const garageGeo = new THREE.BoxGeometry(0.24, 0.22, 0.28);
-    garageGeo.translate(0.31, 0.11, 0.02);
+    garageGeo.translate(0.31, 0.14, 0.02);
     const garageMat = new THREE.MeshStandardMaterial({
       color: 0x6ea8fe,
       emissive: 0x3b82f6,
-      emissiveIntensity: 0.3,
-      roughness: 0.4,
+      emissiveIntensity: 0.28,
+      roughness: 0.36,
+      metalness: 0.3,
     });
     const garageMesh = new THREE.Mesh(garageGeo, garageMat);
     miniHouseGroup.add(garageMesh);
@@ -862,22 +912,36 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
     });
     resizeObserver.observe(container);
 
+    let isInViewport = true;
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isInViewport = entry.isIntersecting;
+        });
+      },
+      { threshold: 0.05 }
+    );
+    visibilityObserver.observe(container);
+
     let animFrameId = 0;
     const clock = new THREE.Clock();
 
     const animate = () => {
       animFrameId = requestAnimationFrame(animate);
-      const elapsed = clock.getElapsedTime();
+      if (!isInViewport) return;
+
+      const dt = Math.min(clock.getDelta(), 0.1);
+      const elapsed = clock.elapsedTime;
       const st = sceneStateRef.current;
 
       if (st.autoRotate && !isDraggingOrbit && !isDraggingSurfacePin) {
         st.targetTheta += 0.0035;
       }
 
-      // Smooth damped camera interpolation
-      st.currentTheta += (st.targetTheta - st.currentTheta) * 0.12;
-      st.currentPhi += (st.targetPhi - st.currentPhi) * 0.12;
-      st.currentRadius += (st.targetRadius - st.currentRadius) * 0.12;
+      // Swift exponential damping for camera orbit & zoom
+      st.currentTheta = THREE.MathUtils.damp(st.currentTheta, st.targetTheta, 9, dt);
+      st.currentPhi = THREE.MathUtils.damp(st.currentPhi, st.targetPhi, 9, dt);
+      st.currentRadius = THREE.MathUtils.damp(st.currentRadius, st.targetRadius, 9, dt);
 
       camera.position.x =
         st.currentRadius * Math.sin(st.currentPhi) * Math.sin(st.currentTheta);
@@ -886,10 +950,10 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
         st.currentRadius * Math.sin(st.currentPhi) * Math.cos(st.currentTheta);
       camera.lookAt(0, 0.25, 0);
 
-      // Smooth damped active marker & 3D house position
-      st.currentMarkerX += (st.markerWorldX - st.currentMarkerX) * 0.18;
-      st.currentMarkerY += (st.markerWorldY - st.currentMarkerY) * 0.18;
-      st.currentMarkerZ += (st.markerWorldZ - st.currentMarkerZ) * 0.18;
+      // Swift exponential damping for active marker & 3D house position
+      st.currentMarkerX = THREE.MathUtils.damp(st.currentMarkerX, st.markerWorldX, 12, dt);
+      st.currentMarkerY = THREE.MathUtils.damp(st.currentMarkerY, st.markerWorldY, 12, dt);
+      st.currentMarkerZ = THREE.MathUtils.damp(st.currentMarkerZ, st.markerWorldZ, 12, dt);
 
       activeBeaconGroup.position.set(
         st.currentMarkerX,
@@ -897,14 +961,19 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
         st.currentMarkerZ
       );
 
-      // Scale 3D miniature house dynamically with Living Area, Quality, and Garage sliders
+      // Swift exponential damping on 3D miniature house scales
+      st.currentHouseScaleX = THREE.MathUtils.damp(st.currentHouseScaleX, st.houseScaleX, 10, dt);
+      st.currentHouseScaleY = THREE.MathUtils.damp(st.currentHouseScaleY, st.houseScaleY, 10, dt);
+      st.currentHouseScaleZ = THREE.MathUtils.damp(st.currentHouseScaleZ, st.houseScaleZ, 10, dt);
+      st.currentGarageScale = THREE.MathUtils.damp(st.currentGarageScale, st.garageScale, 10, dt);
+
       miniHouseGroup.scale.set(
-        st.houseScaleX,
-        st.houseScaleY,
-        st.houseScaleZ
+        st.currentHouseScaleX,
+        st.currentHouseScaleY,
+        st.currentHouseScaleZ
       );
-      garageMesh.scale.set(st.garageScale, 1, 1);
-      garageMesh.visible = st.garageScale > 0.18;
+      garageMesh.scale.set(st.currentGarageScale, 1, 1);
+      garageMesh.visible = st.currentGarageScale > 0.18;
 
       const pulse = 1 + Math.sin(elapsed * 3.2) * 0.12;
       beaconRing.scale.set(pulse, pulse, 1);
@@ -928,7 +997,15 @@ export const PredictionSurface: React.FC<PredictionSurfaceProps> = ({
 
     return () => {
       cancelAnimationFrame(animFrameId);
+      visibilityObserver.disconnect();
       resizeObserver.disconnect();
+      envTexture?.dispose();
+      housePlinthGeo.dispose();
+      housePlinthMat.dispose();
+      houseWinGeo.dispose();
+      houseWinMat.dispose();
+      chimneyGeo.dispose();
+      chimneyMat.dispose();
       domEl.removeEventListener('mousedown', onPointerDown);
       window.removeEventListener('mousemove', onPointerMove);
       window.removeEventListener('mouseup', onPointerUp);
