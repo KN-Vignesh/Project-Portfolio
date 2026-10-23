@@ -5,6 +5,7 @@ import { runSonarQubeAnalysis } from '../src/vero/server/sonarEngine.js';
 import { runJevInference } from '../src/vero/server/jevEngine.js';
 import { runDeterministicDecisionEngine } from '../src/vero/server/decisionEngine.js';
 import { SAMPLE_PRS } from '../src/vero/server/sampleFixtures.js';
+import { runClientPrAnalysis, getClientTrialStatus } from '../src/vero/utils/clientAnalyzer.js';
 
 test('VERO PR URL Parser: correctly parses canonical and short GitHub URLs', () => {
   const canonical = parseGitHubPrUrl('https://github.com/vitejs/vite/pull/23700');
@@ -160,3 +161,18 @@ test('VERO Multi-PR Session History Archive: verifies structured export schema',
   assert.ok(serialized.includes('vitejs/vite'));
   assert.ok(serialized.includes('PR-Sentinel-Demo'));
 });
+
+test('VERO Isomorphic Client Analyzer: executes 4-stage pipeline when static host returns HTTP 405', async () => {
+  const statusBefore = getClientTrialStatus();
+  assert.equal(statusBefore.trialsMax, 3);
+  assert.equal(statusBefore.coolingPeriodHours, 24);
+
+  const result = await runClientPrAnalysis('https://github.com/KN-Vignesh/PR-Sentinel-Demo/pull/1');
+  assert.equal(result.pullRequest.owner, 'KN-Vignesh');
+  assert.equal(result.pullRequest.repo, 'PR-Sentinel-Demo');
+  assert.equal(result.pullRequest.number, 1);
+  assert.equal(result.sonarQube.qualityGate, 'FAILED');
+  assert.equal(result.assessment.verdict, 'SECURITY_REVIEW_REQUIRED');
+  assert.ok(result.telemetry.totalMs >= 0);
+});
+

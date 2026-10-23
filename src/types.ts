@@ -109,6 +109,7 @@ export interface ProjectItem {
 
 export interface ExperimentConfig {
   type: 'regression-surface' | 'cnn-explorer' | 'qlora-quantizer' | 'standard';
+  componentType?: string;
   dataUrl?: string;
   fallbackFixtureUrl?: string;
   schemaVersion?: string;

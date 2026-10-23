@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 export const NeuralCore3D: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -8,47 +9,89 @@ export const NeuralCore3D: React.FC = () => {
     const currentMount = mountRef.current;
     if (!currentMount) return;
 
-    // Check prefers-reduced-motion
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
 
-    // Scene, Camera, Renderer
     const scene = new THREE.Scene();
     const width = currentMount.clientWidth || 500;
-    const height = currentMount.clientHeight || 500;
+    const height = currentMount.clientHeight || 420;
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
     camera.position.z = 9;
 
-    // Purge any stale canvas instances to prevent duplicate canvases
     const existingCanvases = currentMount.querySelectorAll('canvas');
     existingCanvases.forEach((c) => c.remove());
 
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.domElement.style.display = 'block';
-    renderer.domElement.style.width = '100%';
-    renderer.domElement.style.height = '100%';
-    currentMount.appendChild(renderer.domElement);
+    let renderer: THREE.WebGLRenderer;
+    let envTexture: THREE.Texture | null = null;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+        powerPreference: 'high-performance',
+      });
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.12;
+      renderer.setSize(width, height);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.domElement.style.display = 'block';
+      renderer.domElement.style.width = '100%';
+      renderer.domElement.style.height = '100%';
+      currentMount.appendChild(renderer.domElement);
 
-    // Neural Core Node Graph
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      envTexture = pmremGenerator.fromScene(
+        new RoomEnvironment(),
+        0.04
+      ).texture;
+      scene.environment = envTexture;
+      pmremGenerator.dispose();
+    } catch {
+      return;
+    }
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+    scene.add(ambientLight);
+
+    const keyLight = new THREE.PointLight(0x7cff6b, 3.2, 40);
+    keyLight.position.set(5, 5, 7);
+    scene.add(keyLight);
+
     const coreGroup = new THREE.Group();
     scene.add(coreGroup);
 
-    // Nodes geometry & materials
     const nodeCount = 28;
     const nodePositions: THREE.Vector3[] = [];
     const baseNodePositions: THREE.Vector3[] = [];
     const nodeMeshes: THREE.Mesh[] = [];
 
-    const nodeGeometry = new THREE.SphereGeometry(0.09, 16, 16);
-    const centerNodeGeometry = new THREE.SphereGeometry(0.22, 24, 24);
+    const nodeGeometry = new THREE.SphereGeometry(0.11, 20, 20);
+    const centerNodeGeometry = new THREE.SphereGeometry(0.28, 28, 28);
 
-    const normalNodeMaterial = new THREE.MeshBasicMaterial({ color: 0x7CFF6B });
-    const blueNodeMaterial = new THREE.MeshBasicMaterial({ color: 0x6EA8FE });
-    const centerNodeMaterial = new THREE.MeshBasicMaterial({ color: 0x7CFF6B });
+    const normalNodeMaterial = new THREE.MeshStandardMaterial({
+      color: 0x7cff6b,
+      emissive: 0x7cff6b,
+      emissiveIntensity: 0.35,
+      roughness: 0.18,
+      metalness: 0.85,
+    });
+    const blueNodeMaterial = new THREE.MeshStandardMaterial({
+      color: 0x6ea8fe,
+      emissive: 0x6ea8fe,
+      emissiveIntensity: 0.35,
+      roughness: 0.2,
+      metalness: 0.85,
+    });
+    const centerNodeMaterial = new THREE.MeshStandardMaterial({
+      color: 0x7cff6b,
+      emissive: 0x7cff6b,
+      emissiveIntensity: 0.55,
+      roughness: 0.15,
+      metalness: 0.9,
+    });
 
-    // Center Core Node
     const centerNode = new THREE.Mesh(centerNodeGeometry, centerNodeMaterial);
     centerNode.position.set(0, 0, 0);
     coreGroup.add(centerNode);
@@ -56,12 +99,11 @@ export const NeuralCore3D: React.FC = () => {
     baseNodePositions.push(new THREE.Vector3(0, 0, 0));
     nodeMeshes.push(centerNode);
 
-    // Surrounding layered nodes
     const goldenRatio = (1 + Math.sqrt(5)) / 2;
     for (let i = 1; i < nodeCount; i++) {
       const radius = 1.8 + (i % 3) * 0.9;
-      const theta = 2 * Math.PI * i / goldenRatio;
-      const phi = Math.acos(1 - 2 * (i + 0.5) / nodeCount);
+      const theta = (2 * Math.PI * i) / goldenRatio;
+      const phi = Math.acos(1 - (2 * (i + 0.5)) / nodeCount);
 
       const x = radius * Math.sin(phi) * Math.cos(theta);
       const y = radius * Math.sin(phi) * Math.sin(theta);
@@ -71,27 +113,25 @@ export const NeuralCore3D: React.FC = () => {
       nodePositions.push(pos.clone());
       baseNodePositions.push(pos.clone());
 
-      const mat = (i % 4 === 0) ? blueNodeMaterial : normalNodeMaterial;
+      const mat = i % 4 === 0 ? blueNodeMaterial : normalNodeMaterial;
       const mesh = new THREE.Mesh(nodeGeometry, mat);
       mesh.position.copy(pos);
       coreGroup.add(mesh);
       nodeMeshes.push(mesh);
     }
 
-    // Dynamic Connections (Line Segments)
     const lineMaterial = new THREE.LineBasicMaterial({
-      color: 0x24272D,
+      color: 0x24272d,
       transparent: true,
       opacity: 0.7,
     });
 
     const activeLineMaterial = new THREE.LineBasicMaterial({
-      color: 0x7CFF6B,
+      color: 0x7cff6b,
       transparent: true,
       opacity: 0.45,
     });
 
-    // Build connections based on distance
     const linesGroup = new THREE.Group();
     coreGroup.add(linesGroup);
 
@@ -106,30 +146,17 @@ export const NeuralCore3D: React.FC = () => {
       }
     }
 
-    // Line geometry builder
-    const updateLines = () => {
-      // Clear previous lines
-      while (linesGroup.children.length > 0) {
-        const obj = linesGroup.children[0];
-        linesGroup.remove(obj);
-        if (obj instanceof THREE.Line) {
-          obj.geometry.dispose();
-        }
-      }
+    connections.forEach(([i, j, isHighlight]) => {
+      const p1 = nodeMeshes[i].position;
+      const p2 = nodeMeshes[j].position;
+      const geometry = new THREE.BufferGeometry().setFromPoints([p1, p2]);
+      const line = new THREE.Line(
+        geometry,
+        isHighlight ? activeLineMaterial : lineMaterial
+      );
+      linesGroup.add(line);
+    });
 
-      // Draw active and standard lines
-      connections.forEach(([i, j, isHighlight]) => {
-        const p1 = nodeMeshes[i].position;
-        const p2 = nodeMeshes[j].position;
-        const geometry = new THREE.BufferGeometry().setFromPoints([p1, p2]);
-        const line = new THREE.Line(geometry, isHighlight ? activeLineMaterial : lineMaterial);
-        linesGroup.add(line);
-      });
-    };
-
-    updateLines();
-
-    // Floating background particles
     const particleCount = 80;
     const particleGeo = new THREE.BufferGeometry();
     const particlePos = new Float32Array(particleCount * 3);
@@ -138,9 +165,12 @@ export const NeuralCore3D: React.FC = () => {
       particlePos[p + 1] = Math.cos(p * 2.314 + 0.4) * 6;
       particlePos[p + 2] = Math.sin(p * 3.123 + 0.6) * 4;
     }
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePos, 3));
+    particleGeo.setAttribute(
+      'position',
+      new THREE.BufferAttribute(particlePos, 3)
+    );
     const particleMat = new THREE.PointsMaterial({
-      color: 0x8B8F98,
+      color: 0x8b8f98,
       size: 0.04,
       transparent: true,
       opacity: 0.4,
@@ -148,9 +178,6 @@ export const NeuralCore3D: React.FC = () => {
     const particles = new THREE.Points(particleGeo, particleMat);
     scene.add(particles);
 
-    // Mouse Interaction
-    let mouseX = 0;
-    let mouseY = 0;
     let targetRotationX = 0;
     let targetRotationY = 0;
 
@@ -158,42 +185,61 @@ export const NeuralCore3D: React.FC = () => {
       const rect = currentMount.getBoundingClientRect();
       const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
       const y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
-      mouseX = x;
-      mouseY = y;
       targetRotationY = x * 0.45;
       targetRotationX = -y * 0.45;
     };
 
     window.addEventListener('mousemove', handleMouseMove);
 
-    // Resize Handler
     const handleResize = () => {
       if (!currentMount) return;
       const newWidth = currentMount.clientWidth;
       const newHeight = currentMount.clientHeight;
-      camera.aspect = newWidth / newHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(newWidth, newHeight);
+      if (newWidth > 0 && newHeight > 0) {
+        camera.aspect = newWidth / newHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(newWidth, newHeight);
+      }
     };
 
     const resizeObserver = new ResizeObserver(handleResize);
     resizeObserver.observe(currentMount);
 
-    // Animation Loop
+    let isInViewport = true;
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isInViewport = entry.isIntersecting;
+        });
+      },
+      { threshold: 0.05 }
+    );
+    visibilityObserver.observe(currentMount);
+
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-      const delta = clock.getDelta();
-      const elapsedTime = clock.getElapsedTime();
+      if (!isInViewport) return;
+
+      const dt = Math.min(clock.getDelta(), 0.1);
+      const elapsedTime = clock.elapsedTime;
 
       if (!prefersReducedMotion) {
-        // Slow continuous rotation
-        coreGroup.rotation.y += 0.003 + (targetRotationY - coreGroup.rotation.y) * 0.05;
-        coreGroup.rotation.x += 0.0015 + (targetRotationX - coreGroup.rotation.x) * 0.05;
+        coreGroup.rotation.y = THREE.MathUtils.damp(
+          coreGroup.rotation.y,
+          coreGroup.rotation.y + 0.18 + (targetRotationY - coreGroup.rotation.y) * 0.4,
+          6,
+          dt
+        );
+        coreGroup.rotation.x = THREE.MathUtils.damp(
+          coreGroup.rotation.x,
+          coreGroup.rotation.x + 0.08 + (targetRotationX - coreGroup.rotation.x) * 0.4,
+          6,
+          dt
+        );
 
-        // Subtle node breathing motion
         for (let i = 1; i < nodeCount; i++) {
           const mesh = nodeMeshes[i];
           const base = baseNodePositions[i];
@@ -203,7 +249,6 @@ export const NeuralCore3D: React.FC = () => {
           mesh.position.z = base.z * (1 + offset * 0.5);
         }
 
-        // Particle subtle drift
         particles.rotation.y = elapsedTime * 0.02;
       }
 
@@ -212,14 +257,15 @@ export const NeuralCore3D: React.FC = () => {
 
     animate();
 
-    // Cleanup
     return () => {
       cancelAnimationFrame(animationFrameId);
+      visibilityObserver.disconnect();
       window.removeEventListener('mousemove', handleMouseMove);
       resizeObserver.disconnect();
       if (currentMount.contains(renderer.domElement)) {
         currentMount.removeChild(renderer.domElement);
       }
+      envTexture?.dispose();
       renderer.dispose();
       nodeGeometry.dispose();
       centerNodeGeometry.dispose();
@@ -234,12 +280,10 @@ export const NeuralCore3D: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-[400px] sm:h-[460px] md:h-[500px] flex items-center justify-center pointer-events-none select-none">
+    <div className="relative w-full h-[360px] sm:h-[420px] rounded-2xl border border-white/[0.08] bg-[#101216] flex items-center justify-center overflow-hidden select-none">
       <div ref={mountRef} className="w-full h-full pointer-events-auto" />
-      {/* Visual System Overlay Label */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded border border-[#24272D] bg-[#101216]/80 backdrop-blur-sm font-mono text-[11px] text-[#8B8F98] tracking-widest flex items-center gap-2 pointer-events-none">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#7CFF6B] animate-pulse"></span>
-        <span>AI ENGINEERING CORE // INTERACTIVE</span>
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-lg border border-white/[0.08] bg-[#08090B]/85 backdrop-blur-sm font-mono text-[11px] text-[#8B8F98] tracking-wide pointer-events-none">
+        3D Neural Attention Graph · Interactive Orbit
       </div>
     </div>
   );

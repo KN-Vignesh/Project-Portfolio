@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import {
   Cpu,
   Network,
@@ -9,6 +10,7 @@ import {
   ArrowRight,
   Home,
 } from 'lucide-react';
+import { SwiftRollLabel } from './ScrollReveal';
 
 export type ThreeDSceneType =
   | 'HOUSE_PRICE_3D'
@@ -22,10 +24,9 @@ interface Interactive3DProjectStageProps {
   onInspectSpec?: (scene: ThreeDSceneType) => void;
 }
 
-export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps> = ({
-  initialScene = 'HOUSE_PRICE_3D',
-  onInspectSpec,
-}) => {
+export const Interactive3DProjectStage: React.FC<
+  Interactive3DProjectStageProps
+> = ({ initialScene = 'HOUSE_PRICE_3D', onInspectSpec }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [activeScene, setActiveScene] = useState<ThreeDSceneType>(initialScene);
 
@@ -37,7 +38,22 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
   const [loraRank, setLoraRank] = useState<number>(16);
 
   // Scene 2: Selected Agent Node
-  const [selectedAgentNode, setSelectedAgentNode] = useState<string>('Planner Agent');
+  const [selectedAgentNode, setSelectedAgentNode] =
+    useState<string>('Planner Agent');
+
+  // Mutable target ref so slider drags smoothly damp in the 60fps loop without recreating WebGLRenderer
+  const paramTargetRef = useRef({
+    livingArea: 1710,
+    overallQual: 7,
+    loraRank: 16,
+    scrollTilt: 0,
+  });
+
+  useEffect(() => {
+    paramTargetRef.current.livingArea = livingArea;
+    paramTargetRef.current.overallQual = overallQual;
+    paramTargetRef.current.loraRank = loraRank;
+  }, [livingArea, overallQual, loraRank]);
 
   const estimatedQuickPrice = Math.round(
     45000 +
@@ -53,47 +69,83 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
     const existingCanvases = currentMount.querySelectorAll('canvas');
     existingCanvases.forEach((c) => c.remove());
 
-    const width = currentMount.clientWidth || 600;
+    const width = currentMount.clientWidth || 640;
     const height = currentMount.clientHeight || 420;
 
+    const isSoftwareGl = (() => {
+      try {
+        const probe = document.createElement('canvas').getContext('webgl2');
+        if (!probe) return true;
+        const ext = probe.getExtension('WEBGL_debug_renderer_info');
+        const param = ext ? ext.UNMASKED_RENDERER_WEBGL : probe.RENDERER;
+        const gpu = String(probe.getParameter(param));
+        probe.getExtension('WEBGL_lose_context')?.loseContext();
+        return /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
+      } catch {
+        return false;
+      }
+    })();
+
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(42, width / height, 0.1, 1000);
-    camera.position.set(0, 2.5, 17);
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000);
+    camera.position.set(0, 2.6, 16.5);
     camera.lookAt(0, 0, 0);
 
     let renderer: THREE.WebGLRenderer;
+    let envTexture: THREE.Texture | null = null;
     try {
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({
+        antialias: !isSoftwareGl,
+        alpha: true,
+        powerPreference: 'high-performance',
+      });
+      renderer.outputColorSpace = THREE.SRGBColorSpace;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.12;
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(
+        isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2)
+      );
       renderer.domElement.style.display = 'block';
       renderer.domElement.style.width = '100%';
       renderer.domElement.style.height = '100%';
       renderer.domElement.style.outline = 'none';
       currentMount.appendChild(renderer.domElement);
+
+      const pmremGenerator = new THREE.PMREMGenerator(renderer);
+      envTexture = pmremGenerator.fromScene(
+        new RoomEnvironment(),
+        0.04
+      ).texture;
+      scene.environment = envTexture;
+      pmremGenerator.dispose();
     } catch {
       return;
     }
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
     scene.add(ambientLight);
 
-    const mainLight = new THREE.PointLight(0x7cff6b, 3.5, 60);
+    const mainLight = new THREE.PointLight(0x7cff6b, 3.8, 60);
     mainLight.position.set(6, 8, 10);
     scene.add(mainLight);
 
-    const accentLight = new THREE.PointLight(0x6ea8fe, 2.5, 60);
+    const accentLight = new THREE.PointLight(0x6ea8fe, 2.8, 60);
     accentLight.position.set(-8, -6, 8);
     scene.add(accentLight);
 
     const rootGroup = new THREE.Group();
-    rootGroup.scale.set(0.88, 0.88, 0.88);
+    rootGroup.scale.set(0.9, 0.9, 0.9);
     scene.add(rootGroup);
 
+    // References for swift damped animation inside the loop
+    let houseGroupRef: THREE.Group | null = null;
+    let loraMeshARef: THREE.Mesh | null = null;
+    let loraMeshBRef: THREE.Mesh | null = null;
+    const span = 8.4;
+
     if (activeScene === 'HOUSE_PRICE_3D') {
-      // Build a responsive 3D Regression Terrain + Scaling 3D House Marker
-      const gridN = 20;
-      const span = 8.4;
+      const gridN = 22;
       const geo = new THREE.BufferGeometry();
       const pos = new Float32Array(gridN * gridN * 3);
       const col = new Float32Array(gridN * gridN * 3);
@@ -110,7 +162,10 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
         for (let xi = 0; xi < gridN; xi++) {
           const nx = xi / (gridN - 1);
           const wx = (nx - 0.5) * span;
-          const normH = Math.min(1, 0.12 + nx * 0.45 + Math.pow(nz, 1.6) * 0.5 + nx * nz * 0.25);
+          const normH = Math.min(
+            1,
+            0.12 + nx * 0.45 + Math.pow(nz, 1.6) * 0.5 + nx * nz * 0.25
+          );
           const wy = -2.0 + normH * 4.2;
 
           pos[k * 3] = wx;
@@ -148,50 +203,98 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
         geo,
         new THREE.MeshStandardMaterial({
           vertexColors: true,
-          roughness: 0.35,
-          metalness: 0.15,
+          roughness: 0.32,
+          metalness: 0.18,
           side: THREE.DoubleSide,
         })
       );
       rootGroup.add(surfMesh);
 
-      // Position active 3D House Marker based on livingArea and overallQual sliders
-      const nx = Math.max(0, Math.min(1, (livingArea - 400) / (4400 - 400)));
-      const nz = Math.max(0, Math.min(1, (overallQual - 1) / 9));
-      const wx = (nx - 0.5) * span;
-      const wz = (0.5 - nz) * span;
-      const normH = Math.min(1, 0.12 + nx * 0.45 + Math.pow(nz, 1.6) * 0.5 + nx * nz * 0.25);
-      const wy = -2.0 + normH * 4.2;
-
+      // Composite 6-Part Architectural 3D House Marker (Gemini Argon4 3D Object Standard)
       const houseGroup = new THREE.Group();
-      houseGroup.position.set(wx, wy + 0.08, wz);
-      const scaleW = 0.75 + nx * 0.85;
-      const scaleH = 0.75 + nz * 0.85;
-      houseGroup.scale.set(scaleW, scaleH, scaleW);
+      houseGroupRef = houseGroup;
 
+      // 1. Foundation Plinth
+      const plinthMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.84, 0.08, 0.72),
+        new THREE.MeshStandardMaterial({
+          color: 0x1e293b,
+          roughness: 0.7,
+          metalness: 0.2,
+        })
+      );
+      plinthMesh.position.y = 0.04;
+      houseGroup.add(plinthMesh);
+
+      // 2. Main Architectural Living Volume
       const bodyMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(0.65, 0.5, 0.55),
+        new THREE.BoxGeometry(0.66, 0.5, 0.56),
         new THREE.MeshStandardMaterial({
           color: 0xf8fafc,
           emissive: 0x7cff6b,
-          emissiveIntensity: 0.25,
+          emissiveIntensity: 0.18,
+          roughness: 0.28,
+          metalness: 0.12,
         })
       );
-      bodyMesh.position.y = 0.25;
+      bodyMesh.position.y = 0.33;
       houseGroup.add(bodyMesh);
 
-      const roofGeo = new THREE.ConeGeometry(0.55, 0.38, 4);
+      // 3. Pitched Roof with Overhang
+      const roofGeo = new THREE.ConeGeometry(0.58, 0.38, 4);
       roofGeo.rotateY(Math.PI / 4);
       const roofMesh = new THREE.Mesh(
         roofGeo,
         new THREE.MeshStandardMaterial({
           color: 0x7cff6b,
           emissive: 0x7cff6b,
-          emissiveIntensity: 0.45,
+          emissiveIntensity: 0.4,
+          roughness: 0.22,
+          metalness: 0.45,
         })
       );
-      roofMesh.position.y = 0.69;
+      roofMesh.position.y = 0.77;
       houseGroup.add(roofMesh);
+
+      // 4. Attached Garage Wing
+      const garageMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.32, 0.34, 0.44),
+        new THREE.MeshStandardMaterial({
+          color: 0x6ea8fe,
+          emissive: 0x3b82f6,
+          emissiveIntensity: 0.25,
+          roughness: 0.42,
+          metalness: 0.3,
+        })
+      );
+      garageMesh.position.set(0.46, 0.25, 0.02);
+      houseGroup.add(garageMesh);
+
+      // 5. Illuminated Clerestory Window Band
+      const windowMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.42, 0.12, 0.58),
+        new THREE.MeshStandardMaterial({
+          color: 0xffb86b,
+          emissive: 0xffb86b,
+          emissiveIntensity: 0.85,
+          roughness: 0.1,
+          metalness: 0.9,
+        })
+      );
+      windowMesh.position.set(0, 0.38, 0);
+      houseGroup.add(windowMesh);
+
+      // 6. Chimney Stack Accent
+      const chimneyMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(0.11, 0.28, 0.11),
+        new THREE.MeshStandardMaterial({
+          color: 0x334155,
+          roughness: 0.65,
+          metalness: 0.2,
+        })
+      );
+      chimneyMesh.position.set(-0.18, 0.78, -0.12);
+      houseGroup.add(chimneyMesh);
 
       rootGroup.add(houseGroup);
       rootGroup.rotation.x = 0.25;
@@ -200,8 +303,8 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
       const baseGeo = new THREE.BoxGeometry(4.2, 4.2, 4.2);
       const baseMat = new THREE.MeshStandardMaterial({
         color: 0x1e293b,
-        roughness: 0.4,
-        metalness: 0.8,
+        roughness: 0.32,
+        metalness: 0.82,
       });
       const baseMesh = new THREE.Mesh(baseGeo, baseMat);
       rootGroup.add(baseMesh);
@@ -211,30 +314,27 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
       const wireMesh = new THREE.LineSegments(wireEdges, wireMat);
       rootGroup.add(wireMesh);
 
-      const rankScale = (loraRank / 64) * 1.5 + 0.3;
-
-      const matAGeo = new THREE.BoxGeometry(rankScale, 4.2, 1.2);
+      const unitGeo = new THREE.BoxGeometry(1, 4.2, 1.2);
       const matAMat = new THREE.MeshStandardMaterial({
         color: 0x7cff6b,
         emissive: 0x7cff6b,
         emissiveIntensity: 0.3,
-        roughness: 0.2,
-        metalness: 0.8,
+        roughness: 0.18,
+        metalness: 0.85,
       });
-      const meshA = new THREE.Mesh(matAGeo, matAMat);
-      meshA.position.set(3.4 + rankScale / 2, 0, 0);
+      const meshA = new THREE.Mesh(unitGeo, matAMat);
+      loraMeshARef = meshA;
       rootGroup.add(meshA);
 
-      const matBGeo = new THREE.BoxGeometry(rankScale, 4.2, 1.2);
       const matBMat = new THREE.MeshStandardMaterial({
         color: 0xffb703,
         emissive: 0xffb703,
         emissiveIntensity: 0.3,
-        roughness: 0.2,
-        metalness: 0.8,
+        roughness: 0.18,
+        metalness: 0.85,
       });
-      const meshB = new THREE.Mesh(matBGeo, matBMat);
-      meshB.position.set(-3.4 - rankScale / 2, 0, 0);
+      const meshB = new THREE.Mesh(unitGeo, matBMat);
+      loraMeshBRef = meshB;
       rootGroup.add(meshB);
     } else if (activeScene === 'MULTI_AGENT') {
       const agentPositions = [
@@ -251,8 +351,8 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
           color: agent.color,
           emissive: agent.color,
           emissiveIntensity: 0.35,
-          roughness: 0.2,
-          metalness: 0.8,
+          roughness: 0.18,
+          metalness: 0.85,
         });
         const mesh = new THREE.Mesh(nodeGeo, mat);
         mesh.position.set(agent.pos[0], agent.pos[1], agent.pos[2]);
@@ -280,6 +380,8 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
         color: 0x7cff6b,
         emissive: 0x7cff6b,
         emissiveIntensity: 0.4,
+        roughness: 0.2,
+        metalness: 0.8,
       });
       const rootMesh = new THREE.Mesh(rootNodeGeo, rootMat);
       rootMesh.position.set(0, 3.2, 0);
@@ -301,6 +403,8 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
           color: c.pass ? 0x7cff6b : 0xf43f5e,
           emissive: c.pass ? 0x7cff6b : 0xf43f5e,
           emissiveIntensity: c.pass ? 0.3 : 0.6,
+          roughness: 0.25,
+          metalness: 0.65,
         });
         const m = new THREE.Mesh(geo, mat);
         m.position.set(c.pos[0], c.pos[1], c.pos[2]);
@@ -325,7 +429,10 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
         positions[i + 1] = Math.cos(i * 2.113 + 0.3) * 5;
         positions[i + 2] = Math.sin(i * 3.789 + 0.5) * 4;
       }
-      pointsGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      pointsGeo.setAttribute(
+        'position',
+        new THREE.BufferAttribute(positions, 3)
+      );
       const pointsMat = new THREE.PointsMaterial({
         color: 0x6ea8fe,
         size: 0.35,
@@ -340,6 +447,8 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
         color: 0x7cff6b,
         emissive: 0x7cff6b,
         emissiveIntensity: 0.6,
+        roughness: 0.15,
+        metalness: 0.8,
       });
       const queryMesh = new THREE.Mesh(queryGeo, queryMat);
       rootGroup.add(queryMesh);
@@ -393,19 +502,74 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
     });
     resizeObserver.observe(currentMount);
 
+    // Pause WebGL loop when scrolled out of viewport
+    let isInViewport = true;
+    const visibilityObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isInViewport = entry.isIntersecting;
+        });
+      },
+      { threshold: 0.05 }
+    );
+    visibilityObserver.observe(currentMount);
+
     let animId: number;
+    const clock = new THREE.Clock();
+
+    // Smooth damped state for 60fps parameter interpolation
+    let curLiving = paramTargetRef.current.livingArea;
+    let curQual = paramTargetRef.current.overallQual;
+    let curRank = paramTargetRef.current.loraRank;
+
     const animate = () => {
       animId = requestAnimationFrame(animate);
-      if (!isDragging && activeScene !== 'HOUSE_PRICE_3D') {
-        rootGroup.rotation.y += 0.003;
-        rootGroup.rotation.x += 0.001;
+      if (!isInViewport) return;
+
+      const dt = Math.min(clock.getDelta(), 0.1);
+      const targets = paramTargetRef.current;
+
+      curLiving = THREE.MathUtils.damp(curLiving, targets.livingArea, 10, dt);
+      curQual = THREE.MathUtils.damp(curQual, targets.overallQual, 10, dt);
+      curRank = THREE.MathUtils.damp(curRank, targets.loraRank, 10, dt);
+
+      if (houseGroupRef) {
+        const nx = Math.max(0, Math.min(1, (curLiving - 400) / (4400 - 400)));
+        const nz = Math.max(0, Math.min(1, (curQual - 1) / 9));
+        const wx = (nx - 0.5) * span;
+        const wz = (0.5 - nz) * span;
+        const normH = Math.min(
+          1,
+          0.12 + nx * 0.45 + Math.pow(nz, 1.6) * 0.5 + nx * nz * 0.25
+        );
+        const wy = -2.0 + normH * 4.2;
+
+        houseGroupRef.position.set(wx, wy + 0.05, wz);
+        const scaleW = 0.75 + nx * 0.85;
+        const scaleH = 0.75 + nz * 0.85;
+        houseGroupRef.scale.set(scaleW, scaleH, scaleW);
       }
+
+      if (loraMeshARef && loraMeshBRef) {
+        const rankScale = (curRank / 64) * 1.5 + 0.3;
+        loraMeshARef.scale.x = rankScale;
+        loraMeshARef.position.x = 3.4 + rankScale / 2;
+        loraMeshBRef.scale.x = rankScale;
+        loraMeshBRef.position.x = -3.4 - rankScale / 2;
+      }
+
+      if (!isDragging && activeScene !== 'HOUSE_PRICE_3D') {
+        rootGroup.rotation.y += 0.0035;
+        rootGroup.rotation.x += 0.0012;
+      }
+
       renderer.render(scene, camera);
     };
     animate();
 
     return () => {
       cancelAnimationFrame(animId);
+      visibilityObserver.disconnect();
       domElement.removeEventListener('mousedown', onPointerDown);
       window.removeEventListener('mousemove', onPointerMove);
       window.removeEventListener('mouseup', onPointerUp);
@@ -413,19 +577,24 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
       window.removeEventListener('touchmove', onPointerMove);
       window.removeEventListener('touchend', onPointerUp);
       resizeObserver.disconnect();
-      if (currentMount && renderer.domElement && currentMount.contains(renderer.domElement)) {
+      if (
+        currentMount &&
+        renderer.domElement &&
+        currentMount.contains(renderer.domElement)
+      ) {
         currentMount.removeChild(renderer.domElement);
       }
+      envTexture?.dispose();
       renderer.dispose();
     };
-  }, [activeScene, loraRank, livingArea, overallQual]);
+  }, [activeScene]);
 
   return (
-    <div className="rounded-2xl border border-[#24272D] bg-[#101216] p-5 shadow-2xl relative overflow-hidden flex flex-col justify-between font-mono">
+    <div className="rounded-2xl border border-white/[0.08] bg-[#101216] p-6 sm:p-8 shadow-2xl relative overflow-hidden flex flex-col justify-between">
       {/* Top Header & Scene Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#24272D]">
-        <div className="flex items-center gap-2">
-          <div className="h-8 w-8 rounded-lg bg-[#7CFF6B]/10 border border-[#7CFF6B]/30 flex items-center justify-center text-[#7CFF6B]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-5 border-b border-white/[0.08]">
+        <div className="flex items-center gap-3">
+          <div className="h-9 w-9 rounded-xl bg-[#7CFF6B]/10 border border-[#7CFF6B]/30 flex items-center justify-center text-[#7CFF6B]">
             {activeScene === 'HOUSE_PRICE_3D' && <Home className="w-4 h-4" />}
             {activeScene === 'PEFT_LORA' && <Cpu className="w-4 h-4" />}
             {activeScene === 'MULTI_AGENT' && <Network className="w-4 h-4" />}
@@ -433,21 +602,21 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
             {activeScene === 'VECTOR_RAG' && <Database className="w-4 h-4" />}
           </div>
           <div>
-            <h3 className="text-xs font-bold text-[#F2F2F2] uppercase tracking-wider">
+            <div className="font-mono text-[11px] text-[#8B8F98] uppercase tracking-wider">
+              02 · Interactive WebGL Topology Lab
+            </div>
+            <h3 className="text-lg sm:text-xl font-bold text-[#F2F2F2]">
               3D Project Architecture Workbench
             </h3>
-            <p className="text-[11px] text-[#8B8F98]">
-              Interactive WebGL parameter &amp; topology experimentation
-            </p>
           </div>
         </div>
 
         {/* Scene Navigation Tabs */}
-        <div className="flex flex-wrap gap-1 p-1 bg-[#08090B] rounded-xl border border-[#24272D] text-[11px]">
+        <div className="flex flex-wrap gap-1 p-1 bg-[#08090B] rounded-xl border border-white/[0.08] text-xs font-medium">
           <button
             type="button"
             onClick={() => setActiveScene('HOUSE_PRICE_3D')}
-            className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeScene === 'HOUSE_PRICE_3D'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -458,7 +627,7 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
           <button
             type="button"
             onClick={() => setActiveScene('PEFT_LORA')}
-            className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeScene === 'PEFT_LORA'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -469,7 +638,7 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
           <button
             type="button"
             onClick={() => setActiveScene('MULTI_AGENT')}
-            className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeScene === 'MULTI_AGENT'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -480,7 +649,7 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
           <button
             type="button"
             onClick={() => setActiveScene('VERO_AST')}
-            className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeScene === 'VERO_AST'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -491,7 +660,7 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
           <button
             type="button"
             onClick={() => setActiveScene('VECTOR_RAG')}
-            className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
               activeScene === 'VECTOR_RAG'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -502,24 +671,28 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
         </div>
       </div>
 
-      {/* 3D Canvas Stage */}
+      {/* Responsive 3D Canvas Stage */}
       <div
         ref={mountRef}
-        className="w-full h-72 sm:h-80 my-3 cursor-grab active:cursor-grabbing relative flex items-center justify-center rounded-xl bg-[#08090B]/50 border border-[#24272D]/50"
+        className="w-full h-[320px] sm:h-[400px] lg:h-[460px] my-4 cursor-grab active:cursor-grabbing relative flex items-center justify-center rounded-xl bg-[#08090B]/70 border border-white/[0.06]"
       >
-        <div className="absolute bottom-2 left-2 pointer-events-none text-[10px] text-[#8B8F98]/80">
-          * Drag to rotate 3D perspective · Use sliders below to change parameters live
+        <div className="absolute bottom-3 left-3.5 pointer-events-none font-mono text-[11px] text-[#8B8F98]">
+          Drag to orbit 3D stage · Adjust sliders below for real-time 60fps damped morphing
         </div>
       </div>
 
       {/* Interactive Controls based on Active Scene */}
       {activeScene === 'HOUSE_PRICE_3D' && (
-        <div className="space-y-3 pt-2 border-t border-[#24272D]">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-            <div className="p-2.5 rounded-lg bg-[#08090B] border border-[#24272D] space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[#D1D5DB] font-bold">1. Living Area (Sq Ft):</span>
-                <span className="text-[#7CFF6B] font-bold">{livingArea.toLocaleString()} sq ft</span>
+        <div className="space-y-4 pt-3 border-t border-white/[0.08]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div className="p-3.5 rounded-xl bg-[#08090B] border border-white/[0.08] space-y-2">
+              <div className="flex items-center justify-between font-mono">
+                <span className="text-[#D1D5DB] font-semibold">
+                  1. Living Area (Sq Ft):
+                </span>
+                <span className="text-[#7CFF6B] font-bold tabular-nums">
+                  {livingArea.toLocaleString()} sq ft
+                </span>
               </div>
               <input
                 type="range"
@@ -532,10 +705,14 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
               />
             </div>
 
-            <div className="p-2.5 rounded-lg bg-[#08090B] border border-[#24272D] space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-[#D1D5DB] font-bold">2. Overall Quality (1–10):</span>
-                <span className="text-[#6EA8FE] font-bold">Level {overallQual} / 10</span>
+            <div className="p-3.5 rounded-xl bg-[#08090B] border border-white/[0.08] space-y-2">
+              <div className="flex items-center justify-between font-mono">
+                <span className="text-[#D1D5DB] font-semibold">
+                  2. Overall Quality (1–10):
+                </span>
+                <span className="text-[#6EA8FE] font-bold tabular-nums">
+                  Level {overallQual} / 10
+                </span>
               </div>
               <input
                 type="range"
@@ -549,10 +726,12 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2 bg-[#08090B] p-3 rounded-lg border border-[#7CFF6B]/40">
+          <div className="flex flex-wrap items-center justify-between gap-3 bg-[#08090B] p-4 rounded-xl border border-white/[0.1]">
             <div>
-              <span className="text-[10px] text-[#8B8F98] block">ESTIMATED VALUATION</span>
-              <span className="text-lg font-bold text-[#7CFF6B]">
+              <span className="font-mono text-[10px] text-[#8B8F98] block uppercase">
+                ESTIMATED VALUATION
+              </span>
+              <span className="font-mono text-xl sm:text-2xl font-bold text-[#7CFF6B] tabular-nums">
                 ${estimatedQuickPrice.toLocaleString()}
               </span>
             </div>
@@ -561,9 +740,12 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
               onClick={() => {
                 window.location.hash = '#project-house-price';
               }}
-              className="px-3.5 py-2 rounded-lg bg-[#7CFF6B] text-[#08090B] font-bold text-xs flex items-center gap-1.5 cursor-pointer hover:opacity-90"
+              className="group swift-spring-btn px-4 py-2.5 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold text-xs flex items-center gap-2 cursor-pointer"
             >
-              <span>OPEN FULL 3D WORKBENCH &amp; SHAP LAB</span>
+              <SwiftRollLabel
+                label="Open Full 3D Workbench & SHAP Lab"
+                hoverLabel="Inspect 1,458 Holdout Homes"
+              />
               <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -571,15 +753,15 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
       )}
 
       {activeScene === 'PEFT_LORA' && (
-        <div className="space-y-3 pt-2 border-t border-[#24272D]">
+        <div className="space-y-4 pt-3 border-t border-white/[0.08] font-mono">
           <div className="flex items-center justify-between text-xs">
             <span className="text-[#8B8F98] flex items-center gap-1.5">
               <Sliders className="w-3.5 h-3.5 text-[#7CFF6B]" />
               <span>
-                Interactive Rank ($r$): <strong>{loraRank}</strong>
+                Interactive Rank (r): <strong className="text-[#F2F2F2]">{loraRank}</strong>
               </span>
             </span>
-            <span className="text-[#7CFF6B] font-bold">
+            <span className="text-[#7CFF6B] font-bold tabular-nums">
               VRAM: {(14.2 - (64 - loraRank) * 0.16).toFixed(1)} GB (Base: 14.2 GB)
             </span>
           </div>
@@ -594,43 +776,50 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
             className="w-full accent-[#7CFF6B] bg-[#24272D] h-1.5 rounded cursor-pointer"
           />
 
-          <div className="grid grid-cols-3 gap-2 text-center text-xs">
-            <div className="bg-[#08090B] p-2 rounded border border-[#24272D]">
+          <div className="grid grid-cols-3 gap-3 text-center text-xs">
+            <div className="bg-[#08090B] p-3 rounded-xl border border-white/[0.08]">
               <div className="text-[10px] text-[#8B8F98]">ADAPTER MATRICES</div>
-              <div className="text-sm font-bold text-[#F2F2F2]">
+              <div className="text-sm font-bold text-[#F2F2F2] tabular-nums mt-0.5">
                 A (4096×{loraRank}) · B ({loraRank}×4096)
               </div>
             </div>
-            <div className="bg-[#08090B] p-2 rounded border border-[#24272D]">
+            <div className="bg-[#08090B] p-3 rounded-xl border border-white/[0.08]">
               <div className="text-[10px] text-[#8B8F98]">TRAINABLE FRACTION</div>
-              <div className="text-sm font-bold text-[#7CFF6B]">
+              <div className="text-sm font-bold text-[#7CFF6B] tabular-nums mt-0.5">
                 {((loraRank / 64) * 0.5).toFixed(2)}%
               </div>
             </div>
-            <div className="bg-[#08090B] p-2 rounded border border-[#24272D]">
+            <div className="bg-[#08090B] p-3 rounded-xl border border-white/[0.08]">
               <div className="text-[10px] text-[#8B8F98]">QUANTIZATION</div>
-              <div className="text-sm font-bold text-[#6EA8FE]">4-bit NF4 NormalFloat</div>
+              <div className="text-sm font-bold text-[#6EA8FE] mt-0.5">
+                4-bit NF4 NormalFloat
+              </div>
             </div>
           </div>
         </div>
       )}
 
       {activeScene === 'MULTI_AGENT' && (
-        <div className="space-y-2 pt-2 border-t border-[#24272D]">
+        <div className="space-y-3 pt-3 border-t border-white/[0.08] font-mono">
           <div className="text-xs text-[#8B8F98] flex items-center justify-between">
             <span>CrewAI &amp; LangGraph State DAG</span>
             <span className="text-[#7CFF6B]">Deterministic JSON Contracts</span>
           </div>
-          <div className="grid grid-cols-4 gap-1.5 text-xs text-center">
-            {['Planner Agent', 'Tool Executor', 'Code Reviewer', 'Critic & Guard'].map((agent) => (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-center">
+            {[
+              'Planner Agent',
+              'Tool Executor',
+              'Code Reviewer',
+              'Critic & Guard',
+            ].map((agent) => (
               <button
                 key={agent}
                 type="button"
                 onClick={() => setSelectedAgentNode(agent)}
-                className={`p-1.5 rounded text-[11px] transition-colors ${
+                className={`p-2 rounded-lg text-[11px] transition-colors cursor-pointer ${
                   selectedAgentNode === agent
                     ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
-                    : 'bg-[#08090B] text-[#8B8F98] border border-[#24272D]'
+                    : 'bg-[#08090B] text-[#8B8F98] border border-white/[0.08]'
                 }`}
               >
                 {agent}
@@ -641,34 +830,49 @@ export const Interactive3DProjectStage: React.FC<Interactive3DProjectStageProps>
       )}
 
       {activeScene === 'VERO_AST' && (
-        <div className="pt-2 border-t border-[#24272D] flex items-center justify-between text-xs">
+        <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono">
           <div className="space-y-0.5">
-            <div className="text-[#F2F2F2] font-bold">SonarQube Clean Code Invariants</div>
-            <div className="text-[11px] text-[#8B8F98]">Rule S3649 &middot; S2068 &middot; S3776</div>
+            <div className="text-[#F2F2F2] font-bold">
+              SonarQube Clean Code Invariants
+            </div>
+            <div className="text-[11px] text-[#8B8F98]">
+              Rule S3649 · S2068 · S3776
+            </div>
           </div>
           <div className="text-right">
-            <div className="text-xs font-bold text-[#7CFF6B]">&lt;35ms Latency</div>
-            <div className="text-[10px] text-[#8B8F98]">Zero-chat hallucination</div>
+            <div className="text-xs font-bold text-[#7CFF6B] tabular-nums">
+              &lt;35ms Latency
+            </div>
+            <div className="text-[10px] text-[#8B8F98]">
+              Zero-chat hallucination
+            </div>
           </div>
         </div>
       )}
 
       {activeScene === 'VECTOR_RAG' && (
-        <div className="pt-2 border-t border-[#24272D] flex items-center justify-between text-xs">
+        <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between text-xs font-mono">
           <div className="space-y-0.5">
-            <div className="text-[#F2F2F2] font-bold">Cosmos DB Vector Clustered Embeddings</div>
-            <div className="text-[11px] text-[#8B8F98]">Cosine Similarity: 0.92 &middot; P95: 84ms</div>
+            <div className="text-[#F2F2F2] font-bold">
+              Cosmos DB Vector Clustered Embeddings
+            </div>
+            <div className="text-[11px] text-[#8B8F98]">
+              Cosine Similarity: 0.92 · P95: 84ms
+            </div>
           </div>
           <div className="text-right">
-            <div className="text-xs font-bold text-[#6EA8FE]">Top-3 Recall: 94%</div>
-            <div className="text-[10px] text-[#8B8F98]">Dense Representation</div>
+            <div className="text-xs font-bold text-[#6EA8FE] tabular-nums">
+              Top-3 Recall: 94%
+            </div>
+            <div className="text-[10px] text-[#8B8F98]">
+              Dense Representation
+            </div>
           </div>
         </div>
       )}
 
-      {/* Direct Action Link */}
       {onInspectSpec && activeScene !== 'HOUSE_PRICE_3D' && (
-        <div className="pt-3 mt-2 border-t border-[#24272D] flex items-center justify-between">
+        <div className="pt-3 mt-3 border-t border-white/[0.08] flex items-center justify-between font-mono">
           <span className="text-[11px] text-[#8B8F98]">
             Source: github.com/KN-Vignesh/Projects
           </span>
