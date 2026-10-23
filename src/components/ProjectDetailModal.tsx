@@ -166,7 +166,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
           tabIndex={-1}
           initial={prefersReducedMotion ? { opacity: 1 } : { opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={prefersReducedMotion ? { opacity: 0 } : { opacity: 0 }}
+          exit={{ opacity: 0 }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
           onKeyDown={(e) => {
             if (
