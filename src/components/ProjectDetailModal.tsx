@@ -425,9 +425,8 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({
                     projectId={project.id}
                     experiment={project.experiment}
                     onOpenVero={
-                      project.liveAppView === 'vero'
+                      project.liveAppView === 'vero' || project.id === 'vero'
                         ? () => {
-                            onClose();
                             onOpenVero?.();
                           }
                         : undefined

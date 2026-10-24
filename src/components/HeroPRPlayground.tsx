@@ -78,7 +78,8 @@ export const HeroPRPlayground: React.FC<HeroPRPlaygroundProps> = ({ onOpenFullVe
           <button
             type="button"
             onClick={onOpenFullVero}
-            className="text-[10px] font-mono font-semibold text-[#7CFF6B] hover:underline flex items-center gap-1"
+            title="Open deployed Vero PR Engine (https://vero-silk-delta.vercel.app/) in a new tab"
+            className="text-[10px] font-mono font-semibold text-[#7CFF6B] hover:underline flex items-center gap-1 cursor-pointer"
           >
             <span>FULL VERO APP</span>
             <ArrowRight className="w-3 h-3" />
