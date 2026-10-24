@@ -23,10 +23,20 @@ import { MobileAppDock } from './components/MobileAppDock';
 import { ProjectItem } from './types';
 import { useProjects } from './hooks/useProjects';
 import { resolveCanonicalProjectId } from './data/projectSource';
-import VeroApp from './vero/VeroApp';
+
+export const VERO_EXTERNAL_URL = 'https://vero-silk-delta.vercel.app/';
+
+export function openExternalVero(): void {
+  const anchor = document.createElement('a');
+  anchor.href = VERO_EXTERNAL_URL;
+  anchor.target = '_blank';
+  anchor.rel = 'noopener noreferrer';
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+}
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<'portfolio' | 'vero'>('portfolio');
   const [activeSection, setActiveSection] = useState<string>('hero');
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isResumeOpen, setIsResumeOpen] = useState<boolean>(false);
@@ -46,19 +56,17 @@ export default function App() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Check URL hash on initial load and navigation for direct project deep-linking or VERO engine
+  // Check URL hash on initial load and navigation for direct project deep-linking or external VERO redirect
   useEffect(() => {
     const handleUrlChange = () => {
       const hash = window.location.hash.replace('#', '');
       
       if (hash === 'vero' || hash.startsWith('vero')) {
         setSelectedProjectId(null);
-        setCurrentView('vero');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.history.replaceState(null, '', '#projects');
+        openExternalVero();
         return;
       }
-      
-      setCurrentView('portfolio');
       
       const params = new URLSearchParams(window.location.search);
       const queryProject = params.get('project');
@@ -96,10 +104,8 @@ export default function App() {
     };
   }, [projects, projectsLoading]);
 
-  // Update active section based on scroll position (when in portfolio view)
+  // Update active section based on scroll position
   useEffect(() => {
-    if (currentView !== 'portfolio') return;
-
     const sections = [
       'hero',
       'projects',
@@ -134,23 +140,13 @@ export default function App() {
     });
 
     return () => observer.disconnect();
-  }, [currentView]);
+  }, []);
 
   const handleNavigate = (sectionId: string) => {
     setSelectedProjectId(null);
-    if (currentView !== 'portfolio') {
-      setCurrentView('portfolio');
-      setTimeout(() => {
-        const element = document.getElementById(sectionId);
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 50);
-    } else {
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-      }
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
     }
     window.location.hash = `#${sectionId}`;
   };
@@ -177,31 +173,11 @@ export default function App() {
   };
 
   const handleOpenVero = () => {
-    setCurrentView('vero');
-    window.history.pushState(null, '', '#vero');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleBackToPortfolio = () => {
-    setCurrentView('portfolio');
-    window.history.pushState(null, '', '#projects');
-    setTimeout(() => {
-      const el = document.getElementById('projects');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }, 50);
+    openExternalVero();
   };
 
   const currentProject: ProjectItem | null =
     projects.find((p) => p.id === selectedProjectId) || null;
-
-  if (currentView === 'vero') {
-    return (
-      <div className="min-h-screen bg-[#08090B] text-[#F2F2F2] selection:bg-[#7CFF6B]/20 selection:text-[#7CFF6B]">
-        <VeroApp onBackToPortfolio={handleBackToPortfolio} />
-        <Analytics />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-[#08090B] text-[#F2F2F2] flex flex-col selection:bg-[#7CFF6B]/20 selection:text-[#7CFF6B]">

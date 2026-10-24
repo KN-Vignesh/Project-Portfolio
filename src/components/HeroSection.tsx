@@ -148,13 +148,15 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <button
                   type="button"
                   onClick={onOpenVero}
+                  title="Open Vero PR Engine (https://vero-silk-delta.vercel.app/) in a new tab"
                   className="group swift-spring-btn px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F2F2F2] flex items-center gap-2 font-semibold cursor-pointer"
                 >
                   <GitPullRequest className="w-4 h-4 text-[#7CFF6B]" />
                   <SwiftRollLabel
                     label="Vero PR Engine"
-                    hoverLabel="Analyze GitHub PR"
+                    hoverLabel="Open Vero Live App"
                   />
+                  <ExternalLink className="w-3.5 h-3.5 text-[#8B8F98] group-hover:text-[#7CFF6B] transition-colors" />
                 </button>
               )}
 

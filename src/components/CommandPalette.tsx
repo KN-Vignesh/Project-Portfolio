@@ -73,8 +73,8 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
     },
     {
       id: 'open-vero',
-      title: 'Launch Vero AI PR Review Workbench',
-      subtitle: 'Deterministic AST Quality Gate + TypeSafe Jev System 1 Model',
+      title: 'Launch Vero AI PR Review Workbench (External App)',
+      subtitle: 'Opens https://vero-silk-delta.vercel.app/ in a new tab',
       category: 'SYSTEMS',
       icon: GitPullRequest,
       handler: () => {
@@ -122,7 +122,13 @@ export const CommandPalette: React.FC<CommandPaletteProps> = ({
       category: 'SYSTEMS',
       icon: ShieldCheck,
       handler: () => {
-        window.open('https://sonarcloud.io/dashboard?id=KN-Vignesh_Project-Portfolio', '_blank', 'noopener,noreferrer');
+        const anchor = document.createElement('a');
+        anchor.href = 'https://sonarcloud.io/dashboard?id=KN-Vignesh_Project-Portfolio';
+        anchor.target = '_blank';
+        anchor.rel = 'noopener noreferrer';
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
         onClose();
       }
     },
