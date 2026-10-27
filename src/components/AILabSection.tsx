@@ -245,9 +245,13 @@ export const AILabSection: React.FC<AILabSectionProps> = ({
       renderer.render(scene, camera);
 
       if (isSoftwareGl) {
-        afterDraw().then(() => {
-          if (!disposed) animId = requestAnimationFrame(tick);
-        });
+        void afterDraw()
+          .then(() => {
+            if (!disposed) animId = requestAnimationFrame(tick);
+          })
+          .catch(() => {
+            // Ignore frame scheduling rejection on teardown
+          });
       } else {
         animId = requestAnimationFrame(tick);
       }

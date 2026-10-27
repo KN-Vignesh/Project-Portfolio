@@ -17,6 +17,19 @@ interface ContactSectionProps {
   onOpenResume?: () => void;
 }
 
+const isValidEmail = (email: string): boolean => {
+  if (!email || email.length > 254) return false;
+  for (let i = 0; i < email.length; i++) {
+    const code = email.charCodeAt(i);
+    if (code <= 32 || code === 127) return false;
+  }
+  const atIndex = email.indexOf('@');
+  if (atIndex <= 0 || atIndex !== email.lastIndexOf('@')) return false;
+  const domain = email.slice(atIndex + 1);
+  const dotIndex = domain.indexOf('.');
+  return dotIndex > 0 && !domain.startsWith('.') && !domain.endsWith('.') && !domain.includes('..');
+};
+
 export const ContactSection: React.FC<ContactSectionProps> = ({
   onOpenResume,
 }) => {
@@ -50,7 +63,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
       setFormError('Please enter your name.');
       return;
     }
-    if (!trimmedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+    if (!isValidEmail(trimmedEmail)) {
       setFormError('Please provide a valid email address.');
       return;
     }
