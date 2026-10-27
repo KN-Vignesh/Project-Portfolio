@@ -3,11 +3,25 @@ import { EXPERIENCES } from '../data/portfolioData';
 import { ScrollReveal } from './ScrollReveal';
 import { NutshellText } from './Nutshell';
 
+const getDateTimeAttr = (period: string): string => {
+  if (period.includes('Aug 2024')) return '2024-08';
+  if (period.includes('Aug 2022')) return '2022-08/2024-08';
+  if (period.includes('Feb 2022')) return '2022-02/2022-07';
+  return period;
+};
+
+const getCompanyMonogram = (company: string): string => {
+  if (company.toLowerCase().includes('acl')) return 'ACL';
+  if (company.toLowerCase().includes('enmarq')) return 'ENM';
+  return company.slice(0, 3).toUpperCase();
+};
+
 export const ExperienceSection: React.FC = () => {
   return (
     <section
       id="experience"
-      className="py-28 lg:py-32 border-t border-white/[0.08] bg-[#08090B] relative"
+      aria-labelledby="experience-heading"
+      className="section-fluid border-t border-white/[0.08] bg-[#08090B] relative"
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
         {/* Sticky Left Column + Scrolling Right Column Layout */}
@@ -18,10 +32,13 @@ export const ExperienceSection: React.FC = () => {
               <div className="font-mono text-xs text-[#8B8F98] tracking-wide uppercase">
                 06 · Professional Track Record
               </div>
-              <h2 className="editorial-h2 font-bold text-[#F2F2F2]">
+              <h2
+                id="experience-heading"
+                className="editorial-h2 font-bold text-[#F2F2F2]"
+              >
                 4+ Years From Enterprise Cloud to Production AI
               </h2>
-              <p className="text-base text-[#8B8F98] leading-relaxed">
+              <p className="fluid-body text-[#8B8F98]">
                 Progression across enterprise .NET 8 microservices, Azure serverless automation, vector search infrastructure, and parameter-efficient LLM engineering.
               </p>
             </ScrollReveal>
@@ -29,9 +46,12 @@ export const ExperienceSection: React.FC = () => {
             {/* Hairlined 2x2 Trajectory Matrix */}
             <div className="grid grid-cols-2 border border-white/[0.08] rounded-2xl overflow-hidden divide-x divide-y divide-white/[0.08] bg-[#101216]">
               <div className="p-4 space-y-1">
-                <span className="font-mono text-xs text-[#7CFF6B] font-bold">
+                <time
+                  dateTime="2022"
+                  className="font-mono text-xs text-[#7CFF6B] font-bold block"
+                >
                   2022
-                </span>
+                </time>
                 <div className="text-sm font-bold text-[#F2F2F2]">
                   Data &amp; API Foundations
                 </div>
@@ -41,9 +61,12 @@ export const ExperienceSection: React.FC = () => {
               </div>
 
               <div className="p-4 space-y-1">
-                <span className="font-mono text-xs text-[#6EA8FE] font-bold">
+                <time
+                  dateTime="2022/2024"
+                  className="font-mono text-xs text-[#6EA8FE] font-bold block"
+                >
                   2022–2024
-                </span>
+                </time>
                 <div className="text-sm font-bold text-[#F2F2F2]">
                   Cloud &amp; MLOps Scale
                 </div>
@@ -53,9 +76,12 @@ export const ExperienceSection: React.FC = () => {
               </div>
 
               <div className="p-4 space-y-1">
-                <span className="font-mono text-xs text-[#FFB86B] font-bold">
+                <time
+                  dateTime="2024"
+                  className="font-mono text-xs text-[#FFB86B] font-bold block"
+                >
                   2024–Present
-                </span>
+                </time>
                 <div className="text-sm font-bold text-[#F2F2F2]">
                   Agentic AI &amp; .NET 8
                 </div>
@@ -65,7 +91,7 @@ export const ExperienceSection: React.FC = () => {
               </div>
 
               <div className="p-4 space-y-1 bg-[#15181D]">
-                <span className="font-mono text-xs text-[#7CFF6B] font-bold">
+                <span className="font-mono text-xs text-[#7CFF6B] font-bold block">
                   Current Focus
                 </span>
                 <div className="text-sm font-bold text-[#7CFF6B]">
@@ -78,29 +104,48 @@ export const ExperienceSection: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Scrolling Column: Experience Case Cards */}
-          <div className="lg:col-span-7 space-y-6">
+          {/* Right Scrolling Column: Vertical Experience Timeline */}
+          <div className="lg:col-span-7 relative pl-0 sm:pl-6 before:hidden sm:before:block before:absolute before:left-[11px] before:top-4 before:bottom-4 before:w-[1px] before:bg-white/[0.08] space-y-6">
             {EXPERIENCES.map((exp, idx) => (
-              <ScrollReveal key={idx} delay={idx * 0.06}>
-                <div className="editorial-card rounded-2xl p-6 sm:p-9 space-y-6">
-                  {/* Top Unboxed Metadata */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-5 border-b border-white/[0.08]">
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-[#8B8F98]">
-                        <span className="text-[#7CFF6B] font-semibold">
-                          {exp.company}
-                        </span>
-                        <span aria-hidden="true">·</span>
-                        <span>{exp.type}</span>
+              <ScrollReveal key={idx} delay={idx * 0.06} className="relative">
+                {/* Vertical Timeline Node Marker (Desktop/Tablet) */}
+                <div
+                  aria-hidden="true"
+                  className="hidden sm:flex absolute -left-6 top-8 w-6 h-6 rounded-full bg-[#08090B] border border-[#7CFF6B]/50 items-center justify-center font-mono text-[10px] font-bold text-[#7CFF6B]"
+                >
+                  {idx + 1}
+                </div>
+
+                <article className="editorial-card rounded-2xl p-6 sm:p-9 space-y-6">
+                  {/* Top Unboxed Metadata + Monogram + Semantic <time> */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-white/[0.08]">
+                    <div className="flex items-start sm:items-center gap-3.5">
+                      <div
+                        aria-hidden="true"
+                        className="w-10 h-10 rounded-xl bg-[#08090B] border border-white/[0.1] flex items-center justify-center font-mono text-xs font-bold text-[#7CFF6B] shrink-0"
+                      >
+                        {getCompanyMonogram(exp.company)}
                       </div>
-                      <h3 className="text-xl sm:text-2xl font-bold text-[#F2F2F2]">
-                        {exp.role}
-                      </h3>
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-2 font-mono text-xs text-[#8B8F98]">
+                          <span className="text-[#7CFF6B] font-semibold">
+                            {exp.company}
+                          </span>
+                          <span aria-hidden="true">·</span>
+                          <span>{exp.type}</span>
+                        </div>
+                        <h3 className="text-xl sm:text-2xl font-bold text-[#F2F2F2]">
+                          {exp.role}
+                        </h3>
+                      </div>
                     </div>
 
-                    <div className="font-mono text-xs text-[#8B8F98] tabular-nums shrink-0">
+                    <time
+                      dateTime={getDateTimeAttr(exp.period)}
+                      className="font-mono text-xs text-[#8B8F98] tabular-nums shrink-0"
+                    >
                       {exp.period}
-                    </div>
+                    </time>
                   </div>
 
                   {/* Narrative */}
@@ -146,7 +191,7 @@ export const ExperienceSection: React.FC = () => {
                       </React.Fragment>
                     ))}
                   </div>
-                </div>
+                </article>
               </ScrollReveal>
             ))}
           </div>

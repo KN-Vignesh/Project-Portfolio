@@ -32,7 +32,8 @@ export const EducationCertificationsSection: React.FC<
   return (
     <section
       id="education"
-      className="py-24 lg:py-28 border-t border-white/[0.08] bg-[#08090B] relative"
+      aria-labelledby="education-heading"
+      className="section-fluid border-t border-white/[0.08] bg-[#08090B] relative"
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
         {/* Section Header */}
@@ -41,7 +42,10 @@ export const EducationCertificationsSection: React.FC<
             <div className="font-mono text-xs text-[#8B8F98] tracking-wide uppercase">
               07 · Credentials &amp; Specialization Scope
             </div>
-            <h2 className="editorial-h2 font-bold text-[#F2F2F2]">
+            <h2
+              id="education-heading"
+              className="editorial-h2 font-bold text-[#F2F2F2]"
+            >
               Education &amp; Certifications
             </h2>
           </div>
@@ -54,7 +58,7 @@ export const EducationCertificationsSection: React.FC<
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {CERTIFICATIONS.map((cert, idx) => (
             <ScrollReveal key={idx} delay={idx * 0.05}>
-              <div className="editorial-card rounded-2xl p-6 sm:p-7 h-full flex flex-col justify-between">
+              <article className="editorial-card rounded-2xl p-6 sm:p-7 h-full flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-5">
                     <div className="w-9 h-9 rounded-xl border border-white/[0.08] bg-[#15181D] flex items-center justify-center text-[#7CFF6B]">
@@ -80,9 +84,9 @@ export const EducationCertificationsSection: React.FC<
 
                 <div className="pt-4 border-t border-white/[0.08] font-mono text-xs text-[#8B8F98] flex items-center justify-between">
                   <span>Issued / Period</span>
-                  <span className="text-[#F2F2F2] tabular-nums">{cert.period}</span>
+                  <time className="text-[#F2F2F2] tabular-nums">{cert.period}</time>
                 </div>
-              </div>
+              </article>
             </ScrollReveal>
           ))}
         </div>

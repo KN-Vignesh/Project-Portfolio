@@ -44,7 +44,7 @@ export const MobileAppDock: React.FC<MobileAppDockProps> = ({
                   onNavigate(item.id);
                 }
               }}
-              className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-all cursor-pointer min-h-[46px] ${
+              className={`flex flex-col items-center justify-center flex-1 py-1 px-1 rounded-xl transition-all cursor-pointer min-h-12 min-w-12 ${
                 isActive
                   ? 'text-[#7CFF6B]'
                   : item.isVero

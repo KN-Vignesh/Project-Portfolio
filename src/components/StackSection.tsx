@@ -19,7 +19,11 @@ export const StackSection: React.FC = () => {
   };
 
   return (
-    <section id="stack" className="py-24 lg:py-28 border-t border-white/[0.08] bg-[#08090B] relative">
+    <section
+      id="stack"
+      aria-labelledby="stack-heading"
+      className="section-fluid border-t border-white/[0.08] bg-[#08090B] relative"
+    >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
         {/* Section Header */}
         <ScrollReveal className="flex flex-col lg:flex-row lg:items-end justify-between mb-14 pb-6 border-b border-white/[0.08] gap-6">
@@ -27,7 +31,10 @@ export const StackSection: React.FC = () => {
             <div className="font-mono text-xs text-[#8B8F98] tracking-wide uppercase">
               05 · Architectural Toolchain
             </div>
-            <h2 className="editorial-h2 font-bold text-[#F2F2F2]">
+            <h2
+              id="stack-heading"
+              className="editorial-h2 font-bold text-[#F2F2F2]"
+            >
               Technical Capabilities &amp; Stack
             </h2>
           </div>
