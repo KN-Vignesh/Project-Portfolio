@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { ENGINEERING_PIPELINE_STEPS } from '../data/portfolioData';
 import { ScrollReveal, SwiftRollLabel } from './ScrollReveal';
+import { NutshellText } from './Nutshell';
 
 interface EngineeringSystemSectionProps {
   onSelectProject: (projectId: string) => void;
@@ -57,9 +58,13 @@ export const EngineeringSystemSection: React.FC<
               <h2 className="editorial-h2 font-bold text-[#F2F2F2]">
                 Systems Architecture &amp; Delivery Pipeline
               </h2>
-              <p className="text-base text-[#8B8F98] leading-relaxed">
-                Every AI system follows a 5-stage engineering contract—from framing measurable business constraints and data validation to PEFT fine-tuning, deterministic guardrails, and holdout benchmarking.
-              </p>
+              <NutshellText
+                blockId="eng-system-intro"
+                as="p"
+                maxTriggers={2}
+                className="text-base text-[#8B8F98] leading-relaxed"
+                text="Every AI system follows a 5-stage engineering contract—from framing measurable business constraints and data validation to :peft[PEFT] fine-tuning, :jev-gate[deterministic gates], and holdout benchmarking."
+              />
             </ScrollReveal>
 
             {/* Active Stage Inspector Card */}
@@ -76,9 +81,13 @@ export const EngineeringSystemSection: React.FC<
                 <h3 className="text-lg font-bold text-[#F2F2F2]">
                   {ENGINEERING_PIPELINE_STEPS[activeStage].name}
                 </h3>
-                <p className="text-sm text-[#D1D5DB] leading-relaxed">
-                  {ENGINEERING_PIPELINE_STEPS[activeStage].desc}
-                </p>
+                <NutshellText
+                  blockId={`eng-active-stage-${activeStage}`}
+                  as="p"
+                  maxTriggers={2}
+                  className="text-sm text-[#D1D5DB] leading-relaxed"
+                  text={ENGINEERING_PIPELINE_STEPS[activeStage].desc}
+                />
               </div>
 
               <div className="pt-3 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3 text-xs">
@@ -173,9 +182,13 @@ export const EngineeringSystemSection: React.FC<
                       {step.name}
                     </h3>
 
-                    <p className="text-base text-[#8B8F98] leading-relaxed">
-                      {step.desc}
-                    </p>
+                    <NutshellText
+                      blockId={`eng-pipeline-step-${step.step}`}
+                      as="p"
+                      maxTriggers={2}
+                      className="text-base text-[#8B8F98] leading-relaxed"
+                      text={step.desc}
+                    />
                   </div>
                 </ScrollReveal>
               );

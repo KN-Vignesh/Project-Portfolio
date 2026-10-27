@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://vignesh-k-n.is-a.dev/sitemap.xml

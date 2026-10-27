@@ -29,6 +29,7 @@ export const Interactive3DProjectStage: React.FC<
 > = ({ initialScene = 'HOUSE_PRICE_3D', onInspectSpec }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const [activeScene, setActiveScene] = useState<ThreeDSceneType>(initialScene);
+  const [webglFallback, setWebglFallback] = useState<boolean>(false);
 
   // Scene 0: House Price 3D Quick Interactive Sliders
   const [livingArea, setLivingArea] = useState<number>(1710);
@@ -41,7 +42,7 @@ export const Interactive3DProjectStage: React.FC<
   const [selectedAgentNode, setSelectedAgentNode] =
     useState<string>('Planner Agent');
 
-  // Mutable target ref so slider drags smoothly damp in the 60fps loop without recreating WebGLRenderer
+  // Mutable target ref so slider drags smoothly damp in the loop without recreating WebGLRenderer
   const paramTargetRef = useRef({
     livingArea: 1710,
     overallQual: 7,
@@ -68,6 +69,10 @@ export const Interactive3DProjectStage: React.FC<
 
     const existingCanvases = currentMount.querySelectorAll('canvas');
     existingCanvases.forEach((c) => c.remove());
+
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
     const width = currentMount.clientWidth || 640;
     const height = currentMount.clientHeight || 420;
@@ -120,11 +125,12 @@ export const Interactive3DProjectStage: React.FC<
       scene.environment = envTexture;
       pmremGenerator.dispose();
     } catch {
+      setWebglFallback(true);
       return;
     }
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
-    scene.add(ambientLight);
+    const hemiLight = new THREE.HemisphereLight(0x6ea8fe, 0x08090b, 0.85);
+    scene.add(hemiLight);
 
     const mainLight = new THREE.PointLight(0x7cff6b, 3.8, 60);
     mainLight.position.set(6, 8, 10);
@@ -138,7 +144,6 @@ export const Interactive3DProjectStage: React.FC<
     rootGroup.scale.set(0.9, 0.9, 0.9);
     scene.add(rootGroup);
 
-    // References for swift damped animation inside the loop
     let houseGroupRef: THREE.Group | null = null;
     let loraMeshARef: THREE.Mesh | null = null;
     let loraMeshBRef: THREE.Mesh | null = null;
@@ -210,7 +215,7 @@ export const Interactive3DProjectStage: React.FC<
       );
       rootGroup.add(surfMesh);
 
-      // Composite 6-Part Architectural 3D House Marker (Gemini Argon4 3D Object Standard)
+      // Composite 6-Part Architectural 3D House Marker
       const houseGroup = new THREE.Group();
       houseGroupRef = houseGroup;
 
@@ -502,8 +507,14 @@ export const Interactive3DProjectStage: React.FC<
     });
     resizeObserver.observe(currentMount);
 
-    // Pause WebGL loop when scrolled out of viewport
     let isInViewport = true;
+    let isPageVisible = !document.hidden;
+
+    const handleVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     const visibilityObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -514,17 +525,38 @@ export const Interactive3DProjectStage: React.FC<
     );
     visibilityObserver.observe(currentMount);
 
-    let animId: number;
+    let frameId = 0;
     const clock = new THREE.Clock();
 
-    // Smooth damped state for 60fps parameter interpolation
     let curLiving = paramTargetRef.current.livingArea;
     let curQual = paramTargetRef.current.overallQual;
     let curRank = paramTargetRef.current.loraRank;
 
-    const animate = () => {
-      animId = requestAnimationFrame(animate);
-      if (!isInViewport) return;
+    function afterDraw(cb: () => void) {
+      const gl = renderer.getContext() as WebGL2RenderingContext;
+      if (!gl || typeof gl.fenceSync !== 'function') {
+        frameId = window.setTimeout(cb, 80);
+        return;
+      }
+      const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      gl.flush();
+      const poll = () => {
+        const state = sync && gl.getSyncParameter(sync, gl.SYNC_STATUS);
+        if (state === gl.UNSIGNALED) {
+          frameId = window.setTimeout(poll, 5);
+        } else {
+          if (sync) gl.deleteSync(sync);
+          frameId = window.setTimeout(cb, 80);
+        }
+      };
+      frameId = window.setTimeout(poll, 5);
+    }
+
+    const tick = () => {
+      if (!isInViewport || !isPageVisible) {
+        frameId = window.setTimeout(tick, 200);
+        return;
+      }
 
       const dt = Math.min(clock.getDelta(), 0.1);
       const targets = paramTargetRef.current;
@@ -558,17 +590,29 @@ export const Interactive3DProjectStage: React.FC<
         loraMeshBRef.position.x = -3.4 - rankScale / 2;
       }
 
-      if (!isDragging && activeScene !== 'HOUSE_PRICE_3D') {
-        rootGroup.rotation.y += 0.0035;
-        rootGroup.rotation.x += 0.0012;
+      if (
+        !isDragging &&
+        !prefersReducedMotion &&
+        activeScene !== 'HOUSE_PRICE_3D'
+      ) {
+        rootGroup.rotation.y += dt * 0.21;
+        rootGroup.rotation.x += dt * 0.07;
       }
 
       renderer.render(scene, camera);
+
+      if (isSoftwareGl) {
+        afterDraw(tick);
+      } else {
+        frameId = requestAnimationFrame(tick);
+      }
     };
-    animate();
+    tick();
 
     return () => {
-      cancelAnimationFrame(animId);
+      cancelAnimationFrame(frameId);
+      clearTimeout(frameId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       visibilityObserver.disconnect();
       domElement.removeEventListener('mousedown', onPointerDown);
       window.removeEventListener('mousemove', onPointerMove);
@@ -602,21 +646,27 @@ export const Interactive3DProjectStage: React.FC<
             {activeScene === 'VECTOR_RAG' && <Database className="w-4 h-4" />}
           </div>
           <div>
-            <div className="font-mono text-[11px] text-[#8B8F98] uppercase tracking-wider">
+            <div className="font-mono text-[11px] text-[#8B8F98] tracking-wide">
               02 · Interactive WebGL Topology Lab
             </div>
-            <h3 className="text-lg sm:text-xl font-bold text-[#F2F2F2]">
+            <h2 className="text-lg sm:text-xl font-bold text-[#F2F2F2]">
               3D Project Architecture Workbench
-            </h3>
+            </h2>
           </div>
         </div>
 
         {/* Scene Navigation Tabs */}
-        <div className="flex flex-wrap gap-1 p-1 bg-[#08090B] rounded-xl border border-white/[0.08] text-xs font-medium">
+        <div
+          role="tablist"
+          aria-label="3D Architecture Scenes"
+          className="flex flex-wrap gap-1 p-1 bg-[#08090B] rounded-xl border border-white/[0.08] text-xs font-medium"
+        >
           <button
             type="button"
+            role="tab"
+            aria-selected={activeScene === 'HOUSE_PRICE_3D'}
             onClick={() => setActiveScene('HOUSE_PRICE_3D')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
               activeScene === 'HOUSE_PRICE_3D'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -626,8 +676,10 @@ export const Interactive3DProjectStage: React.FC<
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeScene === 'PEFT_LORA'}
             onClick={() => setActiveScene('PEFT_LORA')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
               activeScene === 'PEFT_LORA'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -637,8 +689,10 @@ export const Interactive3DProjectStage: React.FC<
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeScene === 'MULTI_AGENT'}
             onClick={() => setActiveScene('MULTI_AGENT')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
               activeScene === 'MULTI_AGENT'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -648,8 +702,10 @@ export const Interactive3DProjectStage: React.FC<
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeScene === 'VERO_AST'}
             onClick={() => setActiveScene('VERO_AST')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
               activeScene === 'VERO_AST'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -659,8 +715,10 @@ export const Interactive3DProjectStage: React.FC<
           </button>
           <button
             type="button"
+            role="tab"
+            aria-selected={activeScene === 'VECTOR_RAG'}
             onClick={() => setActiveScene('VECTOR_RAG')}
-            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer whitespace-nowrap ${
               activeScene === 'VECTOR_RAG'
                 ? 'bg-[#7CFF6B] text-[#08090B] font-bold'
                 : 'text-[#8B8F98] hover:text-[#F2F2F2]'
@@ -674,10 +732,22 @@ export const Interactive3DProjectStage: React.FC<
       {/* Responsive 3D Canvas Stage */}
       <div
         ref={mountRef}
-        className="w-full h-[320px] sm:h-[400px] lg:h-[460px] my-4 cursor-grab active:cursor-grabbing relative flex items-center justify-center rounded-xl bg-[#08090B]/70 border border-white/[0.06]"
+        role="img"
+        aria-label={`Interactive 3D scene for ${activeScene}`}
+        className="w-full h-[320px] sm:h-[400px] lg:h-[460px] my-4 cursor-grab active:cursor-grabbing relative flex items-center justify-center rounded-xl bg-[#08090B] border border-white/[0.06]"
       >
+        {webglFallback && (
+          <div className="p-6 text-center space-y-2 font-mono">
+            <div className="text-xs text-[#7CFF6B] font-bold">
+              STATIC 3D TOPOLOGY PREVIEW ({activeScene})
+            </div>
+            <p className="text-[11px] text-[#8B8F98] max-w-md mx-auto">
+              Interactive parameter controls remain active below. Use the sliders to inspect real-time valuation and rank scaling metrics.
+            </p>
+          </div>
+        )}
         <div className="absolute bottom-3 left-3.5 pointer-events-none font-mono text-[11px] text-[#8B8F98]">
-          Drag to orbit 3D stage · Adjust sliders below for real-time 60fps damped morphing
+          Drag to orbit 3D stage · Adjust sliders below for real-time damped morphing
         </div>
       </div>
 
@@ -685,17 +755,18 @@ export const Interactive3DProjectStage: React.FC<
       {activeScene === 'HOUSE_PRICE_3D' && (
         <div className="space-y-4 pt-3 border-t border-white/[0.08]">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div className="p-3.5 rounded-xl bg-[#08090B] border border-white/[0.08] space-y-2">
-              <div className="flex items-center justify-between font-mono">
+            <label className="p-3.5 rounded-xl bg-[#08090B] border border-white/[0.08] space-y-2 block">
+              <span className="flex items-center justify-between font-mono">
                 <span className="text-[#D1D5DB] font-semibold">
                   1. Living Area (Sq Ft):
                 </span>
                 <span className="text-[#7CFF6B] font-bold tabular-nums">
                   {livingArea.toLocaleString()} sq ft
                 </span>
-              </div>
+              </span>
               <input
                 type="range"
+                aria-label="Living Area in square feet"
                 min={500}
                 max={4200}
                 step={50}
@@ -703,19 +774,20 @@ export const Interactive3DProjectStage: React.FC<
                 onChange={(e) => setLivingArea(Number(e.target.value))}
                 className="w-full accent-[#7CFF6B] cursor-pointer"
               />
-            </div>
+            </label>
 
-            <div className="p-3.5 rounded-xl bg-[#08090B] border border-white/[0.08] space-y-2">
-              <div className="flex items-center justify-between font-mono">
+            <label className="p-3.5 rounded-xl bg-[#08090B] border border-white/[0.08] space-y-2 block">
+              <span className="flex items-center justify-between font-mono">
                 <span className="text-[#D1D5DB] font-semibold">
                   2. Overall Quality (1–10):
                 </span>
                 <span className="text-[#6EA8FE] font-bold tabular-nums">
                   Level {overallQual} / 10
                 </span>
-              </div>
+              </span>
               <input
                 type="range"
+                aria-label="Overall Quality rating from 1 to 10"
                 min={1}
                 max={10}
                 step={1}
@@ -723,7 +795,7 @@ export const Interactive3DProjectStage: React.FC<
                 onChange={(e) => setOverallQual(Number(e.target.value))}
                 className="w-full accent-[#6EA8FE] cursor-pointer"
               />
-            </div>
+            </label>
           </div>
 
           <div className="flex flex-wrap items-center justify-between gap-3 bg-[#08090B] p-4 rounded-xl border border-white/[0.1]">
@@ -735,19 +807,20 @@ export const Interactive3DProjectStage: React.FC<
                 ${estimatedQuickPrice.toLocaleString()}
               </span>
             </div>
-            <button
-              type="button"
-              onClick={() => {
+            <a
+              href="/projects/house-price"
+              onClick={(e) => {
+                e.preventDefault();
                 window.location.hash = '#project-house-price';
               }}
               className="group swift-spring-btn px-4 py-2.5 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold text-xs flex items-center gap-2 cursor-pointer"
             >
               <SwiftRollLabel
-                label="Open Full 3D Workbench & SHAP Lab"
+                label="Open Full 3D Workbench & SHAP Case Study"
                 hoverLabel="Inspect 1,458 Holdout Homes"
               />
               <ArrowRight className="w-3.5 h-3.5" />
-            </button>
+            </a>
           </div>
         </div>
       )}
@@ -768,6 +841,7 @@ export const Interactive3DProjectStage: React.FC<
 
           <input
             type="range"
+            aria-label="PEFT LoRA Rank r"
             min={4}
             max={64}
             step={4}

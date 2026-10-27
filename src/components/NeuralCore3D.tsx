@@ -1,17 +1,32 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
 export const NeuralCore3D: React.FC = () => {
   const mountRef = useRef<HTMLDivElement>(null);
+  const [webglFallback, setWebglFallback] = useState<boolean>(false);
 
   useEffect(() => {
     const currentMount = mountRef.current;
     if (!currentMount) return;
 
-    const prefersReducedMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)'
-    ).matches;
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
+    const isSoftwareGl = (() => {
+      try {
+        const probe = document.createElement('canvas').getContext('webgl2');
+        if (!probe) return true;
+        const ext = probe.getExtension('WEBGL_debug_renderer_info');
+        const param = ext ? ext.UNMASKED_RENDERER_WEBGL : probe.RENDERER;
+        const gpu = String(probe.getParameter(param));
+        probe.getExtension('WEBGL_lose_context')?.loseContext();
+        return /SwiftShader|llvmpipe|softpipe|Software|Basic Render/i.test(gpu);
+      } catch {
+        return false;
+      }
+    })();
 
     const scene = new THREE.Scene();
     const width = currentMount.clientWidth || 500;
@@ -28,14 +43,16 @@ export const NeuralCore3D: React.FC = () => {
     try {
       renderer = new THREE.WebGLRenderer({
         alpha: true,
-        antialias: true,
+        antialias: !isSoftwareGl,
         powerPreference: 'high-performance',
       });
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
       renderer.toneMappingExposure = 1.12;
       renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setPixelRatio(
+        isSoftwareGl ? 1 : Math.min(window.devicePixelRatio, 2)
+      );
       renderer.domElement.style.display = 'block';
       renderer.domElement.style.width = '100%';
       renderer.domElement.style.height = '100%';
@@ -49,11 +66,12 @@ export const NeuralCore3D: React.FC = () => {
       scene.environment = envTexture;
       pmremGenerator.dispose();
     } catch {
+      setWebglFallback(true);
       return;
     }
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
-    scene.add(ambientLight);
+    const hemiLight = new THREE.HemisphereLight(0x6ea8fe, 0x08090b, 0.85);
+    scene.add(hemiLight);
 
     const keyLight = new THREE.PointLight(0x7cff6b, 3.2, 40);
     keyLight.position.set(5, 5, 7);
@@ -206,6 +224,13 @@ export const NeuralCore3D: React.FC = () => {
     resizeObserver.observe(currentMount);
 
     let isInViewport = true;
+    let isPageVisible = !document.hidden;
+
+    const handleVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     const visibilityObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -216,12 +241,34 @@ export const NeuralCore3D: React.FC = () => {
     );
     visibilityObserver.observe(currentMount);
 
-    let animationFrameId: number;
+    let frameId = 0;
     const clock = new THREE.Clock();
 
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-      if (!isInViewport) return;
+    function afterDraw(cb: () => void) {
+      const gl = renderer.getContext() as WebGL2RenderingContext;
+      if (!gl || typeof gl.fenceSync !== 'function') {
+        frameId = window.setTimeout(cb, 80);
+        return;
+      }
+      const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      gl.flush();
+      const poll = () => {
+        const state = sync && gl.getSyncParameter(sync, gl.SYNC_STATUS);
+        if (state === gl.UNSIGNALED) {
+          frameId = window.setTimeout(poll, 5);
+        } else {
+          if (sync) gl.deleteSync(sync);
+          frameId = window.setTimeout(cb, 80);
+        }
+      };
+      frameId = window.setTimeout(poll, 5);
+    }
+
+    const tick = () => {
+      if (!isInViewport || !isPageVisible) {
+        frameId = window.setTimeout(tick, 200);
+        return;
+      }
 
       const dt = Math.min(clock.getDelta(), 0.1);
       const elapsedTime = clock.elapsedTime;
@@ -229,13 +276,17 @@ export const NeuralCore3D: React.FC = () => {
       if (!prefersReducedMotion) {
         coreGroup.rotation.y = THREE.MathUtils.damp(
           coreGroup.rotation.y,
-          coreGroup.rotation.y + 0.18 + (targetRotationY - coreGroup.rotation.y) * 0.4,
+          coreGroup.rotation.y +
+            0.18 +
+            (targetRotationY - coreGroup.rotation.y) * 0.4,
           6,
           dt
         );
         coreGroup.rotation.x = THREE.MathUtils.damp(
           coreGroup.rotation.x,
-          coreGroup.rotation.x + 0.08 + (targetRotationX - coreGroup.rotation.x) * 0.4,
+          coreGroup.rotation.x +
+            0.08 +
+            (targetRotationX - coreGroup.rotation.x) * 0.4,
           6,
           dt
         );
@@ -253,12 +304,20 @@ export const NeuralCore3D: React.FC = () => {
       }
 
       renderer.render(scene, camera);
+
+      if (isSoftwareGl) {
+        afterDraw(tick);
+      } else {
+        frameId = requestAnimationFrame(tick);
+      }
     };
 
-    animate();
+    tick();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      cancelAnimationFrame(frameId);
+      clearTimeout(frameId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       visibilityObserver.disconnect();
       window.removeEventListener('mousemove', handleMouseMove);
       resizeObserver.disconnect();
@@ -280,9 +339,23 @@ export const NeuralCore3D: React.FC = () => {
   }, []);
 
   return (
-    <div className="relative w-full h-[360px] sm:h-[420px] rounded-2xl border border-white/[0.08] bg-[#101216] flex items-center justify-center overflow-hidden select-none">
+    <div
+      role="img"
+      aria-label="3D Neural Attention Graph visualization"
+      className="relative w-full h-[360px] sm:h-[420px] rounded-2xl border border-white/[0.08] bg-[#101216] flex items-center justify-center overflow-hidden select-none"
+    >
       <div ref={mountRef} className="w-full h-full pointer-events-auto" />
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-lg border border-white/[0.08] bg-[#08090B]/85 backdrop-blur-sm font-mono text-[11px] text-[#8B8F98] tracking-wide pointer-events-none">
+      {webglFallback && (
+        <div className="p-6 text-center space-y-2 font-mono">
+          <div className="text-xs text-[#7CFF6B] font-bold">
+            3D NEURAL ATTENTION TOPOLOGY (STATIC FALLBACK)
+          </div>
+          <p className="text-[11px] text-[#8B8F98] max-w-xs mx-auto">
+            28-Node Multi-Head Self-Attention Graph · Fibonacci Spherical Lattice
+          </p>
+        </div>
+      )}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-lg border border-white/[0.08] bg-[#08090B] font-mono text-[11px] text-[#8B8F98] tracking-wide pointer-events-none">
         3D Neural Attention Graph · Interactive Orbit
       </div>
     </div>

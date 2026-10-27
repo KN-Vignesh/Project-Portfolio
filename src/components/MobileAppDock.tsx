@@ -16,15 +16,15 @@ export const MobileAppDock: React.FC<MobileAppDockProps> = ({
   const navItems = [
     { id: 'hero', label: 'Home', icon: Home },
     { id: 'projects', label: 'Projects', icon: FolderGit2 },
-    { id: 'vero', label: 'VERO', icon: GitPullRequest, isVero: true },
+    { id: 'vero', label: 'Vero Engine', icon: GitPullRequest, isVero: true },
     { id: 'engineering-system', label: 'System', icon: Cpu },
   ];
 
   return (
     <nav
       id="mobile-bottom-app-dock"
-      aria-label="Mobile Navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0C0E12]/95 border-t border-[#24272D]/90 backdrop-blur-lg px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl transition-all"
+      aria-label="Mobile Quick Navigation"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#0C0E12]/95 border-t border-white/[0.08] backdrop-blur-lg px-2 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] shadow-2xl transition-all"
     >
       <div className="flex items-center justify-around max-w-md mx-auto">
         {navItems.map((item) => {
@@ -35,6 +35,8 @@ export const MobileAppDock: React.FC<MobileAppDockProps> = ({
             <button
               key={item.id}
               id={`mobile-dock-${item.id}`}
+              type="button"
+              aria-current={isActive ? 'page' : undefined}
               onClick={() => {
                 if (item.isVero) {
                   onOpenVero();
@@ -51,10 +53,11 @@ export const MobileAppDock: React.FC<MobileAppDockProps> = ({
               }`}
             >
               <div className="relative">
-                <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-[1.8]'}`} />
-                {item.isVero && (
-                  <span className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-[#7CFF6B] animate-pulse ring-2 ring-[#0C0E12]" />
-                )}
+                <Icon
+                  className={`w-5 h-5 ${
+                    isActive ? 'stroke-[2.5]' : 'stroke-[1.8]'
+                  }`}
+                />
                 {isActive && (
                   <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-3 h-0.5 rounded-full bg-[#7CFF6B]" />
                 )}

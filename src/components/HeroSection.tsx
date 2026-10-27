@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { motion, useScroll, useTransform, useReducedMotion } from 'motion/react';
 import {
   ArrowDown,
@@ -7,16 +7,24 @@ import {
   Layers,
   Cpu,
   Search,
+  FileDown,
 } from 'lucide-react';
 import { PERSONAL_INFO } from '../data/portfolioData';
-import { ModelVisualizer3D } from './ModelVisualizer3D';
-import { NeuralCore3D } from './NeuralCore3D';
 import { HeroPRPlayground } from './HeroPRPlayground';
 import { SwiftRollLabel } from './ScrollReveal';
+import { NutshellText } from './Nutshell';
+
+const LazyModelVisualizer3D = React.lazy(() =>
+  import('./ModelVisualizer3D').then((m) => ({ default: m.ModelVisualizer3D }))
+);
+const LazyNeuralCore3D = React.lazy(() =>
+  import('./NeuralCore3D').then((m) => ({ default: m.NeuralCore3D }))
+);
 
 interface HeroSectionProps {
   onExploreProjects: () => void;
   onExploreSystem: () => void;
+  onSelectProject?: (projectId: string) => void;
   onOpenResume?: () => void;
   onOpenVero?: () => void;
   onOpenCommandPalette?: () => void;
@@ -24,6 +32,7 @@ interface HeroSectionProps {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onExploreProjects,
+  onSelectProject,
   onOpenResume,
   onOpenVero,
   onOpenCommandPalette,
@@ -34,16 +43,16 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const stageParallaxY = useTransform(
     scrollYProgress,
     [0, 0.25],
-    prefersReducedMotion ? [0, 0] : [0, -28]
+    prefersReducedMotion ? [0, 0] : [0, -24]
   );
 
   const entranceVariants = {
-    hidden: { opacity: 0, y: 22 },
+    hidden: { opacity: 0, y: 18 },
     visible: (delay: number) => ({
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.65,
+        duration: 0.48,
         delay,
         ease: [0.22, 1, 0.36, 1] as [number, number, number, number],
       },
@@ -53,108 +62,123 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section
       id="hero"
-      className="relative min-h-[92vh] pt-32 pb-20 lg:pt-36 lg:pb-24 flex flex-col justify-between overflow-hidden tech-grid"
+      className="relative min-h-[90vh] pt-28 pb-16 lg:pt-36 lg:pb-24 flex flex-col justify-between overflow-hidden tech-grid"
     >
-      {/* Ambient Focal Glow */}
-      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[680px] h-[680px] bg-[#7CFF6B]/[0.04] blur-[150px] rounded-full pointer-events-none" />
+      {/* Subtle Ambient Focal Glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[640px] bg-[#7CFF6B]/[0.035] blur-[140px] rounded-full pointer-events-none" />
 
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 w-full z-10 my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-          {/* Left Column: Editorial Narrative */}
-          <div className="lg:col-span-6 space-y-7">
-            {/* Unboxed Metadata Strip (Zero-Pill Discipline) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-stretch">
+          {/* Left Column: Editorial Identity & Value Proposition */}
+          <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
+            {/* Unboxed Metadata Kicker (Zero-Pill Discipline) */}
             <motion.div
               custom={0}
               initial={prefersReducedMotion ? false : 'hidden'}
               animate="visible"
               variants={entranceVariants}
-              className="flex flex-wrap items-center gap-2.5 text-xs text-[#8B8F98] font-medium"
+              className="flex flex-wrap items-center gap-2 text-xs text-[#8B8F98] font-medium"
             >
               <span className="text-[#7CFF6B] font-semibold">
-                Available for AI &amp; Full-Stack Roles
+                Vignesh K N
               </span>
+              <span aria-hidden="true">·</span>
+              <span className="text-[#D1D5DB]">AI Software Engineer at ACL Digital</span>
               <span aria-hidden="true">·</span>
               <span>Bengaluru, India</span>
-              <span aria-hidden="true">·</span>
-              <span className="font-mono text-[#D1D5DB]">
-                SonarCloud Gate: Passing (A)
-              </span>
             </motion.div>
 
-            {/* Neo-Grotesque Display Headline */}
+            {/* Primary Editorial Headline */}
             <motion.div
-              custom={0.08}
+              custom={0.06}
               initial={prefersReducedMotion ? false : 'hidden'}
               animate="visible"
               variants={entranceVariants}
-              className="space-y-3.5"
+              className="space-y-4"
             >
-              <div className="flex items-center gap-2 text-xs font-mono text-[#8B8F98] tracking-wide">
-                <span className="text-[#F2F2F2] font-semibold">{PERSONAL_INFO.name}</span>
-                <span aria-hidden="true">·</span>
-                <span>{PERSONAL_INFO.title}</span>
-              </div>
-              <h1 className="editorial-h1 font-bold text-[#F2F2F2]">
-                I build AI systems. Explore the problems, experiments, and engineering behind them.
+              <h1 className="editorial-h1 font-bold text-[#F4F4F6]">
+                Engineering production AI systems, fine-tuned LLMs, and deterministic backends.
               </h1>
+              <NutshellText
+                blockId="hero-supporting"
+                as="p"
+                maxTriggers={3}
+                className="text-base sm:text-lg text-[#D1D5DB] leading-[1.65] max-w-[62ch]"
+                text="4+ years building enterprise .NET Core 8 microservices, Azure serverless :rag-architecture[RAG pipelines], :qlora[QLoRA 4-bit quantized adapters], and :jev-gate[sub-35ms AST code review gates]—documented with interactive 3D workbenches and verified holdout benchmarks."
+              />
             </motion.div>
 
-            {/* Readable 16px-18px Body Prose */}
-            <motion.p
-              custom={0.16}
-              initial={prefersReducedMotion ? false : 'hidden'}
-              animate="visible"
-              variants={entranceVariants}
-              className="text-base sm:text-lg text-[#D1D5DB] leading-[1.6] max-w-[62ch]"
-            >
-              Engineering scalable .NET 8 backends, PEFT fine-tuned LLMs, and deterministic AST code security—each documented with interactive 3D experiments and verified benchmarks.
-            </motion.p>
-
-            {/* Primary Action Controls with Dual-Layer Text Roll */}
+            {/* Specialization Summary Line (Unboxed Text) */}
             <motion.div
-              custom={0.24}
+              custom={0.12}
               initial={prefersReducedMotion ? false : 'hidden'}
               animate="visible"
               variants={entranceVariants}
-              className="flex flex-wrap items-center gap-3 pt-1 text-xs sm:text-sm"
+              className="font-mono text-xs text-[#8B8F98] flex flex-wrap items-center gap-x-2.5 gap-y-1 pt-1"
             >
-              <button
-                type="button"
-                onClick={onExploreProjects}
-                className="group swift-spring-btn px-5 py-3 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/95 shadow-lg shadow-[#7CFF6B]/10 flex items-center gap-2 cursor-pointer"
+              <span className="text-[#F4F4F6] font-semibold">Focus:</span>
+              <span>QLoRA &amp; PEFT</span>
+              <span aria-hidden="true">·</span>
+              <span>Agentic Workflows &amp; RAG</span>
+              <span aria-hidden="true">·</span>
+              <span>.NET Core 8 &amp; FastAPI</span>
+              <span aria-hidden="true">·</span>
+              <span>Azure Functions &amp; Cosmos DB</span>
+            </motion.div>
+
+            {/* Primary Action Controls */}
+            <motion.div
+              custom={0.18}
+              initial={prefersReducedMotion ? false : 'hidden'}
+              animate="visible"
+              variants={entranceVariants}
+              className="flex flex-wrap items-center gap-3 pt-2 text-xs sm:text-sm"
+            >
+              <a
+                href="/#projects"
+                onClick={(e) => {
+                  e.preventDefault();
+                  onExploreProjects();
+                }}
+                className="group swift-spring-btn px-5 py-3 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/95 shadow-lg shadow-[#7CFF6B]/10 flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <SwiftRollLabel
-                  label="Explore 9 Systems"
-                  hoverLabel="View Case Studies"
+                  label="Explore 9 Case Studies"
+                  hoverLabel="View Engineering Work"
                 />
                 <ArrowDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-              </button>
+              </a>
 
-              <button
-                type="button"
-                onClick={() => {
-                  window.location.hash = '#project-house-price';
+              <a
+                href="/projects/house-price"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (onSelectProject) {
+                    onSelectProject('house-price');
+                  } else {
+                    window.location.hash = '#project-house-price';
+                  }
                 }}
-                className="group swift-spring-btn px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F2F2F2] flex items-center gap-2 font-semibold cursor-pointer"
+                className="group swift-spring-btn px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F4F4F6] flex items-center gap-2 font-semibold whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <Layers className="w-4 h-4 text-[#7CFF6B]" />
                 <SwiftRollLabel
                   label="3D House Price Lab"
-                  hoverLabel="Launch 3D Terrain"
+                  hoverLabel="Launch 3D Surface + SHAP"
                 />
-              </button>
+              </a>
 
               {onOpenVero && (
                 <button
                   type="button"
                   onClick={onOpenVero}
                   title="Open Vero PR Engine (https://vero-silk-delta.vercel.app/) in a new tab"
-                  className="group swift-spring-btn px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F2F2F2] flex items-center gap-2 font-semibold cursor-pointer"
+                  className="group swift-spring-btn px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F4F4F6] flex items-center gap-2 font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <GitPullRequest className="w-4 h-4 text-[#7CFF6B]" />
                   <SwiftRollLabel
                     label="Vero PR Engine"
-                    hoverLabel="Open Vero Live App"
+                    hoverLabel="Open Live Vero App"
                   />
                   <ExternalLink className="w-3.5 h-3.5 text-[#8B8F98] group-hover:text-[#7CFF6B] transition-colors" />
                 </button>
@@ -164,8 +188,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 <button
                   type="button"
                   onClick={onOpenCommandPalette}
-                  className="swift-spring-btn px-3.5 py-3 rounded-xl border border-white/[0.08] bg-[#101216] text-[#8B8F98] hover:text-[#F2F2F2] hover:border-white/20 flex items-center gap-1.5 font-mono text-xs cursor-pointer"
-                  title="Press Cmd+K"
+                  aria-label="Open command palette (Cmd+K)"
+                  className="swift-spring-btn px-3.5 py-3 rounded-xl border border-white/[0.08] bg-[#101216] text-[#8B8F98] hover:text-[#F4F4F6] hover:border-white/20 flex items-center gap-1.5 font-mono text-xs whitespace-nowrap shrink-0 cursor-pointer"
+                  title="Quick search & navigation (Cmd+K)"
                 >
                   <Search className="w-3.5 h-3.5 text-[#7CFF6B]" />
                   <span>⌘K</span>
@@ -173,21 +198,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               )}
             </motion.div>
 
-            {/* Quiet External Links */}
+            {/* Secondary Profile & Contact Links */}
             <motion.div
-              custom={0.32}
+              custom={0.24}
               initial={prefersReducedMotion ? false : 'hidden'}
               animate="visible"
               variants={entranceVariants}
-              className="flex items-center gap-4 pt-1 text-xs text-[#8B8F98] font-medium"
+              className="flex flex-wrap items-center gap-4 pt-1 text-xs text-[#8B8F98] font-medium"
             >
               <a
                 href={PERSONAL_INFO.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#F2F2F2] transition-colors flex items-center gap-1"
+                className="hover:text-[#F4F4F6] transition-colors flex items-center gap-1 whitespace-nowrap"
               >
-                <span>GitHub Repositories</span>
+                <span>GitHub (KN-Vignesh)</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
               <span aria-hidden="true">·</span>
@@ -195,7 +220,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 href={PERSONAL_INFO.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#F2F2F2] transition-colors flex items-center gap-1"
+                className="hover:text-[#F4F4F6] transition-colors flex items-center gap-1 whitespace-nowrap"
               >
                 <span>LinkedIn</span>
                 <ExternalLink className="w-3 h-3" />
@@ -204,107 +229,138 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <button
                 type="button"
                 onClick={onOpenResume}
-                className="hover:text-[#7CFF6B] transition-colors cursor-pointer"
+                className="hover:text-[#7CFF6B] transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap"
               >
-                Curriculum Vitae
+                <FileDown className="w-3 h-3 text-[#7CFF6B]" />
+                <span>Resume (PDF)</span>
               </button>
+              <span aria-hidden="true">·</span>
+              <a
+                href={`mailto:${PERSONAL_INFO.email}`}
+                className="hover:text-[#F4F4F6] transition-colors whitespace-nowrap"
+              >
+                {PERSONAL_INFO.email}
+              </a>
             </motion.div>
           </div>
 
-          {/* Right Column: Scroll-Linked Interactive 3D Stage & PR Sandbox */}
+          {/* Right Column: Lazy-Loaded 3D Centerpiece with Instant Static Skeleton Fallback */}
           <motion.div
             style={{ y: stageParallaxY }}
-            custom={0.14}
+            custom={0.1}
             initial={prefersReducedMotion ? false : 'hidden'}
             animate="visible"
             variants={entranceVariants}
-            className="lg:col-span-6 space-y-3"
+            className="lg:col-span-6 flex flex-col justify-between space-y-3"
           >
-            {/* Segmented Switcher */}
-            <div className="flex items-center p-1 rounded-xl bg-[#101216] border border-white/[0.08] text-xs overflow-x-auto">
+            {/* Segmented Mode Switcher */}
+            <div
+              role="tablist"
+              aria-label="Hero Interactive Stage"
+              className="flex items-center p-1 rounded-xl bg-[#101216] border border-white/[0.08] text-xs overflow-x-auto"
+            >
               <button
                 type="button"
+                role="tab"
+                aria-selected={heroTab === '3d-tensor'}
                 onClick={() => setHeroTab('3d-tensor')}
                 className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
                   heroTab === '3d-tensor'
                     ? 'bg-[#08090B] text-[#7CFF6B] border border-white/[0.1] shadow-sm'
-                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                    : 'text-[#8B8F98] hover:text-[#F4F4F6]'
                 }`}
               >
                 <Cpu className="w-3.5 h-3.5" />
-                <span>3D Tensors</span>
+                <span>3D QLoRA Tensors</span>
               </button>
 
               <button
                 type="button"
+                role="tab"
+                aria-selected={heroTab === '3d-core'}
                 onClick={() => setHeroTab('3d-core')}
                 className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
                   heroTab === '3d-core'
                     ? 'bg-[#08090B] text-[#7CFF6B] border border-white/[0.1] shadow-sm'
-                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                    : 'text-[#8B8F98] hover:text-[#F4F4F6]'
                 }`}
               >
                 <Layers className="w-3.5 h-3.5" />
-                <span>3D Neural Graph</span>
+                <span>3D Attention Graph</span>
               </button>
 
               <button
                 type="button"
+                role="tab"
+                aria-selected={heroTab === 'pr-playground'}
                 onClick={() => setHeroTab('pr-playground')}
                 className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
                   heroTab === 'pr-playground'
                     ? 'bg-[#08090B] text-[#7CFF6B] border border-white/[0.1] shadow-sm'
-                    : 'text-[#8B8F98] hover:text-[#F2F2F2]'
+                    : 'text-[#8B8F98] hover:text-[#F4F4F6]'
                 }`}
               >
                 <GitPullRequest className="w-3.5 h-3.5" />
-                <span>PR Sandbox</span>
+                <span>PR Gate Sandbox</span>
               </button>
             </div>
 
-            {/* Active Interactive Stage */}
-            {heroTab === '3d-tensor' && <ModelVisualizer3D />}
-            {heroTab === '3d-core' && <NeuralCore3D />}
-            {heroTab === 'pr-playground' && (
-              <HeroPRPlayground onOpenFullVero={onOpenVero} />
-            )}
+            {/* Active Interactive Stage with Non-Blocking Suspense Fallback */}
+            <Suspense
+              fallback={
+                <div className="w-full h-[380px] rounded-2xl border border-white/[0.08] bg-[#101216] p-6 flex flex-col items-center justify-center text-center font-mono space-y-2">
+                  <div className="text-xs text-[#7CFF6B] font-bold">
+                    INITIALIZING 3D TENSOR STAGE
+                  </div>
+                  <div className="text-[11px] text-[#8B8F98]">
+                    4-Bit NF4 Quantization · Rank r=16 Adapter Lattice
+                  </div>
+                </div>
+              }
+            >
+              {heroTab === '3d-tensor' && <LazyModelVisualizer3D />}
+              {heroTab === '3d-core' && <LazyNeuralCore3D />}
+              {heroTab === 'pr-playground' && (
+                <HeroPRPlayground onOpenFullVero={onOpenVero} />
+              )}
+            </Suspense>
           </motion.div>
         </div>
 
-        {/* Hairlined 4-Column Trust & Engineering KPI Strip (.dx-trust pattern) */}
+        {/* Full-Width 4-Column Engineering Evidence Strip Below Split */}
         <motion.div
-          custom={0.38}
+          custom={0.3}
           initial={prefersReducedMotion ? false : 'hidden'}
           animate="visible"
           variants={entranceVariants}
-          className="grid grid-cols-2 md:grid-cols-4 mt-16 lg:mt-20 border-y border-white/[0.08] divide-y md:divide-y-0 md:divide-x divide-white/[0.08]"
+          className="grid grid-cols-2 md:grid-cols-4 mt-14 lg:mt-20 border-y border-white/[0.08] divide-y md:divide-y-0 md:divide-x divide-white/[0.08]"
         >
           <div className="py-6 px-4 sm:px-6">
-            <div className="font-mono text-2xl sm:text-3xl font-bold text-[#F2F2F2] tabular-nums">
+            <div className="font-mono text-2xl sm:text-3xl font-bold text-[#F4F4F6] tabular-nums">
               4+ Years
             </div>
             <div className="text-xs text-[#8B8F98] mt-1">
-              Enterprise .NET &amp; AI Systems Engineering
+              Enterprise .NET 8, Azure Serverless &amp; Production AI
             </div>
           </div>
           <div className="py-6 px-4 sm:px-6">
             <div className="font-mono text-2xl sm:text-3xl font-bold text-[#7CFF6B] tabular-nums">
-              9 Systems
+              9 Case Studies
             </div>
             <div className="text-xs text-[#8B8F98] mt-1">
-              Interactive 3D &amp; ML Production Workbenches
+              Interactive 3D Workbenches &amp; Holdout Benchmarks
             </div>
           </div>
           <div className="py-6 px-4 sm:px-6">
-            <div className="font-mono text-2xl sm:text-3xl font-bold text-[#F2F2F2] tabular-nums">
+            <div className="font-mono text-2xl sm:text-3xl font-bold text-[#F4F4F6] tabular-nums">
               &lt;35ms
             </div>
             <div className="text-xs text-[#8B8F98] mt-1">
-              Deterministic AST &amp; Jev Gate Latency
+              Vero AST + TypeSafe Jev PR Gate Latency
             </div>
           </div>
           <div className="py-6 px-4 sm:px-6">
-            <div className="font-mono text-2xl sm:text-3xl font-bold text-[#F2F2F2] tabular-nums">
+            <div className="font-mono text-2xl sm:text-3xl font-bold text-[#F4F4F6] tabular-nums">
               R² = 0.898
             </div>
             <div className="text-xs text-[#8B8F98] mt-1">
