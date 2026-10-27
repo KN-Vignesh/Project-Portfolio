@@ -9,13 +9,14 @@ interface ScrollRevealProps {
 }
 
 /**
- * Viewport-triggered upward reveal matching the cosmos.studio .dx-reveal
- * cubic-bezier(0.2, 0.7, 0.2, 1) cadence with reduced-motion accessibility.
+ * Viewport-triggered upward reveal (480ms target duration, cubic-bezier(0.2, 0.7, 0.2, 1))
+ * Triggers once per session to prevent distracting repeated animations when scrolling up/down.
+ * Respects prefers-reduced-motion.
  */
 export const ScrollReveal: React.FC<ScrollRevealProps> = ({
   children,
   delay = 0,
-  yOffset = 24,
+  yOffset = 20,
   className = '',
 }) => {
   const prefersReducedMotion = useReducedMotion();
@@ -28,9 +29,9 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
     <motion.div
       initial={{ opacity: 0, y: yOffset }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-8% 0px' }}
+      viewport={{ once: true, margin: '-6% 0px' }}
       transition={{
-        duration: 0.68,
+        duration: 0.48,
         delay,
         ease: [0.2, 0.7, 0.2, 1],
       }}
@@ -48,7 +49,7 @@ interface SwiftRollLabelProps {
 }
 
 /**
- * Dual-layer vertical text roll interaction (.button_text._1 / ._2 pattern)
+ * Dual-layer vertical text roll interaction (200ms compositor transform)
  */
 export const SwiftRollLabel: React.FC<SwiftRollLabelProps> = ({
   label,

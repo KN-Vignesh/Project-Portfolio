@@ -1,6 +1,7 @@
 import React from 'react';
 import { EXPERIENCES } from '../data/portfolioData';
 import { ScrollReveal } from './ScrollReveal';
+import { NutshellText } from './Nutshell';
 
 export const ExperienceSection: React.FC = () => {
   return (
@@ -118,7 +119,15 @@ export const ExperienceSection: React.FC = () => {
                           <span className="font-mono text-xs text-[#7CFF6B] mt-1 shrink-0">
                             0{hIdx + 1}
                           </span>
-                          <span className="leading-relaxed">{h}</span>
+                          <div className="flex-1 min-w-0">
+                            <NutshellText
+                              blockId={`exp-${idx}-bullet-${hIdx}`}
+                              as="span"
+                              maxTriggers={2}
+                              className="leading-relaxed"
+                              text={h}
+                            />
+                          </div>
                         </li>
                       ))}
                     </ul>

@@ -11,6 +11,7 @@ export const ModelVisualizer3D: React.FC = () => {
   const [mode, setMode] = useState<QuantMode>('QLORA_NF4');
   const [loraRank, setLoraRank] = useState<number>(16);
   const [seqLength, setSeqLength] = useState<number>(2048);
+  const [webglFallback, setWebglFallback] = useState<boolean>(false);
 
   const targetStateRef = useRef<{ mode: QuantMode; loraRank: number }>({
     mode: 'QLORA_NF4',
@@ -22,7 +23,7 @@ export const ModelVisualizer3D: React.FC = () => {
     targetStateRef.current.loraRank = loraRank;
   }, [mode, loraRank]);
 
-  // Live Llama-3 8B / 7B empirical math based on user controls
+  // Empirical Llama-3 / Qwen 7B parameter & memory calculation
   const hiddenDim = 4096;
   const numLayers = 32;
   const baseParamsB = 7.24;
@@ -52,8 +53,12 @@ export const ModelVisualizer3D: React.FC = () => {
     const existingCanvases = currentMount.querySelectorAll('canvas');
     existingCanvases.forEach((c) => c.remove());
 
+    const prefersReducedMotion =
+      typeof window !== 'undefined' &&
+      window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
     const width = currentMount.clientWidth || 400;
-    const height = currentMount.clientHeight || 300;
+    const height = currentMount.clientHeight || 260;
 
     const isSoftwareGl = (() => {
       try {
@@ -102,11 +107,12 @@ export const ModelVisualizer3D: React.FC = () => {
       scene.environment = envTexture;
       pmremGenerator.dispose();
     } catch {
+      setWebglFallback(true);
       return;
     }
 
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.75);
-    scene.add(ambientLight);
+    const hemiLight = new THREE.HemisphereLight(0x6ea8fe, 0x08090b, 0.85);
+    scene.add(hemiLight);
 
     const pointLight = new THREE.PointLight(0x7cff6b, 3.2, 50);
     pointLight.position.set(5, 5, 8);
@@ -118,6 +124,7 @@ export const ModelVisualizer3D: React.FC = () => {
 
     const rootGroup = new THREE.Group();
     rootGroup.scale.set(0.92, 0.92, 0.92);
+    rootGroup.rotation.set(0.32, -0.48, 0);
     scene.add(rootGroup);
 
     const unitBoxGeo = new THREE.BoxGeometry(1, 1, 1);
@@ -234,6 +241,13 @@ export const ModelVisualizer3D: React.FC = () => {
     resizeObserver.observe(currentMount);
 
     let isInViewport = true;
+    let isPageVisible = !document.hidden;
+
+    const handleVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     const visibilityObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -244,14 +258,36 @@ export const ModelVisualizer3D: React.FC = () => {
     );
     visibilityObserver.observe(currentMount);
 
-    let animationFrameId: number;
+    let frameId = 0;
     const clock = new THREE.Clock();
     let curBaseScale = 0.3;
     let curAdapterScale = 0.36;
 
-    const animate = () => {
-      animationFrameId = requestAnimationFrame(animate);
-      if (!isInViewport) return;
+    function afterDraw(cb: () => void) {
+      const gl = renderer.getContext() as WebGL2RenderingContext;
+      if (!gl || typeof gl.fenceSync !== 'function') {
+        frameId = window.setTimeout(cb, 80);
+        return;
+      }
+      const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      gl.flush();
+      const poll = () => {
+        const state = sync && gl.getSyncParameter(sync, gl.SYNC_STATUS);
+        if (state === gl.UNSIGNALED) {
+          frameId = window.setTimeout(poll, 5);
+        } else {
+          if (sync) gl.deleteSync(sync);
+          frameId = window.setTimeout(cb, 80);
+        }
+      };
+      frameId = window.setTimeout(poll, 5);
+    }
+
+    const tick = () => {
+      if (!isInViewport || !isPageVisible) {
+        frameId = window.setTimeout(tick, 200);
+        return;
+      }
 
       const dt = Math.min(clock.getDelta(), 0.1);
       const { mode: activeMode, loraRank: activeRank } = targetStateRef.current;
@@ -287,16 +323,25 @@ export const ModelVisualizer3D: React.FC = () => {
         cell.mesh.scale.setScalar(isAdapter ? curAdapterScale : curBaseScale);
       }
 
-      if (!isDragging) {
-        rootGroup.rotation.y += 0.004;
-        rootGroup.rotation.x += 0.002;
+      if (!isDragging && !prefersReducedMotion) {
+        rootGroup.rotation.y += dt * 0.24;
+        rootGroup.rotation.x += dt * 0.12;
       }
+
       renderer.render(scene, camera);
+
+      if (isSoftwareGl) {
+        afterDraw(tick);
+      } else {
+        frameId = requestAnimationFrame(tick);
+      }
     };
-    animate();
+    tick();
 
     return () => {
-      cancelAnimationFrame(animationFrameId);
+      cancelAnimationFrame(frameId);
+      clearTimeout(frameId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
       visibilityObserver.disconnect();
       domElement.removeEventListener('mousedown', onPointerDown);
       window.removeEventListener('mousemove', onPointerMove);
@@ -337,25 +382,37 @@ export const ModelVisualizer3D: React.FC = () => {
               3D Tensor &amp; Quantization Explorer
             </h3>
             <p className="text-[11px] text-[#8B8F98]">
-              Adjust rank &amp; precision below to see how QLoRA shrinks GPU memory
+              Adjust rank &amp; precision below to inspect QLoRA memory scaling
             </p>
           </div>
         </div>
 
-        <span className="font-mono text-[10px] text-[#7CFF6B] border border-[#7CFF6B]/30 bg-[#7CFF6B]/10 px-2 py-0.5 rounded font-bold tabular-nums">
+        <span className="font-mono text-[10px] text-[#7CFF6B] font-bold tabular-nums">
           {mode === 'QLORA_NF4'
-            ? `4-BIT NF4 (r=${loraRank})`
+            ? `4-BIT NF4 · r=${loraRank}`
             : mode === 'LORA_DECOMP'
-            ? `8-BIT LORA (r=${loraRank})`
+            ? `8-BIT LORA · r=${loraRank}`
             : '16-BIT FULL'}
         </span>
       </div>
 
-      {/* 3D Canvas Area */}
+      {/* 3D Canvas Area with Static Fallback */}
       <div
         ref={mountRef}
-        className="w-full h-56 sm:h-64 my-2.5 cursor-grab active:cursor-grabbing relative flex items-center justify-center overflow-hidden rounded-xl bg-[#08090B]/70 border border-white/[0.06]"
+        role="img"
+        aria-label={`Interactive 3D Tensor Quantization visualization in ${mode} mode with LoRA rank ${loraRank}`}
+        className="w-full h-56 sm:h-64 my-2.5 cursor-grab active:cursor-grabbing relative flex items-center justify-center overflow-hidden rounded-xl bg-[#08090B] border border-white/[0.06]"
       >
+        {webglFallback && (
+          <div className="p-6 text-center space-y-2 font-mono">
+            <div className="text-xs text-[#7CFF6B] font-bold">
+              STATIC TENSOR MATRIX PREVIEW ({mode})
+            </div>
+            <p className="text-[11px] text-[#8B8F98] max-w-xs mx-auto">
+              4×4×4 Quantized Weight Lattice · Rank r={loraRank} Adapter Decomposition · Estimated VRAM {totalVramGb} GB
+            </p>
+          </div>
+        )}
         <div className="absolute bottom-2 left-3 z-10 pointer-events-none font-mono text-[10px] text-[#8B8F98]">
           Drag to orbit 3D weights · Amber cubes = Trainable LoRA Adapters (r=
           {loraRank})
@@ -364,11 +421,12 @@ export const ModelVisualizer3D: React.FC = () => {
 
       {/* Interactive Controls: Mode Buttons + Live Rank & Context Sliders */}
       <div className="space-y-2.5 py-2.5 border-t border-b border-white/[0.08] font-mono">
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5" role="group" aria-label="Quantization precision mode">
           <button
             type="button"
             onClick={() => setMode('QLORA_NF4')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+            aria-pressed={mode === 'QLORA_NF4'}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer whitespace-nowrap ${
               mode === 'QLORA_NF4'
                 ? 'bg-[#7CFF6B] text-[#08090B]'
                 : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-white/[0.08]'
@@ -379,7 +437,8 @@ export const ModelVisualizer3D: React.FC = () => {
           <button
             type="button"
             onClick={() => setMode('LORA_DECOMP')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+            aria-pressed={mode === 'LORA_DECOMP'}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer whitespace-nowrap ${
               mode === 'LORA_DECOMP'
                 ? 'bg-[#7CFF6B] text-[#08090B]'
                 : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-white/[0.08]'
@@ -390,7 +449,8 @@ export const ModelVisualizer3D: React.FC = () => {
           <button
             type="button"
             onClick={() => setMode('FP16')}
-            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer ${
+            aria-pressed={mode === 'FP16'}
+            className={`flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold transition-colors cursor-pointer whitespace-nowrap ${
               mode === 'FP16'
                 ? 'bg-[#7CFF6B] text-[#08090B]'
                 : 'bg-[#08090B] text-[#8B8F98] hover:text-[#F2F2F2] border border-white/[0.08]'
@@ -402,8 +462,8 @@ export const ModelVisualizer3D: React.FC = () => {
 
         {/* Sliders for Rank (r) and Sequence Length */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
-          <div className="p-2 rounded-lg bg-[#08090B] border border-white/[0.06] space-y-1">
-            <div className="flex items-center justify-between text-[11px]">
+          <label className="p-2 rounded-lg bg-[#08090B] border border-white/[0.06] space-y-1 block">
+            <span className="flex items-center justify-between text-[11px]">
               <span className="text-[#8B8F98] flex items-center gap-1">
                 <Sliders className="w-3 h-3 text-[#FFB86B]" />
                 <span>LoRA Rank (r):</span>
@@ -411,9 +471,10 @@ export const ModelVisualizer3D: React.FC = () => {
               <span className="text-[#FFB86B] font-bold tabular-nums">
                 r = {loraRank}
               </span>
-            </div>
+            </span>
             <input
               type="range"
+              aria-label="LoRA Rank r"
               min={4}
               max={64}
               step={4}
@@ -422,17 +483,18 @@ export const ModelVisualizer3D: React.FC = () => {
               onChange={(e) => setLoraRank(Number(e.target.value))}
               className="w-full accent-[#FFB86B] cursor-pointer disabled:opacity-40"
             />
-          </div>
+          </label>
 
-          <div className="p-2 rounded-lg bg-[#08090B] border border-white/[0.06] space-y-1">
-            <div className="flex items-center justify-between text-[11px]">
+          <label className="p-2 rounded-lg bg-[#08090B] border border-white/[0.06] space-y-1 block">
+            <span className="flex items-center justify-between text-[11px]">
               <span className="text-[#8B8F98]">Context Window:</span>
               <span className="text-[#6EA8FE] font-bold tabular-nums">
                 {seqLength} tokens
               </span>
-            </div>
+            </span>
             <input
               type="range"
+              aria-label="Context Window Sequence Length"
               min={512}
               max={8192}
               step={512}
@@ -440,7 +502,7 @@ export const ModelVisualizer3D: React.FC = () => {
               onChange={(e) => setSeqLength(Number(e.target.value))}
               className="w-full accent-[#6EA8FE] cursor-pointer"
             />
-          </div>
+          </label>
         </div>
       </div>
 
@@ -451,7 +513,7 @@ export const ModelVisualizer3D: React.FC = () => {
           <div className="text-sm font-bold text-[#7CFF6B] tabular-nums">
             {totalVramGb} GB
           </div>
-          <div className="text-[9px] text-[#8B8F98]">
+          <div className="text-[9px] text-[#8B8F98] tabular-nums">
             {vramSavedPct > 0 ? `-${vramSavedPct}% vs FP16` : 'Baseline'}
           </div>
         </div>
@@ -460,7 +522,7 @@ export const ModelVisualizer3D: React.FC = () => {
           <div className="text-sm font-bold text-[#F2F2F2] tabular-nums">
             {trainableParamsM}M
           </div>
-          <div className="text-[9px] text-[#8B8F98]">
+          <div className="text-[9px] text-[#8B8F98] tabular-nums">
             {trainablePct}% of 7.2B
           </div>
         </div>
@@ -473,14 +535,17 @@ export const ModelVisualizer3D: React.FC = () => {
               ? 'INT8 + LoRA'
               : 'FP16 Dense'}
           </div>
-          <div className="text-[9px] text-[#8B8F98]">99.3% Accuracy</div>
+          <div className="text-[9px] text-[#8B8F98] tabular-nums">
+            99.3% Retention
+          </div>
         </div>
       </div>
 
       {/* Quick Launch Link to Full 3D House Price Lab */}
-      <button
-        type="button"
-        onClick={() => {
+      <a
+        href="/projects/house-price"
+        onClick={(e) => {
+          e.preventDefault();
           window.location.hash = '#project-house-price';
         }}
         className="group swift-spring-btn mt-2.5 w-full py-2 px-3 rounded-lg bg-[#7CFF6B]/10 hover:bg-[#7CFF6B]/20 border border-[#7CFF6B]/35 text-[#7CFF6B] font-mono font-bold text-[11px] flex items-center justify-between transition-colors cursor-pointer"
@@ -489,11 +554,11 @@ export const ModelVisualizer3D: React.FC = () => {
           <Home className="w-3.5 h-3.5" />
           <SwiftRollLabel
             label="Launch 3D House Price Surface & SHAP Workbench"
-            hoverLabel="Open Full-Screen 3D Terrain Lab"
+            hoverLabel="Open Full-Screen 3D Terrain Case Study"
           />
         </span>
         <ArrowRight className="w-3.5 h-3.5" />
-      </button>
+      </a>
     </div>
   );
 };
