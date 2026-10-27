@@ -38,14 +38,18 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   const [senderEmail, setSenderEmail] = useState('');
   const [inquiryTopic, setInquiryTopic] = useState('AI Systems / LLM Engineering Role');
   const [message, setMessage] = useState('');
-  const [formError, setFormError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    message?: string;
+  }>({});
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   const handleCopyEmail = async () => {
     try {
       await navigator.clipboard.writeText(PERSONAL_INFO.email);
       setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 2200);
+      setTimeout(() => setCopiedEmail(false), 2400);
     } catch {
       // Clipboard fallback
     }
@@ -53,24 +57,30 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
   const handleInquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setFormError(null);
+    setFormSubmitted(false);
 
     const trimmedName = senderName.trim();
     const trimmedEmail = senderEmail.trim();
     const trimmedMessage = message.trim();
 
-    if (!trimmedName) {
-      setFormError('Please enter your name.');
-      return;
+    const nextErrors: { name?: string; email?: string; message?: string } = {};
+
+    if (trimmedName.length < 2) {
+      nextErrors.name = 'Please enter your name (at least 2 characters).';
     }
     if (!isValidEmail(trimmedEmail)) {
-      setFormError('Please provide a valid email address.');
-      return;
+      nextErrors.email = 'Please provide a valid email address.';
     }
     if (trimmedMessage.length < 10) {
-      setFormError('Please include a brief message (at least 10 characters).');
+      nextErrors.message = 'Please include a brief message (at least 10 characters).';
+    }
+
+    if (Object.keys(nextErrors).length > 0) {
+      setFieldErrors(nextErrors);
       return;
     }
+
+    setFieldErrors({});
 
     const subject = encodeURIComponent(
       `[Portfolio Inquiry] ${inquiryTopic} — from ${trimmedName}`
@@ -88,10 +98,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     setFormSubmitted(true);
   };
 
+  const hasErrors = Object.keys(fieldErrors).length > 0;
+
   return (
     <section
       id="contact"
-      className="py-28 lg:py-32 border-t border-white/[0.08] bg-[#08090B] relative overflow-hidden"
+      aria-labelledby="contact-heading"
+      className="section-fluid border-t border-white/[0.08] bg-[#08090B] relative overflow-hidden"
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 relative z-10">
         {/* Editorial Section Header */}
@@ -100,7 +113,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             <div className="font-mono text-xs text-[#8B8F98] tracking-wide uppercase">
               09 · Collaboration &amp; Engineering Inquiries
             </div>
-            <h2 className="editorial-h2 font-bold text-[#F2F2F2]">
+            <h2
+              id="contact-heading"
+              className="editorial-h2 font-bold text-[#F2F2F2]"
+            >
               Let&apos;s Build Reliable AI Systems Together
             </h2>
           </div>
@@ -113,7 +129,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
           {/* Left Narrative & Direct Endpoints */}
           <ScrollReveal className="lg:col-span-6 space-y-8">
-            <p className="text-base sm:text-lg text-[#D1D5DB] leading-relaxed max-w-[62ch]">
+            <p className="fluid-body text-[#D1D5DB] max-w-[62ch]">
               Whether you are hiring for AI Systems Engineering, deploying production Large Language Models, fine-tuning adapters via LoRA/QLoRA, or architecting resilient .NET 8 microservices—reach out directly below.
             </p>
 
@@ -136,7 +152,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   type="button"
                   onClick={handleCopyEmail}
                   aria-label="Copy email address to clipboard"
-                  className="swift-spring-btn p-2.5 rounded-xl bg-[#08090B] border border-white/[0.08] hover:border-[#7CFF6B]/50 text-[#D1D5DB] hover:text-[#7CFF6B] shrink-0 cursor-pointer"
+                  className="swift-spring-btn min-h-12 min-w-12 p-2.5 flex items-center justify-center rounded-xl bg-[#08090B] border border-white/[0.08] hover:border-[#7CFF6B]/50 text-[#D1D5DB] hover:text-[#7CFF6B] shrink-0 cursor-pointer"
                   title="Copy email address"
                 >
                   {copiedEmail ? (
@@ -158,11 +174,17 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
               </div>
             </div>
 
-            {/* Primary CTAs */}
+            {/* Accessible Toast Announcement for Clipboard Copy */}
+            <div aria-live="polite" aria-atomic="true" className="sr-only">
+              {copiedEmail ? `Copied ${PERSONAL_INFO.email} to clipboard` : ''}
+            </div>
+
+            {/* Primary CTAs (48px+ Touch Targets) */}
             <div className="flex flex-wrap gap-3 pt-1 text-xs sm:text-sm">
               <a
                 href={`mailto:${PERSONAL_INFO.email}`}
-                className="group swift-spring-btn px-6 py-3 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/95 flex items-center gap-2 shadow-lg shadow-[#7CFF6B]/10"
+                aria-label={`Send direct email to ${PERSONAL_INFO.email}`}
+                className="group swift-spring-btn min-h-12 px-6 py-3 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/95 flex items-center gap-2 shadow-lg shadow-[#7CFF6B]/10"
               >
                 <Mail className="w-4 h-4" />
                 <SwiftRollLabel
@@ -175,7 +197,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 href={PERSONAL_INFO.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group swift-spring-btn px-5 py-3 rounded-xl border border-white/[0.1] bg-[#101216] text-[#F2F2F2] hover:border-[#7CFF6B]/50 font-semibold flex items-center gap-2"
+                aria-label="Open Vignesh K N GitHub profile in a new tab"
+                className="group swift-spring-btn min-h-12 px-5 py-3 rounded-xl border border-white/[0.1] bg-[#101216] text-[#F2F2F2] hover:border-[#7CFF6B]/50 font-semibold flex items-center gap-2"
               >
                 <Github className="w-4 h-4 text-[#7CFF6B]" />
                 <SwiftRollLabel label="GitHub Profile" hoverLabel="KN-Vignesh" />
@@ -186,7 +209,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 href={PERSONAL_INFO.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group swift-spring-btn px-5 py-3 rounded-xl border border-white/[0.1] bg-[#101216] text-[#F2F2F2] hover:border-[#6EA8FE]/50 font-semibold flex items-center gap-2"
+                aria-label="Open Vignesh K N LinkedIn profile in a new tab"
+                className="group swift-spring-btn min-h-12 px-5 py-3 rounded-xl border border-white/[0.1] bg-[#101216] text-[#F2F2F2] hover:border-[#6EA8FE]/50 font-semibold flex items-center gap-2"
               >
                 <Linkedin className="w-4 h-4 text-[#6EA8FE]" />
                 <SwiftRollLabel label="LinkedIn" />
@@ -197,7 +221,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                 <button
                   type="button"
                   onClick={onOpenResume}
-                  className="group swift-spring-btn px-5 py-3 rounded-xl border border-white/[0.1] bg-[#101216] text-[#F2F2F2] hover:border-[#7CFF6B]/50 font-semibold flex items-center gap-2 cursor-pointer"
+                  aria-label="Inspect and download full PDF resume"
+                  className="group swift-spring-btn min-h-12 px-5 py-3 rounded-xl border border-white/[0.1] bg-[#101216] text-[#F2F2F2] hover:border-[#7CFF6B]/50 font-semibold flex items-center gap-2 cursor-pointer"
                 >
                   <FileText className="w-4 h-4 text-[#7CFF6B]" />
                   <span>Inspect Résumé</span>
@@ -236,7 +261,8 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             <form
               onSubmit={handleInquirySubmit}
               noValidate
-              className="bg-[#101216] border border-white/[0.08] rounded-2xl p-6 sm:p-8 space-y-5"
+              aria-label="Direct technical inquiry form"
+              className="editorial-card rounded-2xl p-6 sm:p-8 space-y-5"
             >
               <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
                 <div>
@@ -265,10 +291,32 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     type="text"
                     required
                     value={senderName}
-                    onChange={(e) => setSenderName(e.target.value)}
+                    aria-invalid={Boolean(fieldErrors.name)}
+                    aria-describedby={
+                      fieldErrors.name ? 'contact-name-error' : undefined
+                    }
+                    onChange={(e) => {
+                      setSenderName(e.target.value);
+                      if (fieldErrors.name) {
+                        setFieldErrors((prev) => ({ ...prev, name: undefined }));
+                      }
+                    }}
                     placeholder="Alex Rivera"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#08090B] border border-white/[0.1] text-sm text-[#F2F2F2] placeholder-[#8B8F98]/60 focus:border-[#7CFF6B] focus:outline-none transition-colors"
+                    className={`w-full min-h-12 px-3.5 py-2.5 rounded-xl bg-[#08090B] border text-sm text-[#F2F2F2] placeholder-[#8B8F98]/60 focus:outline-none transition-colors ${
+                      fieldErrors.name
+                        ? 'border-[#FF6B6B] focus:border-[#FF6B6B]'
+                        : 'border-white/[0.1] focus:border-[#7CFF6B]'
+                    }`}
                   />
+                  {fieldErrors.name && (
+                    <p
+                      id="contact-name-error"
+                      role="alert"
+                      className="mt-1.5 font-mono text-[11px] text-[#FF6B6B]"
+                    >
+                      {fieldErrors.name}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -283,10 +331,32 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     type="email"
                     required
                     value={senderEmail}
-                    onChange={(e) => setSenderEmail(e.target.value)}
+                    aria-invalid={Boolean(fieldErrors.email)}
+                    aria-describedby={
+                      fieldErrors.email ? 'contact-email-error' : undefined
+                    }
+                    onChange={(e) => {
+                      setSenderEmail(e.target.value);
+                      if (fieldErrors.email) {
+                        setFieldErrors((prev) => ({ ...prev, email: undefined }));
+                      }
+                    }}
                     placeholder="alex@company.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-[#08090B] border border-white/[0.1] text-sm text-[#F2F2F2] placeholder-[#8B8F98]/60 focus:border-[#7CFF6B] focus:outline-none transition-colors"
+                    className={`w-full min-h-12 px-3.5 py-2.5 rounded-xl bg-[#08090B] border text-sm text-[#F2F2F2] placeholder-[#8B8F98]/60 focus:outline-none transition-colors ${
+                      fieldErrors.email
+                        ? 'border-[#FF6B6B] focus:border-[#FF6B6B]'
+                        : 'border-white/[0.1] focus:border-[#7CFF6B]'
+                    }`}
                   />
+                  {fieldErrors.email && (
+                    <p
+                      id="contact-email-error"
+                      role="alert"
+                      className="mt-1.5 font-mono text-[11px] text-[#FF6B6B]"
+                    >
+                      {fieldErrors.email}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -301,7 +371,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   id="contact-inquiry-topic"
                   value={inquiryTopic}
                   onChange={(e) => setInquiryTopic(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#08090B] border border-white/[0.1] text-sm text-[#F2F2F2] focus:border-[#7CFF6B] focus:outline-none transition-colors"
+                  className="w-full min-h-12 px-3.5 py-2.5 rounded-xl bg-[#08090B] border border-white/[0.1] text-sm text-[#F2F2F2] focus:border-[#7CFF6B] focus:outline-none transition-colors"
                 >
                   <option value="AI Systems / LLM Engineering Role">
                     AI Systems / LLM Engineering Role
@@ -330,37 +400,56 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   rows={4}
                   required
                   value={message}
-                  onChange={(e) => setMessage(e.target.value)}
+                  aria-invalid={Boolean(fieldErrors.message)}
+                  aria-describedby={
+                    fieldErrors.message ? 'contact-message-error' : undefined
+                  }
+                  onChange={(e) => {
+                    setMessage(e.target.value);
+                    if (fieldErrors.message) {
+                      setFieldErrors((prev) => ({
+                        ...prev,
+                        message: undefined,
+                      }));
+                    }
+                  }}
                   placeholder="Share role details, system requirements, or architecture scope..."
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#08090B] border border-white/[0.1] text-sm text-[#F2F2F2] placeholder-[#8B8F98]/60 focus:border-[#7CFF6B] focus:outline-none transition-colors resize-y"
+                  className={`w-full px-3.5 py-2.5 rounded-xl bg-[#08090B] border text-sm text-[#F2F2F2] placeholder-[#8B8F98]/60 focus:outline-none transition-colors resize-y ${
+                    fieldErrors.message
+                      ? 'border-[#FF6B6B] focus:border-[#FF6B6B]'
+                      : 'border-white/[0.1] focus:border-[#7CFF6B]'
+                  }`}
                 />
+                {fieldErrors.message && (
+                  <p
+                    id="contact-message-error"
+                    role="alert"
+                    className="mt-1.5 font-mono text-[11px] text-[#FF6B6B]"
+                  >
+                    {fieldErrors.message}
+                  </p>
+                )}
               </div>
 
-              {formError && (
-                <div
-                  role="alert"
-                  className="p-3 rounded-xl bg-[#FF6B6B]/10 border border-[#FF6B6B]/30 text-xs text-[#FF6B6B] font-mono"
-                >
-                  {formError}
-                </div>
-              )}
+              {/* Accessible Live Region for Form Submission / Validation Summary */}
+              <div aria-live="polite" aria-atomic="true">
+                {formSubmitted && !hasErrors && (
+                  <div
+                    role="status"
+                    className="p-3.5 rounded-xl bg-[#7CFF6B]/10 border border-[#7CFF6B]/30 text-xs text-[#7CFF6B] font-mono"
+                  >
+                    Your email client has been opened with the pre-filled inquiry to {PERSONAL_INFO.email}.
+                  </div>
+                )}
+              </div>
 
-              {formSubmitted && !formError && (
-                <div
-                  role="status"
-                  className="p-3 rounded-xl bg-[#7CFF6B]/10 border border-[#7CFF6B]/30 text-xs text-[#7CFF6B] font-mono"
-                >
-                  Your email client has been opened with the pre-filled inquiry to {PERSONAL_INFO.email}.
-                </div>
-              )}
-
-              <div className="flex items-center justify-between gap-4 pt-1">
+              <div className="flex flex-wrap items-center justify-between gap-4 pt-1">
                 <span className="font-mono text-[11px] text-[#8B8F98]">
                   Direct mailto dispatch · Zero third-party trackers
                 </span>
                 <button
                   type="submit"
-                  className="swift-spring-btn px-6 py-3 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold text-xs sm:text-sm hover:bg-[#7CFF6B]/95 flex items-center gap-2 cursor-pointer"
+                  className="swift-spring-btn min-h-12 px-6 py-3 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold text-xs sm:text-sm hover:bg-[#7CFF6B]/95 flex items-center gap-2 cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
                   <span>Compose &amp; Send</span>

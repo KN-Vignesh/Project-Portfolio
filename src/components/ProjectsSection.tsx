@@ -73,10 +73,26 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
   const featuredVero = filteredProjects.find((p) => p.id === 'vero');
   const remainingProjects = filteredProjects.filter((p) => p.id !== 'vero');
 
+  const handleFilterKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = categories.findIndex((c) => c.id === filterCategory);
+    if (currentIndex === -1) return;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const next = categories[(currentIndex + 1) % categories.length];
+      setFilterCategory(next.id);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prev =
+        categories[(currentIndex - 1 + categories.length) % categories.length];
+      setFilterCategory(prev.id);
+    }
+  };
+
   return (
     <section
       id="projects"
-      className="py-24 lg:py-32 border-t border-white/[0.08] bg-[#08090B] relative"
+      aria-labelledby="projects-heading"
+      className="section-fluid border-t border-white/[0.08] bg-[#08090B] relative"
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
         {/* Editorial Section Header */}
@@ -85,10 +101,13 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             <div className="font-mono text-xs text-[#8B8F98] tracking-wide">
               01 · Selected Engineering Case Studies
             </div>
-            <h2 className="editorial-h2 font-bold text-[#F4F4F6]">
+            <h2
+              id="projects-heading"
+              className="editorial-h2 font-bold text-[#F4F4F6]"
+            >
               Production AI Systems &amp; Interactive Benchmarks
             </h2>
-            <p className="text-base text-[#8B8F98] leading-relaxed">
+            <p className="fluid-body text-[#8B8F98]">
               Every project pairs real training or inference source code with an interactive 3D or live simulation workbench, before-and-after holdout metrics, and root-cause failure debugging.
             </p>
           </div>
@@ -103,13 +122,14 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Filter by stack or model..."
                 aria-label="Filter projects by technology or title"
-                className="w-full pl-8 pr-3 py-2 rounded-xl bg-[#101216] border border-white/[0.08] focus:border-[#7CFF6B] text-xs text-[#F4F4F6] placeholder:text-[#8B8F98] font-mono outline-none transition-colors"
+                className="w-full min-h-12 sm:min-h-10 pl-8 pr-3 py-2 rounded-xl bg-[#101216] border border-white/[0.08] focus:border-[#7CFF6B] text-xs text-[#F4F4F6] placeholder:text-[#8B8F98] font-mono outline-none transition-colors"
               />
             </div>
 
             <div
               role="group"
               aria-label="Filter projects by domain"
+              onKeyDown={handleFilterKeyDown}
               className="flex flex-wrap gap-1 p-1 bg-[#101216] rounded-xl border border-white/[0.08] text-xs"
             >
               {categories.map((cat) => (
@@ -118,7 +138,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   type="button"
                   aria-pressed={filterCategory === cat.id}
                   onClick={() => setFilterCategory(cat.id)}
-                  className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium whitespace-nowrap ${
+                  className={`min-h-11 sm:min-h-9 px-3 py-1.5 rounded-lg transition-all cursor-pointer font-medium whitespace-nowrap ${
                     filterCategory === cat.id
                       ? 'bg-[#7CFF6B] text-[#08090B] font-bold shadow-sm'
                       : 'text-[#8B8F98] hover:text-[#F4F4F6]'
@@ -130,6 +150,11 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
             </div>
           </div>
         </ScrollReveal>
+
+        {/* Screen Reader Live Filter Announcement */}
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          Showing {filteredProjects.length} of {projects.length} engineering case studies
+        </div>
 
         {/* Loading Skeleton State (Only shown while async project registry loads) */}
         {loading && projects.length === 0 && (
@@ -165,7 +190,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                 setFilterCategory('ALL');
                 setSearchQuery('');
               }}
-              className="swift-spring-btn px-4 py-2 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold text-xs cursor-pointer"
+              className="swift-spring-btn min-h-12 px-5 py-2.5 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold text-xs cursor-pointer"
             >
               Reset Filters
             </button>
@@ -230,11 +255,12 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                   <div className="flex flex-wrap items-center gap-3 pt-2 text-xs sm:text-sm">
                     <a
                       href="/projects/vero"
+                      aria-label={`Inspect ${featuredVero.title} case study and architecture`}
                       onClick={(e) => {
                         e.preventDefault();
                         onSelectProject('vero');
                       }}
-                      className="swift-spring-btn px-4 py-2.5 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/95 flex items-center gap-2 whitespace-nowrap cursor-pointer"
+                      className="swift-spring-btn min-h-12 px-4 py-2.5 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/95 flex items-center gap-2 whitespace-nowrap cursor-pointer"
                     >
                       <SwiftRollLabel
                         label="Inspect Case Study"
@@ -247,7 +273,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                       <button
                         type="button"
                         onClick={onOpenVero}
-                        className="swift-spring-btn px-4 py-2.5 rounded-xl border border-white/[0.12] bg-[#08090B] hover:border-[#7CFF6B]/50 text-[#F4F4F6] font-semibold flex items-center gap-2 whitespace-nowrap cursor-pointer"
+                        aria-label={`Launch live demo for ${featuredVero.title}`}
+                        className="swift-spring-btn min-h-12 px-4 py-2.5 rounded-xl border border-white/[0.12] bg-[#08090B] hover:border-[#7CFF6B]/50 text-[#F4F4F6] font-semibold flex items-center gap-2 whitespace-nowrap cursor-pointer"
                       >
                         <GitPullRequest className="w-4 h-4 text-[#7CFF6B]" />
                         <SwiftRollLabel
@@ -262,7 +289,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                       href={featuredVero.repository}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="swift-spring-btn px-3.5 py-2.5 rounded-xl border border-white/[0.08] bg-[#08090B] hover:border-white/25 text-[#8B8F98] hover:text-[#F4F4F6] font-mono text-xs flex items-center gap-1.5 whitespace-nowrap"
+                      aria-label={`View ${featuredVero.title} source code on GitHub`}
+                      className="swift-spring-btn min-h-12 px-3.5 py-2.5 rounded-xl border border-white/[0.08] bg-[#08090B] hover:border-white/25 text-[#8B8F98] hover:text-[#F4F4F6] font-mono text-xs flex items-center gap-1.5 whitespace-nowrap"
                     >
                       <FolderGit2 className="w-3.5 h-3.5 text-[#7CFF6B]" />
                       <span>Source</span>
@@ -353,7 +381,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                           onSelectProject(project.id);
                         }}
                         aria-label={`Open ${project.title} case study`}
-                        className="text-[#8B8F98] group-hover:text-[#7CFF6B] transition-colors shrink-0"
+                        className="min-h-10 min-w-10 inline-flex items-center justify-end text-[#8B8F98] group-hover:text-[#7CFF6B] transition-colors shrink-0"
                       >
                         <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                       </a>
@@ -366,6 +394,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                         e.preventDefault();
                         onSelectProject(project.id);
                       }}
+                      aria-label={`Inspect ${project.title} interactive benchmark preview`}
                       className="card-preview-stage rounded-xl bg-[#08090B] border border-white/[0.06] p-4 space-y-3 font-mono block"
                     >
                       <div className="flex items-center justify-between gap-2">
@@ -412,7 +441,7 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                     <div className="space-y-2.5">
                       <h3 className="text-xl sm:text-2xl font-bold text-[#F4F4F6] group-hover:text-[#7CFF6B] transition-colors">
                         <a
-                           href={`/projects/${project.id}`}
+                          href={`/projects/${project.id}`}
                           onClick={(e) => {
                             e.preventDefault();
                             onSelectProject(project.id);
@@ -441,11 +470,12 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                     <div className="flex items-center justify-between gap-3 pt-1 text-xs font-medium">
                       <a
                         href={`/projects/${project.id}`}
+                        aria-label={`Inspect ${project.title} case study`}
                         onClick={(e) => {
                           e.preventDefault();
                           onSelectProject(project.id);
                         }}
-                        className="text-[#F4F4F6] group-hover:text-[#7CFF6B] inline-flex items-center gap-1.5 font-semibold transition-colors"
+                        className="min-h-11 sm:min-h-9 text-[#F4F4F6] group-hover:text-[#7CFF6B] inline-flex items-center gap-1.5 font-semibold transition-colors"
                       >
                         <SwiftRollLabel
                           label="Inspect Case Study"
@@ -458,7 +488,8 @@ export const ProjectsSection: React.FC<ProjectsSectionProps> = ({
                         href={project.repository}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-[#8B8F98] hover:text-[#F4F4F6] font-mono inline-flex items-center gap-1 transition-colors"
+                        aria-label={`View ${project.title} repository on GitHub`}
+                        className="min-h-11 sm:min-h-9 text-[#8B8F98] hover:text-[#F4F4F6] font-mono inline-flex items-center gap-1 transition-colors"
                         title={`Open ${project.title} repository on GitHub`}
                       >
                         <FolderGit2 className="w-3.5 h-3.5 text-[#7CFF6B]" />

@@ -34,7 +34,8 @@ export const AboutSection: React.FC = () => {
   return (
     <section
       id="about"
-      className="py-24 lg:py-28 border-t border-white/[0.08] relative bg-[#08090B]"
+      aria-labelledby="about-heading"
+      className="section-fluid border-t border-white/[0.08] relative bg-[#08090B]"
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10">
         {/* Section Header */}
@@ -43,7 +44,10 @@ export const AboutSection: React.FC = () => {
             <div className="font-mono text-xs text-[#8B8F98] tracking-wide uppercase">
               06 · Systems Engineering Philosophy
             </div>
-            <h2 className="editorial-h2 font-bold text-[#F2F2F2]">
+            <h2
+              id="about-heading"
+              className="editorial-h2 font-bold text-[#F2F2F2]"
+            >
               Bridging Enterprise Bedrock to Production AI
             </h2>
           </div>

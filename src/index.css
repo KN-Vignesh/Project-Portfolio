@@ -28,6 +28,24 @@
     --border-hover: rgba(124, 255, 107, 0.42);
     --border-strong: #24272D;
 
+    /* Ambient Glows & Glass Elevation */
+    --glow-accent: 0 0 28px -6px rgba(124, 255, 107, 0.16);
+    --glow-card-hover: 0 14px 36px -12px rgba(0, 0, 0, 0.65), 0 0 24px -8px rgba(124, 255, 107, 0.1);
+
+    /* Fluid Typography Scale via clamp() (375px → 1440px+) */
+    --text-xs: clamp(0.75rem, 0.72rem + 0.15vw, 0.8125rem);
+    --text-sm: clamp(0.84rem, 0.8rem + 0.2vw, 0.925rem);
+    --text-base: clamp(0.95rem, 0.91rem + 0.22vw, 1.0625rem);
+    --text-lg: clamp(1.075rem, 1.01rem + 0.32vw, 1.25rem);
+    --text-xl: clamp(1.25rem, 1.12rem + 0.6vw, 1.55rem);
+    --text-2xl: clamp(1.5rem, 1.3rem + 0.95vw, 2rem);
+    --text-3xl: clamp(1.85rem, 1.5rem + 1.6vw, 2.85rem);
+    --text-display: clamp(2.25rem, 1.75rem + 2.3vw, 3.75rem);
+
+    /* Fluid Section & Container Spacing */
+    --space-section-y: clamp(3.5rem, 6vw, 6.75rem);
+    --space-container-x: clamp(1rem, 4vw, 2.5rem);
+
     /* Motion & Timing System (Section 7 Targets) */
     --dur-button: 150ms;
     --dur-card: 220ms;
@@ -66,33 +84,48 @@
     font-variant-numeric: tabular-nums;
   }
 
-  /* Accessible Keyboard Focus Indicator (WCAG 2.2 AA) */
+  /* Accessible Keyboard Focus Indicator (WCAG 2.1 / 2.2 AA) */
   :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
 }
 
-/* Editorial Typographic Scale */
+/* Editorial Typographic Scale (Fluid clamp() Hierarchy) */
 .editorial-h1 {
-  font-size: clamp(2.25rem, 4vw, 3.75rem);
+  font-size: var(--text-display);
   line-height: 1.07;
   letter-spacing: -0.025em;
   text-wrap: balance;
 }
 
 .editorial-h2 {
-  font-size: clamp(1.85rem, 3.4vw, 3.1rem);
+  font-size: var(--text-3xl);
   line-height: 1.08;
   letter-spacing: -0.022em;
   text-wrap: balance;
 }
 
 .editorial-h3 {
-  font-size: clamp(1.25rem, 2vw, 1.65rem);
+  font-size: var(--text-xl);
   line-height: 1.22;
   letter-spacing: -0.015em;
   text-wrap: balance;
+}
+
+.fluid-body {
+  font-size: var(--text-base);
+  line-height: 1.65;
+}
+
+.fluid-small {
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+.section-fluid {
+  padding-top: var(--space-section-y);
+  padding-bottom: var(--space-section-y);
 }
 
 /* Dual-Layer Vertical Text Roll (Zern / Editorial Framer Pattern) */
@@ -147,22 +180,27 @@
   transform: translateY(0px) scale(0.98);
 }
 
-/* Project Card & Surface Hover (180–250ms target: 220ms) */
+/* Project Card & Glassmorphic Surface Hover (180–250ms target: 220ms) */
 .editorial-card {
   position: relative;
-  background-color: var(--surface);
+  background-color: rgba(16, 18, 22, 0.86);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   transition:
     border-color var(--dur-card) var(--ease-swift),
     transform var(--dur-card) var(--ease-swift),
-    background-color var(--dur-card) var(--ease-swift);
+    background-color var(--dur-card) var(--ease-swift),
+    box-shadow var(--dur-card) var(--ease-swift);
   isolation: isolate;
 }
 
 .editorial-card:hover,
 .editorial-card:focus-within {
   border-color: var(--border-hover);
-  background-color: #12151B;
+  background-color: rgba(18, 21, 27, 0.94);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-card-hover);
 }
 
 /* Subtle Card Preview Zoom */

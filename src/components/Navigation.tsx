@@ -39,6 +39,17 @@ export const Navigation: React.FC<NavigationProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
+
   const primaryNavLinks = [
     { label: 'Work', href: '/#projects', id: 'projects', count: 9 },
     { label: '3D Lab', href: '/#3d-workbench', id: '3d-workbench' },
@@ -80,10 +91,10 @@ export const Navigation: React.FC<NavigationProps> = ({
           : 'bg-transparent py-5'
       }`}
     >
-      {/* WCAG 2.2 AA Skip Navigation Link */}
+      {/* WCAG 2.1 / 2.2 AA Skip Navigation Link */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[#7CFF6B] focus:text-[#08090B] focus:font-bold focus:text-xs"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-4 focus:z-50 focus:min-h-12 focus:px-4 focus:py-2.5 focus:inline-flex focus:items-center focus:rounded-lg focus:bg-[#7CFF6B] focus:text-[#08090B] focus:font-bold focus:text-xs"
       >
         Skip to main content
       </a>
@@ -96,7 +107,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             e.preventDefault();
             if (onNavigate) onNavigate('hero');
           }}
-          className="text-base font-bold tracking-tight text-[#F4F4F6] hover:text-[#7CFF6B] transition-colors whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7CFF6B] rounded px-1"
+          className="min-h-12 lg:min-h-10 inline-flex items-center text-base font-bold tracking-tight text-[#F4F4F6] hover:text-[#7CFF6B] transition-colors whitespace-nowrap shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#7CFF6B] rounded px-1"
         >
           Vignesh K N
         </a>
@@ -120,7 +131,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                     onNavigate(link.id);
                   }
                 }}
-                className={`group relative py-1 flex items-center gap-1 transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer ${
+                className={`group relative py-1.5 flex items-center gap-1 transition-colors duration-150 whitespace-nowrap shrink-0 cursor-pointer ${
                   active
                     ? 'text-[#F4F4F6]'
                     : 'text-[#8B8F98] hover:text-[#F4F4F6]'
@@ -149,7 +160,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               type="button"
               onClick={onOpenCommandPalette}
               aria-label="Open command palette (Cmd+K)"
-              className="swift-spring-btn flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#101216] hover:bg-[#15181D] border border-white/[0.08] hover:border-white/20 text-[#8B8F98] hover:text-[#F4F4F6] font-mono text-[11px] whitespace-nowrap shrink-0 cursor-pointer"
+              className="swift-spring-btn min-h-10 flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[#101216] hover:bg-[#15181D] border border-white/[0.08] hover:border-white/20 text-[#8B8F98] hover:text-[#F4F4F6] font-mono text-[11px] whitespace-nowrap shrink-0 cursor-pointer"
               title="Jump to any section or case study (Cmd+K)"
             >
               <span className="text-[#7CFF6B]">⌘K</span>
@@ -161,7 +172,7 @@ export const Navigation: React.FC<NavigationProps> = ({
             <button
               type="button"
               onClick={onOpenResume}
-              className="group swift-spring-btn flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#101216] hover:bg-[#15181D] border border-white/[0.08] hover:border-white/20 text-[#F4F4F6] font-medium whitespace-nowrap shrink-0 cursor-pointer"
+              className="group swift-spring-btn min-h-10 flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#101216] hover:bg-[#15181D] border border-white/[0.08] hover:border-white/20 text-[#F4F4F6] font-medium whitespace-nowrap shrink-0 cursor-pointer"
               title="View & Download Curriculum Vitae (PDF)"
             >
               <FileDown className="w-3.5 h-3.5 text-[#8B8F98] group-hover:text-[#7CFF6B] transition-colors" />
@@ -174,7 +185,7 @@ export const Navigation: React.FC<NavigationProps> = ({
               id="nav-launch-vero-button"
               type="button"
               onClick={onOpenVero}
-              className="group swift-spring-btn flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#7CFF6B] text-[#08090B] font-semibold hover:bg-[#7CFF6B]/95 whitespace-nowrap shrink-0 cursor-pointer"
+              className="group swift-spring-btn min-h-10 flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#7CFF6B] text-[#08090B] font-semibold hover:bg-[#7CFF6B]/95 whitespace-nowrap shrink-0 cursor-pointer"
               title="Launch Live Vero Pull Request Intelligence Engine in a new tab"
             >
               <GitPullRequest className="w-3.5 h-3.5" />
@@ -183,13 +194,13 @@ export const Navigation: React.FC<NavigationProps> = ({
           )}
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile Menu Button (48x48px min touch target) */}
         <button
           type="button"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-expanded={mobileMenuOpen}
           aria-controls="mobile-navigation-drawer"
-          className="lg:hidden p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg border border-white/[0.08] text-[#8B8F98] hover:text-[#F4F4F6] transition-colors"
+          className="lg:hidden p-2.5 min-h-12 min-w-12 flex items-center justify-center rounded-lg border border-white/[0.08] text-[#8B8F98] hover:text-[#F4F4F6] transition-colors cursor-pointer"
           aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -207,7 +218,9 @@ export const Navigation: React.FC<NavigationProps> = ({
       {mobileMenuOpen && (
         <div
           id="mobile-navigation-drawer"
-          className="lg:hidden bg-[#101216]/98 backdrop-blur-xl border-b border-white/[0.08] px-6 py-5 space-y-2 text-sm"
+          role="dialog"
+          aria-label="Mobile navigation menu"
+          className="lg:hidden bg-[#101216]/98 backdrop-blur-xl border-b border-white/[0.08] px-6 py-5 space-y-1.5 text-sm"
         >
           {primaryNavLinks.map((link) => {
             const active = isLinkActive(link);
@@ -215,12 +228,13 @@ export const Navigation: React.FC<NavigationProps> = ({
               <a
                 key={link.id}
                 href={link.href}
+                aria-current={active ? 'page' : undefined}
                 onClick={(e) => {
                   e.preventDefault();
                   setMobileMenuOpen(false);
                   if (onNavigate) onNavigate(link.id);
                 }}
-                className={`flex items-center justify-between py-2.5 border-b border-white/[0.06] font-medium cursor-pointer ${
+                className={`min-h-12 flex items-center justify-between py-2.5 border-b border-white/[0.06] font-medium cursor-pointer ${
                   active ? 'text-[#7CFF6B]' : 'text-[#D1D5DB] hover:text-[#7CFF6B]'
                 }`}
               >
@@ -239,7 +253,8 @@ export const Navigation: React.FC<NavigationProps> = ({
               href={PERSONAL_INFO.github}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full py-2.5 px-3 rounded-lg bg-[#08090B] border border-white/[0.08] text-[#D1D5DB] font-medium flex items-center justify-between"
+              aria-label="Open Vignesh K N GitHub profile in a new tab"
+              className="w-full min-h-12 py-2.5 px-3.5 rounded-lg bg-[#08090B] border border-white/[0.08] text-[#D1D5DB] font-medium flex items-center justify-between"
             >
               <span>GitHub Profile (KN-Vignesh)</span>
               <ArrowUpRight className="w-4 h-4 text-[#7CFF6B]" />
@@ -253,7 +268,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   setMobileMenuOpen(false);
                   onOpenVero();
                 }}
-                className="w-full py-2.5 px-3 rounded-lg bg-[#7CFF6B] text-[#08090B] font-bold flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full min-h-12 py-2.5 px-3.5 rounded-lg bg-[#7CFF6B] text-[#08090B] font-bold flex items-center justify-center gap-2 cursor-pointer"
               >
                 <GitPullRequest className="w-4 h-4" />
                 <span>Launch Vero PR Engine</span>
@@ -267,7 +282,7 @@ export const Navigation: React.FC<NavigationProps> = ({
                   setMobileMenuOpen(false);
                   onOpenResume();
                 }}
-                className="w-full py-2.5 px-3 rounded-lg bg-[#15181D] border border-white/[0.1] text-[#F4F4F6] font-semibold flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full min-h-12 py-2.5 px-3.5 rounded-lg bg-[#15181D] border border-white/[0.1] text-[#F4F4F6] font-semibold flex items-center justify-center gap-2 cursor-pointer"
               >
                 <FileDown className="w-4 h-4 text-[#7CFF6B]" />
                 <span>View &amp; Download Resume (PDF)</span>

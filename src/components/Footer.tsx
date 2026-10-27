@@ -24,11 +24,15 @@ export const Footer: React.FC = () => {
           </div>
         </div>
 
-        {/* Crawlable Navigation & External Links */}
-        <div className="flex flex-wrap items-center justify-center gap-5 text-[11px]">
+        {/* Crawlable Navigation & External Links (48px mobile touch targets) */}
+        <nav
+          aria-label="Footer and social links"
+          className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-[11px]"
+        >
           <a
             href="#projects"
-            className="hover:text-[#F2F2F2] transition-colors"
+            aria-label="Jump to engineering case studies section"
+            className="min-h-12 sm:min-h-10 px-2 inline-flex items-center hover:text-[#F2F2F2] transition-colors"
           >
             Projects
           </a>
@@ -37,7 +41,8 @@ export const Footer: React.FC = () => {
             href="https://vero-silk-delta.vercel.app/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#7CFF6B] hover:underline flex items-center gap-1"
+            aria-label="Open live Vero PR Review Engine in a new tab"
+            className="min-h-12 sm:min-h-10 px-2 text-[#7CFF6B] hover:underline inline-flex items-center gap-1"
           >
             <span>Vero PR Engine</span>
             <ExternalLink className="w-3 h-3" />
@@ -47,7 +52,8 @@ export const Footer: React.FC = () => {
             href={PERSONAL_INFO.github}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#7CFF6B] transition-colors flex items-center gap-1"
+            aria-label="Visit Vignesh K N on GitHub"
+            className="min-h-12 sm:min-h-10 px-2 hover:text-[#7CFF6B] transition-colors inline-flex items-center gap-1"
           >
             <span>GitHub</span>
             <ExternalLink className="w-3 h-3" />
@@ -57,7 +63,8 @@ export const Footer: React.FC = () => {
             href={PERSONAL_INFO.linkedin}
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[#6EA8FE] transition-colors flex items-center gap-1"
+            aria-label="Visit Vignesh K N on LinkedIn"
+            className="min-h-12 sm:min-h-10 px-2 hover:text-[#6EA8FE] transition-colors inline-flex items-center gap-1"
           >
             <span>LinkedIn</span>
             <ExternalLink className="w-3 h-3" />
@@ -65,7 +72,8 @@ export const Footer: React.FC = () => {
 
           <a
             href={`mailto:${PERSONAL_INFO.email}`}
-            className="hover:text-[#F2F2F2] transition-colors"
+            aria-label={`Send email to ${PERSONAL_INFO.email}`}
+            className="min-h-12 sm:min-h-10 px-2 inline-flex items-center hover:text-[#F2F2F2] transition-colors"
           >
             Email
           </a>
@@ -73,13 +81,14 @@ export const Footer: React.FC = () => {
           <button
             type="button"
             onClick={scrollToTop}
-            className="px-2.5 py-1.5 rounded-lg border border-white/[0.08] hover:border-[#7CFF6B] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors flex items-center gap-1 cursor-pointer"
+            aria-label="Scroll back to top of page"
+            className="min-h-12 min-w-12 sm:min-h-10 px-3 py-1.5 rounded-lg border border-white/[0.08] hover:border-[#7CFF6B] text-[#8B8F98] hover:text-[#7CFF6B] transition-colors inline-flex items-center justify-center gap-1 cursor-pointer"
             title="Scroll back to top"
           >
             <span>Top</span>
             <ArrowUp className="w-3 h-3" />
           </button>
-        </div>
+        </nav>
 
         {/* Copyright */}
         <div className="text-[11px] text-[#8B8F98] text-center md:text-right">

@@ -30,6 +30,15 @@ interface HeroSectionProps {
   onOpenCommandPalette?: () => void;
 }
 
+const HERO_ROLES = [
+  'AI Software Engineer at ACL Digital',
+  'QLoRA & LLM Systems Architect',
+  'Enterprise .NET 8 & Azure Engineer',
+  'Deterministic AI & RAG Builder',
+] as const;
+
+const HERO_TABS = ['3d-tensor', '3d-core', 'pr-playground'] as const;
+
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onExploreProjects,
   onSelectProject,
@@ -38,6 +47,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenCommandPalette,
 }) => {
   const [heroTab, setHeroTab] = useState<'3d-tensor' | '3d-core' | 'pr-playground'>('3d-tensor');
+  const [roleIndex, setRoleIndex] = useState(0);
   const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
   const stageParallaxY = useTransform(
@@ -45,6 +55,25 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     [0, 0.25],
     prefersReducedMotion ? [0, 0] : [0, -24]
   );
+
+  React.useEffect(() => {
+    if (prefersReducedMotion) return;
+    const interval = window.setInterval(() => {
+      setRoleIndex((prev) => (prev + 1) % HERO_ROLES.length);
+    }, 3400);
+    return () => window.clearInterval(interval);
+  }, [prefersReducedMotion]);
+
+  const handleTabKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const currentIndex = HERO_TABS.indexOf(heroTab);
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setHeroTab(HERO_TABS[(currentIndex + 1) % HERO_TABS.length]);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setHeroTab(HERO_TABS[(currentIndex - 1 + HERO_TABS.length) % HERO_TABS.length]);
+    }
+  };
 
   const entranceVariants = {
     hidden: { opacity: 0, y: 18 },
@@ -62,30 +91,38 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   return (
     <section
       id="hero"
+      aria-labelledby="hero-heading"
       className="relative min-h-[90vh] pt-28 pb-16 lg:pt-36 lg:pb-24 flex flex-col justify-between overflow-hidden tech-grid"
     >
       {/* Subtle Ambient Focal Glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[640px] h-[640px] bg-[#7CFF6B]/[0.035] blur-[140px] rounded-full pointer-events-none" />
 
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-10 w-full z-10 my-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           {/* Left Column: Editorial Identity & Value Proposition */}
           <div className="lg:col-span-6 flex flex-col justify-center space-y-6">
-            {/* Unboxed Metadata Kicker (Zero-Pill Discipline) */}
+            {/* Unboxed Metadata Kicker with Accessible Role Cycler & Availability */}
             <motion.div
               custom={0}
               initial={prefersReducedMotion ? false : 'hidden'}
               animate="visible"
               variants={entranceVariants}
-              className="flex flex-wrap items-center gap-2 text-xs text-[#8B8F98] font-medium"
+              className="flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-xs text-[#8B8F98] font-medium"
             >
               <span className="text-[#7CFF6B] font-semibold">
                 Vignesh K N
               </span>
               <span aria-hidden="true">·</span>
-              <span className="text-[#D1D5DB]">AI Software Engineer at ACL Digital</span>
+              <span
+                className="text-[#F4F4F6] font-mono transition-opacity duration-200"
+                aria-live="off"
+              >
+                {prefersReducedMotion ? HERO_ROLES[0] : HERO_ROLES[roleIndex]}
+              </span>
               <span aria-hidden="true">·</span>
-              <span>Bengaluru, India</span>
+              <span className="text-[#D1D5DB]">
+                Available for AI &amp; Systems Roles · Bengaluru
+              </span>
             </motion.div>
 
             {/* Primary Editorial Headline */}
@@ -96,14 +133,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               variants={entranceVariants}
               className="space-y-4"
             >
-              <h1 className="editorial-h1 font-bold text-[#F4F4F6]">
+              <h1
+                id="hero-heading"
+                className="editorial-h1 font-bold text-[#F4F4F6]"
+              >
                 Engineering production AI systems, fine-tuned LLMs, and deterministic backends.
               </h1>
               <NutshellText
                 blockId="hero-supporting"
                 as="p"
                 maxTriggers={3}
-                className="text-base sm:text-lg text-[#D1D5DB] leading-[1.65] max-w-[62ch]"
+                className="fluid-body text-[#D1D5DB] max-w-[62ch]"
                 text="4+ years building enterprise .NET Core 8 microservices, Azure serverless :rag-architecture[RAG pipelines], :qlora[QLoRA 4-bit quantized adapters], and :jev-gate[sub-35ms AST code review gates]—documented with interactive 3D workbenches and verified holdout benchmarks."
               />
             </motion.div>
@@ -126,7 +166,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               <span>Azure Functions &amp; Cosmos DB</span>
             </motion.div>
 
-            {/* Primary Action Controls */}
+            {/* Primary Action Controls (Minimum 48px Touch Target on Mobile & Desktop) */}
             <motion.div
               custom={0.18}
               initial={prefersReducedMotion ? false : 'hidden'}
@@ -140,7 +180,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   e.preventDefault();
                   onExploreProjects();
                 }}
-                className="group swift-spring-btn px-5 py-3 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/95 shadow-lg shadow-[#7CFF6B]/10 flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
+                className="group swift-spring-btn min-h-12 px-5 py-3 rounded-xl bg-[#7CFF6B] text-[#08090B] font-bold hover:bg-[#7CFF6B]/95 shadow-lg shadow-[#7CFF6B]/10 flex items-center gap-2 whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <SwiftRollLabel
                   label="Explore 9 Case Studies"
@@ -148,6 +188,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 />
                 <ArrowDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
               </a>
+
+              {onOpenResume && (
+                <button
+                  type="button"
+                  onClick={onOpenResume}
+                  aria-label="View and download Vignesh K N Resume (PDF)"
+                  className="group swift-spring-btn min-h-12 px-4 py-3 rounded-xl border border-white/[0.14] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F4F4F6] flex items-center gap-2 font-semibold whitespace-nowrap shrink-0 cursor-pointer"
+                >
+                  <FileDown className="w-4 h-4 text-[#7CFF6B]" />
+                  <SwiftRollLabel
+                    label="Download Resume"
+                    hoverLabel="Inspect & Export PDF"
+                  />
+                </button>
+              )}
 
               <a
                 href="/projects/house-price"
@@ -159,7 +214,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                     window.location.hash = '#project-house-price';
                   }
                 }}
-                className="group swift-spring-btn px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F4F4F6] flex items-center gap-2 font-semibold whitespace-nowrap shrink-0 cursor-pointer"
+                className="group swift-spring-btn min-h-12 px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F4F4F6] flex items-center gap-2 font-semibold whitespace-nowrap shrink-0 cursor-pointer"
               >
                 <Layers className="w-4 h-4 text-[#7CFF6B]" />
                 <SwiftRollLabel
@@ -173,7 +228,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   type="button"
                   onClick={onOpenVero}
                   title="Open Vero PR Engine (https://vero-silk-delta.vercel.app/) in a new tab"
-                  className="group swift-spring-btn px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F4F4F6] flex items-center gap-2 font-semibold whitespace-nowrap shrink-0 cursor-pointer"
+                  className="group swift-spring-btn min-h-12 px-4 py-3 rounded-xl border border-white/[0.12] bg-[#101216] hover:border-[#7CFF6B]/50 text-[#F4F4F6] flex items-center gap-2 font-semibold whitespace-nowrap shrink-0 cursor-pointer"
                 >
                   <GitPullRequest className="w-4 h-4 text-[#7CFF6B]" />
                   <SwiftRollLabel
@@ -189,7 +244,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   type="button"
                   onClick={onOpenCommandPalette}
                   aria-label="Open command palette (Cmd+K)"
-                  className="swift-spring-btn px-3.5 py-3 rounded-xl border border-white/[0.08] bg-[#101216] text-[#8B8F98] hover:text-[#F4F4F6] hover:border-white/20 flex items-center gap-1.5 font-mono text-xs whitespace-nowrap shrink-0 cursor-pointer"
+                  className="swift-spring-btn min-h-12 min-w-12 px-3.5 py-3 rounded-xl border border-white/[0.08] bg-[#101216] text-[#8B8F98] hover:text-[#F4F4F6] hover:border-white/20 flex items-center justify-center gap-1.5 font-mono text-xs whitespace-nowrap shrink-0 cursor-pointer"
                   title="Quick search & navigation (Cmd+K)"
                 >
                   <Search className="w-3.5 h-3.5 text-[#7CFF6B]" />
@@ -210,7 +265,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 href={PERSONAL_INFO.github}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#F4F4F6] transition-colors flex items-center gap-1 whitespace-nowrap"
+                aria-label="Visit Vignesh K N on GitHub (KN-Vignesh)"
+                className="min-h-11 sm:min-h-0 inline-flex items-center gap-1 hover:text-[#F4F4F6] transition-colors whitespace-nowrap"
               >
                 <span>GitHub (KN-Vignesh)</span>
                 <ExternalLink className="w-3 h-3" />
@@ -220,24 +276,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 href={PERSONAL_INFO.linkedin}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hover:text-[#F4F4F6] transition-colors flex items-center gap-1 whitespace-nowrap"
+                aria-label="Visit Vignesh K N on LinkedIn"
+                className="min-h-11 sm:min-h-0 inline-flex items-center gap-1 hover:text-[#F4F4F6] transition-colors whitespace-nowrap"
               >
                 <span>LinkedIn</span>
                 <ExternalLink className="w-3 h-3" />
               </a>
               <span aria-hidden="true">·</span>
-              <button
-                type="button"
-                onClick={onOpenResume}
-                className="hover:text-[#7CFF6B] transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap"
-              >
-                <FileDown className="w-3 h-3 text-[#7CFF6B]" />
-                <span>Resume (PDF)</span>
-              </button>
-              <span aria-hidden="true">·</span>
               <a
                 href={`mailto:${PERSONAL_INFO.email}`}
-                className="hover:text-[#F4F4F6] transition-colors whitespace-nowrap"
+                aria-label={`Email Vignesh K N at ${PERSONAL_INFO.email}`}
+                className="min-h-11 sm:min-h-0 inline-flex items-center hover:text-[#F4F4F6] transition-colors whitespace-nowrap"
               >
                 {PERSONAL_INFO.email}
               </a>
@@ -251,12 +300,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             initial={prefersReducedMotion ? false : 'hidden'}
             animate="visible"
             variants={entranceVariants}
-            className="lg:col-span-6 flex flex-col justify-between space-y-3"
+            className="lg:col-span-6 flex flex-col justify-center gap-2.5 self-center w-full"
           >
-            {/* Segmented Mode Switcher */}
+            {/* Segmented Mode Switcher with Keyboard Arrow Support */}
             <div
               role="tablist"
               aria-label="Hero Interactive Stage"
+              onKeyDown={handleTabKeyDown}
               className="flex items-center p-1 rounded-xl bg-[#101216] border border-white/[0.08] text-xs overflow-x-auto"
             >
               <button
@@ -264,7 +314,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 role="tab"
                 aria-selected={heroTab === '3d-tensor'}
                 onClick={() => setHeroTab('3d-tensor')}
-                className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
+                className={`flex-1 min-h-11 sm:min-h-10 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
                   heroTab === '3d-tensor'
                     ? 'bg-[#08090B] text-[#7CFF6B] border border-white/[0.1] shadow-sm'
                     : 'text-[#8B8F98] hover:text-[#F4F4F6]'
@@ -279,7 +329,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 role="tab"
                 aria-selected={heroTab === '3d-core'}
                 onClick={() => setHeroTab('3d-core')}
-                className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
+                className={`flex-1 min-h-11 sm:min-h-10 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
                   heroTab === '3d-core'
                     ? 'bg-[#08090B] text-[#7CFF6B] border border-white/[0.1] shadow-sm'
                     : 'text-[#8B8F98] hover:text-[#F4F4F6]'
@@ -294,7 +344,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 role="tab"
                 aria-selected={heroTab === 'pr-playground'}
                 onClick={() => setHeroTab('pr-playground')}
-                className={`flex-1 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
+                className={`flex-1 min-h-11 sm:min-h-10 py-2 px-3 rounded-lg flex items-center justify-center gap-1.5 transition-all cursor-pointer font-semibold whitespace-nowrap ${
                   heroTab === 'pr-playground'
                     ? 'bg-[#08090B] text-[#7CFF6B] border border-white/[0.1] shadow-sm'
                     : 'text-[#8B8F98] hover:text-[#F4F4F6]'
